@@ -1,0 +1,89 @@
+		Marvell 37xx BSP
+
+
+Table of Contents
+=================
+
+1. Supported Boards
+2. Change History
+3. BSP Features
+
+
+1. Supported Boards
+===================
+
+This BSP supports the following boards:
+
+  + Marvell 88F3720-DDR3-Modular development board
+  + Marvell 88F3720-DDR4-Modular development board
+
+2. Change History
+=================
+
+  - 2019/11 (LINUXPG-193): Wind River Linux 10.18 RCPL13, Standard support 
+			   based on Marvell SDK10.0_PR2003
+
+3. BSP Notes
+============
+
+3.1 Marvell 37xx
+------------------
+
+3.1.1 Supported Features
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following BSP features are validated and supported.
+
+	o Network
+		+ Ethernet:
+			+ 1x 1G Ethernet port via RGMII (RJ45)
+
+	o Bus
+		+ I2C:
+			+ I2C Master interface
+		+ PCI-Express:
+			+ 1x PCI Express (PCIe) Gen 2.0 or 1x mini PCI Express (PCIe) Gen 2.0
+		+ SDIO: SDIO Host Controller
+
+	o USB
+		+ USB XHCI controller:
+			+ 1x USB 2.0 Host port
+
+	o Storage
+		+ eMMC card: 1x eMMC 8 GB device
+			+ 1x SD card port
+		+ SATA: SATA 3.0 port
+			+ 1x SATA port
+
+	o Misc Devices
+		+ GPIO
+		+ IOMMU
+		+ RTC
+		+ UART: mvebu-uart compatible serial port
+			+ 1x DEBUG
+			+ 1x Serial port
+		+ Watchdog
+
+3.1.2 Unsupported Features
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following features are not supported or validated.
+
+	x CPU Freq
+	x Sample at Reset (SatR) memory device @ address 0x4C
+	x USB3 switch PI5USB30213XEA @ address 0x0D
+	x ID component of PHY module @ address 0x24
+	x USB3.0 Port (Type-C)
+	x Button (SB_wakeup_button & NB_wakeup_button)
+	x MCi_connector
+
+3.1.3 Validated Board Info
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This BSP is only validated in following environment. If you use this BSP
+in a different environment it may possibly have some issues.
+
+	SoC:  marvell-3720
+	Board: Marvell DB-88F3720 development board
+	BootLoader:		U-Boot
+	BootLoader Version:	U-Boot 2017.03-armada-18.09.1-00813-g656eaed (Aug 29 2018 - 18:18:09 +0300), Build: ga-18.09.4

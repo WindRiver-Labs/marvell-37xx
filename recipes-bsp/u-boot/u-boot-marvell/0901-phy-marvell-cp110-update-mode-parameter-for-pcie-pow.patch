@@ -1,0 +1,44 @@
+From 52b435d110953a98b432055d50012137ad19e284 Mon Sep 17 00:00:00 2001
+From: Igal Liberman <igall@marvell.com>
+Date: Thu, 15 Nov 2018 16:20:54 +0200
+Subject: [PATCH 0901/1200] phy: marvell cp110: update mode parameter for pcie
+ power on calls
+
+It helps ATF to determine who called power on function (U-boot/Linux).
+
+Change-Id: Ic04993b9d9d996f44dcad8c287ce86ed031ee8a0
+Signed-off-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/60960
+Reviewed-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+---
+ drivers/phy/marvell/comphy_cp110.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/phy/marvell/comphy_cp110.c b/drivers/phy/marvell/comphy_cp110.c
+index 8ed90ed9f4..d1a33676be 100644
+--- a/drivers/phy/marvell/comphy_cp110.c
++++ b/drivers/phy/marvell/comphy_cp110.c
+@@ -22,13 +22,16 @@ DECLARE_GLOBAL_DATA_PTR;
+ #define MV_SIP_COMPHY_PLL_LOCK	0x82000003
+ #define MV_SIP_COMPHY_XFI_TRAIN	0x82000004
+ 
++/* Used to distinguish between different possible callers (U-boot/Linux) */
++#define COMPHY_CALLER_UBOOT			(0x1 << 21)
++
+ #define COMPHY_FW_MODE_FORMAT(mode)		((mode) << 12)
+ #define COMPHY_FW_FORMAT(mode, idx, speeds)	\
+ 			(((mode) << 12) | ((idx) << 8) | ((speeds) << 2))
+ 
+ #define COMPHY_FW_PCIE_FORMAT(pcie_width, clk_src, mode, speeds)	\
+-			(((pcie_width) << 18) | ((clk_src) << 17) |	\
+-			 COMPHY_FW_FORMAT(mode, 0, speeds))
++			(COMPHY_CALLER_UBOOT | ((pcie_width) << 18) |	\
++			((clk_src) << 17) | COMPHY_FW_FORMAT(mode, 0, speeds))
+ 
+ #define COMPHY_SATA_MODE	0x1
+ #define COMPHY_SGMII_MODE	0x2	/* SGMII 1G */
+-- 
+2.22.0
+

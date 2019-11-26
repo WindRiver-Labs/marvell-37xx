@@ -1,0 +1,346 @@
+From e279111761fd6bae3c8cb44016075ddc7effd088 Mon Sep 17 00:00:00 2001
+From: Igal Liberman <igall@marvell.com>
+Date: Sun, 8 Jul 2018 17:51:22 +0300
+Subject: [PATCH 0804/1200] dts: 3900: remove unused device-trees
+
+Change-Id: Id723aa9b9599553b0168345f9ce6452722acd801
+Signed-off-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/57776
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+---
+ arch/arm/dts/Makefile                     |   4 -
+ arch/arm/dts/armada-3900-axis-common.dtsi | 122 ----------------------
+ arch/arm/dts/armada-3900-axis.dts         |  17 ---
+ arch/arm/dts/armada-3900-axisbt.dts       |  27 -----
+ arch/arm/dts/armada-3900-vd-nand.dts      |  53 ----------
+ arch/arm/dts/armada-3900-vd.dts           |  56 ----------
+ 6 files changed, 279 deletions(-)
+ delete mode 100644 arch/arm/dts/armada-3900-axis-common.dtsi
+ delete mode 100644 arch/arm/dts/armada-3900-axis.dts
+ delete mode 100644 arch/arm/dts/armada-3900-axisbt.dts
+ delete mode 100644 arch/arm/dts/armada-3900-vd-nand.dts
+ delete mode 100644 arch/arm/dts/armada-3900-vd.dts
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index e28e22b161..b079bd94bb 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -102,10 +102,6 @@ dtb-$(CONFIG_ARCH_MVEBU) +=			\
+ 	armada-388-clearfog.dtb			\
+ 	armada-388-gp.dtb			\
+ 	armada-385-amc.dtb			\
+-	armada-3900-axis.dtb			\
+-	armada-3900-axisbt.dtb			\
+-	armada-3900-vd.dtb			\
+-	armada-3900-vd-nand.dtb			\
+ 	armada-3900-vd-A.dtb			\
+ 	armada-3900-vd-B.dtb			\
+ 	armada-7020-amc.dtb			\
+diff --git a/arch/arm/dts/armada-3900-axis-common.dtsi b/arch/arm/dts/armada-3900-axis-common.dtsi
+deleted file mode 100644
+index 29db3aacfa..0000000000
+--- a/arch/arm/dts/armada-3900-axis-common.dtsi
++++ /dev/null
+@@ -1,122 +0,0 @@
+-// SPDX-License-Identifier: GPL-2.0+
+-/*
+- * Copyright (C) 2018 Marvell International Ltd.
+- */
+-
+-#include "armada-3900-db.dtsi"
+-
+-/ {
+-	compatible = "marvell,armada3900-axis", "marvell,armada7040",
+-		     "marvell,armada-ap806-quad", "marvell,armada-ap806";
+-
+-	aliases {
+-		i2c1 = &cp0_i2c1;
+-	};
+-
+-	cp0 {
+-		config-space {
+-			cp0_reg_usb3_vbus0: cp0_usb3_vbus@0 {
+-				gpio = <&cp0_gpio0 7 GPIO_ACTIVE_HIGH>;
+-			};
+-
+-			cp0_reg_usb3_vbus1: cp0_usb3_vbus@1 {
+-				gpio = <&cp0_gpio0 5 GPIO_ACTIVE_HIGH>;
+-			};
+-
+-			iot_radio_reset: iot-radio-reset {
+-				compatible = "regulator-fixed";
+-				pinctrl-names = "default";
+-				pinctrl-0 = <&iot_radio_reset_pins>;
+-				regulator-name = "iot-radio-reset";
+-				enable-active-high;
+-				regulator-boot-on;
+-				gpio = <&cp0_gpio0 0 GPIO_ACTIVE_HIGH>;
+-			};
+-
+-			eth_phy_reset: eth-phy-reset {
+-				compatible = "regulator-fixed";
+-				pinctrl-names = "default";
+-				pinctrl-0 = <&eth_phy_reset_pins>;
+-				regulator-name = "eth-phy-reset";
+-				enable-active-high;
+-				regulator-boot-on;
+-				gpio = <&cp0_gpio0 1 GPIO_ACTIVE_HIGH>;
+-			};
+-
+-			W9068_pps_reset: W9068-pps-reset {
+-				compatible = "regulator-fixed";
+-				pinctrl-names = "default";
+-				pinctrl-0 = <&W9068_pps_pins>;
+-				regulator-name = "w9068-pps";
+-				enable-active-high;
+-				regulator-boot-on;
+-				gpio = <&cp0_gpio0 29 GPIO_ACTIVE_HIGH>;
+-			};
+-		};
+-	};
+-};
+-
+-/*
+- * CP related configuration
+- */
+-&cp0_pinctl {
+-		/* MPP Bus:
+-		 *   I2C1    [2,3]
+-		 *   USB     [5,7]
+-		 *   NAND    [13,15-27]
+-		 *   SMI     [32,34]
+-		 *   XSMI    [35-36]
+-		 *   I2C0    [37-38]
+-		 *   UART1   [46-47,49,58]
+-		 *   IHB     [56-57]
+-		 *   UART0   [59-62]
+-		 */
+-		/*   0   1   2   3   4   5   6   7   8   9 */
+-	pin-func = < 0   0   7   7   0   0   0   0   0   0
+-		     0   0   0   2   0   1   1   1   1   1
+-		     1   1   1   1   1   1   1   1   0   0
+-		     0   0   7   0   7   7   7   2   2   0
+-		     0   0   0   0   0   0   7   7   0   7
+-		     0   0   0   0   0   0   0   0   7   7
+-		     7   7   7>;
+-
+-	cp0_i2c1_pins: cp0-i2c-pins-1 {
+-		marvell,pins = < 2 3 >;
+-		marvell,function = <7>;
+-	};
+-
+-	cp0_xhci0_vbus_pins: cp0-xhci0-vbus-pins {
+-		marvell,pins = <7>;
+-		marvell,function = <0>;
+-	};
+-
+-	cp0_xhci1_vbus_pins: cp0-xhci1-vbus-pins {
+-		marvell,pins = <5>;
+-		marvell,function = <0>;
+-	};
+-
+-	iot_radio_reset_pins: iot-radio-reset-pins {
+-		marvell,pins = <0>;
+-		marvell,function = <0>;
+-	};
+-
+-	eth_phy_reset_pins: eth-phy-reset-pins {
+-		marvell,pins = <1>;
+-		marvell,function = <0>;
+-	};
+-
+-	W9068_pps_pins: W9068-pps-pins {
+-		marvell,pins = <29>;
+-		marvell,function = <0>;
+-	};
+-};
+-
+-&cp0_i2c1 {
+-	status = "okay";
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&cp0_i2c1_pins>;
+-};
+-
+-&cp0_nand {
+-	status = "okay";
+-};
+diff --git a/arch/arm/dts/armada-3900-axis.dts b/arch/arm/dts/armada-3900-axis.dts
+deleted file mode 100644
+index 7f096da2c3..0000000000
+--- a/arch/arm/dts/armada-3900-axis.dts
++++ /dev/null
+@@ -1,17 +0,0 @@
+-// SPDX-License-Identifier: GPL-2.0+
+-/*
+- * Copyright (C) 2018 Marvell International Ltd.
+- */
+-
+-#include "armada-3900-axis-common.dtsi"
+-
+-/ {
+-	model = "Marvell Armada 3900 AXIS board";
+-};
+-
+-&cp0_comphy {
+-	phy1 {
+-		phy-type = <COMPHY_TYPE_USB3_HOST0>;
+-		phy-speed = <COMPHY_SPEED_5G>;
+-	};
+-};
+diff --git a/arch/arm/dts/armada-3900-axisbt.dts b/arch/arm/dts/armada-3900-axisbt.dts
+deleted file mode 100644
+index 8e1518522b..0000000000
+--- a/arch/arm/dts/armada-3900-axisbt.dts
++++ /dev/null
+@@ -1,27 +0,0 @@
+-// SPDX-License-Identifier: GPL-2.0+
+-/*
+- * Copyright (C) 2018 Marvell International Ltd.
+- */
+-
+-#include "armada-3900-axis-common.dtsi"
+-
+-/ {
+-	model = "Marvell Armada 3900 AXIS-BT board";
+-};
+-
+-/*
+- * CP related configuration
+- */
+-&cp0_pinctl {
+-	cp0_mochi_enable_pins: cp0-mochi-enable-pins {
+-		marvell,pins = <53>;
+-		marvell,function = <0>;
+-	};
+-};
+-
+-&cp0_comphy {
+-	phy1 {
+-		phy-type = <COMPHY_TYPE_USB3_HOST0>;
+-		phy-speed = <COMPHY_SPEED_5G>;
+-	};
+-};
+diff --git a/arch/arm/dts/armada-3900-vd-nand.dts b/arch/arm/dts/armada-3900-vd-nand.dts
+deleted file mode 100644
+index c5793b2376..0000000000
+--- a/arch/arm/dts/armada-3900-vd-nand.dts
++++ /dev/null
+@@ -1,53 +0,0 @@
+-// SPDX-License-Identifier: GPL-2.0+
+-/*
+- * Copyright (C) 2018 Marvell International Ltd.
+- */
+-
+-#include "armada-3900-db.dtsi"
+-
+-/ {
+-	model = "Marvell Armada 3900 Validation Development board(CP NAND)";
+-	compatible = "marvell,armada3900-vd", "marvell,armada7040",
+-		     "marvell,armada-ap806-quad", "marvell,armada-ap806";
+-
+-	aliases {
+-		i2c1 = &ap_i2c0;
+-	};
+-};
+-
+-/*
+- * AP related configuration
+- */
+-&ap_i2c0 {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&ap_i2c0_pins>;
+-	status = "okay";
+-};
+-
+-/*
+- * CP related configuration
+- */
+-&cp0_pinctl {
+-		/* MPP Bus:
+-		 *   NAND	[13,15-27]
+-		 *   SMI	[32,34]
+-		 *   XSMI	[35-36]
+-		 *   I2C0	[37-38]
+-		 *   USB	[44-45]
+-		 *   UART1	[46-47,49,58]
+-		 *   IHB	[56-57]
+-		 *   UART0	[59-62]
+-		 */
+-		/*   0   1   2   3   4   5   6   7   8   9 */
+-	pin-func = < 0   0   0   0   0   0   0   0   0   0
+-		     0   0   0   2   0   1   1   1   1   1
+-		     1   1   1   1   1   1   1   1   0   0
+-		     0   0   7   0   7   7   7   2   2   0
+-		     0   0   0   0   0   0   7   7   0   7
+-		     0   0   0   0   0   0   0   0   7   7
+-		     7   7   7>;
+-};
+-
+-&cp0_nand {
+-	status = "okay";
+-};
+diff --git a/arch/arm/dts/armada-3900-vd.dts b/arch/arm/dts/armada-3900-vd.dts
+deleted file mode 100644
+index 64569d65c6..0000000000
+--- a/arch/arm/dts/armada-3900-vd.dts
++++ /dev/null
+@@ -1,56 +0,0 @@
+-// SPDX-License-Identifier: GPL-2.0+
+-/*
+- * Copyright (C) 2018 Marvell International Ltd.
+- */
+-
+-#include "armada-3900-db.dtsi"
+-
+-/ {
+-	model = "Marvell Armada 3900 Validation Development board(CP NOR)";
+-	compatible = "marvell,armada3900-vd", "marvell,armada7040",
+-		     "marvell,armada-ap806-quad", "marvell,armada-ap806";
+-
+-	aliases {
+-		i2c1 = &ap_i2c0;
+-		spi1 = &cp0_spi1;
+-	};
+-};
+-
+-/*
+- * AP related configuration
+- */
+-&ap_i2c0 {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&ap_i2c0_pins>;
+-	status = "okay";
+-};
+-
+-/*
+- * CP related configuration
+- */
+-&cp0_pinctl {
+-		/* MPP Bus:
+-		 *   SPI1	[13-16]
+-		 *   SMI	[32,34]
+-		 *   XSMI	[35-36]
+-		 *   I2C0	[37-38]
+-		 *   USB	[44-45]
+-		 *   UART1	[46-47,49,58]
+-		 *   IHB	[56-57]
+-		 *   UART0	[59-62]
+-		 */
+-		/*   0   1   2   3   4   5   6   7   8   9 */
+-	pin-func = < 0   0   0   0   0   0   0   0   0   0
+-		     0   0   0   3   3   3   3   0   0   0
+-		     0   0   0   0   0   0   0   0   0   0
+-		     0   0   7   0   7   7   7   2   2   0
+-		     0   0   0   0   0   0   7   7   0   7
+-		     0   0   0   0   0   0   0   0   7   7
+-		     7   7   7>;
+-};
+-
+-&cp0_spi1 {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&cp0_spi0_pins>;
+-	status = "okay";
+-};
+-- 
+2.22.0
+

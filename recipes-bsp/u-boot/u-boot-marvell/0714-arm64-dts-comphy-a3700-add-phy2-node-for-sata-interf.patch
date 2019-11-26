@@ -1,0 +1,55 @@
+From 000657ab13151270ed388b24e531f4c572dd86f9 Mon Sep 17 00:00:00 2001
+From: zachary <zhangzg@marvell.com>
+Date: Mon, 27 Feb 2017 23:18:33 +0800
+Subject: [PATCH 0714/1200] arm64: dts: comphy: a3700: add phy2 node for sata
+ interface
+
+- This patch sets Serdes lane 2 to SATA for Armada3700
+  development board.
+- Now there are maximun 3 comphy lanes: 0, 1, and 2.
+  This patch sets comphy max lanes number to 3.
+
+Change-Id: I0fd3c14cc313fb45e0e11264dfb7585061df721c
+Signed-off-by: zachary <zhangzg@marvell.com>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/53602
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/armada-3720-db.dts | 6 ++++++
+ arch/arm/dts/armada-37xx.dtsi   | 2 +-
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/armada-3720-db.dts b/arch/arm/dts/armada-3720-db.dts
+index 3b7764ea64..5c507da8c3 100644
+--- a/arch/arm/dts/armada-3720-db.dts
++++ b/arch/arm/dts/armada-3720-db.dts
+@@ -108,6 +108,12 @@
+ 		phy-type = <COMPHY_TYPE_USB3_HOST0>;
+ 		phy-speed = <COMPHY_SPEED_5G>;
+ 	};
++
++	phy2 {
++		phy-type = <COMPHY_TYPE_SATA0>;
++		phy-speed = <COMPHY_SPEED_5G>;
++		phy-invert = <COMPHY_POLARITY_NO_INVERT>;
++	};
+ };
+ 
+ &eth0 {
+diff --git a/arch/arm/dts/armada-37xx.dtsi b/arch/arm/dts/armada-37xx.dtsi
+index 4e11751cea..bf9cf7d8b3 100644
+--- a/arch/arm/dts/armada-37xx.dtsi
++++ b/arch/arm/dts/armada-37xx.dtsi
+@@ -291,7 +291,7 @@
+ 				reg = <0x18300 0x28>,
+ 				      <0x1f300 0x3d000>;
+ 				mux-bitcount = <4>;
+-				max-lanes = <2>;
++				max-lanes = <3>;
+ 			};
+ 		};
+ 
+-- 
+2.22.0
+

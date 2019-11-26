@@ -1,0 +1,35 @@
+From a9600c99ca15d87bf6a9e5459f7f3ced2f373f4b Mon Sep 17 00:00:00 2001
+From: Marcin Wojtas <mw@semihalf.com>
+Date: Mon, 25 Feb 2019 17:10:07 +0100
+Subject: [PATCH 1033/1200] arm64: dts: cn913x: change default frequency
+ setting
+
+This patch modifies the default Sample-at-Reset setting
+to 2200/1200 of CPU/DDR frequencies.
+
+Change-Id: I4a2f6a01254b3e823e6faf3066d7daf06499f3b6
+Signed-off-by: Marcin Wojtas <mw@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/4794
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Nadav Haklai <Nadav.Haklai@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/cn9130-db-dev-info.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/cn9130-db-dev-info.dtsi b/arch/arm/dts/cn9130-db-dev-info.dtsi
+index 9eac906434..a7d0180553 100644
+--- a/arch/arm/dts/cn9130-db-dev-info.dtsi
++++ b/arch/arm/dts/cn9130-db-dev-info.dtsi
+@@ -23,7 +23,7 @@
+ 				options = "0x0", "CPU/DDR = 0x0: 2000/1200 Mhz, PIDI = 0: 1Ghz",
+ 					  "0x2", "CPU/DDR = 0x6: 2200/1200 Mhz, PIDI = 0: 1Ghz",
+ 					  "0x4", "CPU/DDR = 0xD: 1600/1200 Mhz, PIDI = 0: 1Ghz";
+-				default = <0x0>;
++				default = <0x2>;
+ 				status = "okay";
+ 			};
+ 			boot_mode {
+-- 
+2.22.0
+

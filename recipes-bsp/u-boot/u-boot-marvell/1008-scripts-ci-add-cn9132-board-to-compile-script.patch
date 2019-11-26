@@ -1,0 +1,42 @@
+From c38e00f5988a7fe4803dbd97ac29d841593cf67a Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Sun, 3 Feb 2019 18:50:09 +0200
+Subject: [PATCH 1008/1200] scripts: ci: add cn9132 board to compile script
+
+Change-Id: Icad9de7f09b3b06d6adc13b700d4c6c32616b0d9
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/3237
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Lior Levin <Lior.Levin@cavium.com>
+---
+ scripts/ci/compile.sh           | 1 +
+ scripts/ci/supported_builds.txt | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index a5c86db7b8..2f2d13511b 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -121,6 +121,7 @@ case $build_name in
+ 	uboot_2018_cn9030_B ) device_tree="cn9030-vd-B"; ;;
+ 	uboot_2018_cn9130_A ) device_tree="cn9130-db-A"; ;;
+ 	uboot_2018_cn9131_A ) device_tree="cn9131-db-A"; ;;
++	uboot_2018_cn9132_A ) device_tree="cn9132-db-A"; ;;
+ 
+ 	uboot_2018*_a37xx_ddr3_v2_A_* )
+ 		device_tree="armada-3720-db"; ;;
+diff --git a/scripts/ci/supported_builds.txt b/scripts/ci/supported_builds.txt
+index b517ba2ae1..7ebccd8dd7 100644
+--- a/scripts/ci/supported_builds.txt
++++ b/scripts/ci/supported_builds.txt
+@@ -34,6 +34,7 @@ uboot_2018_cn9030_A
+ uboot_2018_cn9030_B
+ uboot_2018_cn9130_A
+ uboot_2018_cn9131_A
++uboot_2018_cn9132_A
+ 
+ uboot_2018_a37xx_ddr3_v2_A_1000_800
+ uboot_2018_a37xx_ddr3_v2_B_1000_800
+-- 
+2.22.0
+

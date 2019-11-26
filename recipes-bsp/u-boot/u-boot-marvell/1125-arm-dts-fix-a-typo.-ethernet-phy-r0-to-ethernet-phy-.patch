@@ -1,0 +1,32 @@
+From 2e8c49bc39ad9dcab5702882bfebe462a0cfde96 Mon Sep 17 00:00:00 2001
+From: Zuohai Xu <zouhaix@marvell.com>
+Date: Mon, 20 May 2019 19:48:42 +0800
+Subject: [PATCH 1125/1200] arm: dts: fix a typo. "ethernet-phy@r0" to
+ "ethernet-phy@0"
+
+Change-Id: I996b9ffaa6a021919ebeb6c25543cb60b4ca6e5f
+Signed-off-by: Zuohai Xu <zouhaix@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/9268
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+---
+ arch/arm/dts/cn9130-crb.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/cn9130-crb.dtsi b/arch/arm/dts/cn9130-crb.dtsi
+index 6d12e3c36b..2706f0e364 100644
+--- a/arch/arm/dts/cn9130-crb.dtsi
++++ b/arch/arm/dts/cn9130-crb.dtsi
+@@ -192,7 +192,7 @@
+ 
+ &cp0_xmdio {
+ 	status = "okay";
+-	nbaset_phy0: ethernet-phy@r0 {
++	nbaset_phy0: ethernet-phy@0 {
+ 		reg = <0>;
+ 	};
+ };
+-- 
+2.22.0
+

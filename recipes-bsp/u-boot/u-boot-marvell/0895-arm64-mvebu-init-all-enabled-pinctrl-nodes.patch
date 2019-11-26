@@ -1,0 +1,44 @@
+From 7be7194afcf90adc120679624c88f419fd860148 Mon Sep 17 00:00:00 2001
+From: David Sniatkiwicz <davidsn@marvell.com>
+Date: Tue, 28 Nov 2017 11:13:49 +0200
+Subject: [PATCH 0895/1200] arm64: mvebu: init all enabled pinctrl nodes
+
+Currently, the pin control is initialized only when it probed actively
+by one of the other devices.
+
+This patch adds support to probe all enabled pin control nodes at startup
+by looping over all enabled pin control nodes in the DT.
+
+Change-Id: Iffe412e9538f426d5b0878720e80a6e33b97576c
+Signed-off-by: David Sniatkiwicz <davidsn@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/60906
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/mach-mvebu/arm64-common.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/arch/arm/mach-mvebu/arm64-common.c b/arch/arm/mach-mvebu/arm64-common.c
+index db0d9cb23d..ef733e980e 100644
+--- a/arch/arm/mach-mvebu/arm64-common.c
++++ b/arch/arm/mach-mvebu/arm64-common.c
+@@ -97,6 +97,16 @@ int arch_early_init_r(void)
+ 			break;
+ 	}
+ 
++	i = 0;
++	while (1) {
++		/* Call the pinctrl code via the PINCTRL uclass driver */
++		ret = uclass_get_device(UCLASS_PINCTRL, i++, &dev);
++
++		/* We're done, once no further CP110 device is found */
++		if (ret)
++			break;
++	}
++
+ 	/* Cause the SATA device to do its early init */
+ 	uclass_first_device(UCLASS_AHCI, &dev);
+ 
+-- 
+2.22.0
+

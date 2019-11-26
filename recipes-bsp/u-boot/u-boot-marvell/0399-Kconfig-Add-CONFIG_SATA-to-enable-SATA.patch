@@ -1,0 +1,42 @@
+From 64883fc2ea72950f97bd05bdf1bc4bdd86170f96 Mon Sep 17 00:00:00 2001
+From: Simon Glass <sjg@chromium.org>
+Date: Wed, 14 Jun 2017 21:28:25 -0600
+Subject: [PATCH 0399/1200] Kconfig: Add CONFIG_SATA to enable SATA
+
+At present CONFIG_CMD_SATA enables the 'sata' command which also brings
+in SATA support. Some boards may wish to enable SATA without the command.
+Add a separate CONFIG to permit this.
+
+Signed-off-by: Simon Glass <sjg@chromium.org>
+Reviewed-by: Bin Meng <bmeng.cn@gmail.com>
+---
+ cmd/Kconfig | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/cmd/Kconfig b/cmd/Kconfig
+index a05b96f8ec..4fc0ebe82d 100644
+--- a/cmd/Kconfig
++++ b/cmd/Kconfig
+@@ -985,6 +985,19 @@ config CMD_USB_MASS_STORAGE
+ 	help
+ 	  USB mass storage support
+ 
++config CMD_SATA
++	bool "sata - Access SATA subsystem"
++	select SATA
++	help
++	  SATA (Serial Advanced Technology Attachment) is a serial bus
++	  standard for connecting to hard drives and other storage devices.
++	  This command provides information about attached devices and allows
++	  reading, writing and other operations.
++
++	  SATA replaces PATA (originally just ATA), which stands for Parallel AT
++	  Attachment, where AT refers to an IBM AT (Advanced Technology)
++	  computer released in 1984.
++
+ endmenu
+ 
+ 
+-- 
+2.22.0
+

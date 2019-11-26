@@ -1,0 +1,54 @@
+From 80aa40e65ebeb04bea129f10e2e6f09455e7a05c Mon Sep 17 00:00:00 2001
+From: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+Date: Mon, 7 Jan 2019 23:20:13 -0800
+Subject: [PATCH 0960/1200] Revert "octeontx: cn81xx: Enable support for NAND
+ flash and BCH ECC"
+
+This reverts commit 392b0ea45759fdc003deb80de136ba341ca1b1f7.
+
+Change-Id: Ib1e6753f85486327948358f326c8134d4c4219d1
+Signed-off-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+Reviewed-on: https://sj1git1.cavium.com/1721
+Tested-by: sa_ip-sw-jenkins
+---
+ configs/octeontx_81xx_defconfig |  4 ----
+ include/configs/octeontx_81xx.h | 10 ----------
+ 2 files changed, 14 deletions(-)
+
+diff --git a/configs/octeontx_81xx_defconfig b/configs/octeontx_81xx_defconfig
+index 2b97f2fb19..28bfbe68d9 100644
+--- a/configs/octeontx_81xx_defconfig
++++ b/configs/octeontx_81xx_defconfig
+@@ -62,10 +62,6 @@ CONFIG_MISC=y
+ CONFIG_DM_MMC=y
+ CONFIG_MMC_OCTEONTX=y
+ CONFIG_MTD=y
+-CONFIG_MTD_PARTITIONS=y
+-CONFIG_CMD_MTDPARTS=y
+-CONFIG_MTDPARTS_DEFAULT="mtdparts=octeontx_nor0:6m@0(boot)ro,9m@0x600000(data),64k@0xf00000(env)ro\0"
+-CONFIG_MTDIDS_DEFAULT="nor0=octeontx_nor0"
+ CONFIG_DM_SPI_FLASH=y
+ CONFIG_SPI_FLASH_MTD=y
+ CONFIG_SPI_FLASH=y
+diff --git a/include/configs/octeontx_81xx.h b/include/configs/octeontx_81xx.h
+index f25e5c34d4..18bf0fa1a6 100644
+--- a/include/configs/octeontx_81xx.h
++++ b/include/configs/octeontx_81xx.h
+@@ -120,14 +120,4 @@
+ #define CONFIG_SUPPORT_EMMC_RPMB
+ #define CONFIG_CMD_BKOPS_ENABLE
+ 
+-/* NAND support */
+-#define CONFIG_CMD_NAND
+-#define CONFIG_NAND_OCTEONTX
+-#define CONFIG_MTD_DEVICE
+-/*#define CONFIG_MTD_CONCAT*/
+-#define CONFIG_SYS_MAX_NAND_DEVICE	8
+-#define CONFIG_SYS_NAND_SELF_INIT
+-#define CONFIG_SYS_NAND_ONFI_DETECTION
+-#define CONFIG_OCTEONTX_BCH
+-
+ #endif /* __OCTEONTX_81XX_H__ */
+-- 
+2.22.0
+

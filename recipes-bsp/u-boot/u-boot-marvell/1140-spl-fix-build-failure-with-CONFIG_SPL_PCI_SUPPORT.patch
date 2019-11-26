@@ -1,0 +1,149 @@
+From aa0ba4ef491ee36c18f74243586b0d8836136f76 Mon Sep 17 00:00:00 2001
+From: Sekhar Nori <nsekhar@ti.com>
+Date: Thu, 6 Dec 2018 15:40:08 +0530
+Subject: [PATCH 1140/1200] spl: fix build failure with !CONFIG_SPL_PCI_SUPPORT
+
+Building U-Boot with CONFIG_PCI and CONFIG_DM_PCI enabled, but
+CONFIG_SPL_PCI_SUPPORT disabled, results in following linker
+error:
+
+lib/built-in.o: In function `fdtdec_get_pci_bar32':
+lib/fdtdec.c:305: undefined reference to `dm_pci_read_bar32'
+fdtdec.c:305:(.text.fdtdec_get_pci_bar32+0x24): relocation truncated to fit: R_AARCH64_CALL26 against undefined symbol `dm_pci_read_bar32'
+
+This is because reference to dm_pci_read_bar32() remains in lib/fdtdec.c
+while SPL build does not descend into drivers/pci directory in
+drivers/Makefile if CONFIG_SPL_PCI_SUPPORT is not enabled.
+
+Fix this by applying appropriate #define guards in lib/fdtdec.c.
+It looks like ns16550.c has the same problem, so fixed that too.
+
+To simplify this, CONFIG_SPL_PCI_SUPPORT is renamed to CONFIG_SPL_PCI
+(enables use of CONFIG_IS_ENABLED() macro).
+
+Suggested-by: Vignesh R <vigneshr@ti.com>
+Signed-off-by: Sekhar Nori <nsekhar@ti.com>
+Reviewed-by: Lokesh Vutla <lokeshvutla@ti.com>
+Reviewed-by: Tom Rini <trini@konsulko.com>
+
+ Conflicts:
+	common/spl/Kconfig
+	drivers/Makefile
+
+Change-Id: I96ef9e7b633e08bd02c067dfb98db0ea57edc400
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/9927
+Tested-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ Makefile                            |  1 -
+ common/spl/Kconfig                  | 12 +++++++++++-
+ configs/chromebook_link64_defconfig |  2 +-
+ configs/qemu-x86_64_defconfig       |  2 +-
+ drivers/Makefile                    |  1 +
+ drivers/serial/ns16550.c            |  2 +-
+ lib/fdtdec.c                        |  2 +-
+ 7 files changed, 16 insertions(+), 6 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index c604af3029..34cad1706c 100644
+--- a/Makefile
++++ b/Makefile
+@@ -668,7 +668,6 @@ libs-$(CONFIG_CMD_UBI) += drivers/mtd/ubi/
+ libs-y += drivers/mtd/spi/
+ libs-y += drivers/net/
+ libs-y += drivers/net/phy/
+-libs-y += drivers/pci/
+ libs-y += drivers/power/ \
+ 	drivers/power/domain/ \
+ 	drivers/power/fuel_gauge/ \
+diff --git a/common/spl/Kconfig b/common/spl/Kconfig
+index 9609fceea5..194415c877 100644
+--- a/common/spl/Kconfig
++++ b/common/spl/Kconfig
+@@ -543,7 +543,17 @@ config SYS_OS_BASE
+ 
+ endif # SPL_OS_BOOT
+ 
+-config SPL_PCI_SUPPORT
++config SPL_PAYLOAD
++	string "SPL payload"
++	default "tpl/u-boot-with-tpl.bin" if TPL
++	default "u-boot.bin"
++	help
++	  Payload for SPL boot. For backward compability, default to
++	  u-boot.bin, i.e. RAW image without any header. In case of
++	  TPL, tpl/u-boot-with-tpl.bin. For new boards, suggest to
++	  use u-boot.img.
++
++config SPL_PCI
+ 	bool "Support PCI drivers"
+ 	help
+ 	  Enable support for PCI in SPL. For platforms that need PCI to boot,
+diff --git a/configs/chromebook_link64_defconfig b/configs/chromebook_link64_defconfig
+index e84e571f55..5786ed0fda 100644
+--- a/configs/chromebook_link64_defconfig
++++ b/configs/chromebook_link64_defconfig
+@@ -26,7 +26,7 @@ CONFIG_SPL_CPU_SUPPORT=y
+ CONFIG_SPL_ENV_SUPPORT=y
+ CONFIG_SPL_I2C_SUPPORT=y
+ CONFIG_SPL_NET_SUPPORT=y
+-CONFIG_SPL_PCI_SUPPORT=y
++CONFIG_SPL_PCI=y
+ CONFIG_SPL_PCH_SUPPORT=y
+ CONFIG_SPL_RTC_SUPPORT=y
+ CONFIG_HUSH_PARSER=y
+diff --git a/configs/qemu-x86_64_defconfig b/configs/qemu-x86_64_defconfig
+index d1ad8025e7..2823583422 100644
+--- a/configs/qemu-x86_64_defconfig
++++ b/configs/qemu-x86_64_defconfig
+@@ -27,7 +27,7 @@ CONFIG_SPL_SYS_MALLOC_SIMPLE=y
+ CONFIG_SPL_CPU_SUPPORT=y
+ CONFIG_SPL_ENV_SUPPORT=y
+ CONFIG_SPL_NET_SUPPORT=y
+-CONFIG_SPL_PCI_SUPPORT=y
++CONFIG_SPL_PCI=y
+ CONFIG_SPL_PCH_SUPPORT=y
+ CONFIG_SPL_RTC_SUPPORT=y
+ CONFIG_HUSH_PARSER=y
+diff --git a/drivers/Makefile b/drivers/Makefile
+index e93b009f8d..0fcecb4550 100644
+--- a/drivers/Makefile
++++ b/drivers/Makefile
+@@ -9,6 +9,7 @@ obj-$(CONFIG_$(SPL_TPL_)I2C_SUPPORT) += i2c/
+ obj-$(CONFIG_$(SPL_TPL_)LED) += led/
+ obj-$(CONFIG_$(SPL_TPL_)MMC_SUPPORT) += mmc/
+ obj-$(CONFIG_$(SPL_TPL_)NAND_SUPPORT) += mtd/nand/
++obj-$(CONFIG_$(SPL_TPL_)PCI) += pci/
+ obj-$(CONFIG_$(SPL_TPL_)PHY) += phy/
+ obj-$(CONFIG_$(SPL_TPL_)PINCTRL) += pinctrl/
+ obj-$(CONFIG_$(SPL_TPL_)RAM) += ram/
+diff --git a/drivers/serial/ns16550.c b/drivers/serial/ns16550.c
+index 53550bfa88..332d75c062 100644
+--- a/drivers/serial/ns16550.c
++++ b/drivers/serial/ns16550.c
+@@ -395,7 +395,7 @@ int ns16550_serial_ofdata_to_platdata(struct udevice *dev)
+ 
+ 	/* try Processor Local Bus device first */
+ 	addr = dev_read_addr(dev);
+-#if defined(CONFIG_PCI) && defined(CONFIG_DM_PCI)
++#if CONFIG_IS_ENABLED(PCI) && defined(CONFIG_DM_PCI)
+ 	if (addr == FDT_ADDR_T_NONE) {
+ 		/* then try pci device */
+ 		struct fdt_pci_addr pci_addr;
+diff --git a/lib/fdtdec.c b/lib/fdtdec.c
+index c2869c33e1..333fdca4a7 100644
+--- a/lib/fdtdec.c
++++ b/lib/fdtdec.c
+@@ -204,7 +204,7 @@ fdt_addr_t fdtdec_get_addr(const void *blob, int node, const char *prop_name)
+ 	return fdtdec_get_addr_size(blob, node, prop_name, NULL);
+ }
+ 
+-#if defined(CONFIG_PCI) && defined(CONFIG_DM_PCI)
++#if CONFIG_IS_ENABLED(PCI) && defined(CONFIG_DM_PCI)
+ int fdtdec_get_pci_addr(const void *blob, int node, enum fdt_pci_space type,
+ 			const char *prop_name, struct fdt_pci_addr *addr)
+ {
+-- 
+2.22.0
+

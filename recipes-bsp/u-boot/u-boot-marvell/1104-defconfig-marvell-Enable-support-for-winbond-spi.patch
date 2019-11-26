@@ -1,0 +1,30 @@
+From 05ab1c5563ff6036e62c55faeb78babb706ff1b0 Mon Sep 17 00:00:00 2001
+From: zxu <zouhaix@marvell.com>
+Date: Thu, 2 May 2019 15:19:59 +0800
+Subject: [PATCH 1104/1200] defconfig: marvell: Enable support for winbond spi
+
+Change-Id: Ieadcc9d53c5f3f3290065da794dd6e42282cf40f
+Signed-off-by: Zuohai Xu <zouhaix@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/8399
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+---
+ configs/mvebu_db_cn91xx_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/configs/mvebu_db_cn91xx_defconfig b/configs/mvebu_db_cn91xx_defconfig
+index 990d790a42..08ebbd08f8 100644
+--- a/configs/mvebu_db_cn91xx_defconfig
++++ b/configs/mvebu_db_cn91xx_defconfig
+@@ -57,6 +57,7 @@ CONFIG_SPI_FLASH=y
+ CONFIG_SPI_FLASH_MACRONIX=y
+ CONFIG_SPI_FLASH_SPANSION=y
+ CONFIG_SPI_FLASH_STMICRO=y
++CONFIG_SPI_FLASH_WINBOND=y
+ CONFIG_PHY_MARVELL=y
+ CONFIG_PHY_GIGE=y
+ CONFIG_E1000=y
+-- 
+2.22.0
+

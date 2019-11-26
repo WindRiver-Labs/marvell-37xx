@@ -1,0 +1,36 @@
+From 2132f9e03f643bba46d0c0ffd5dc810fb98fc68a Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Sun, 28 Jul 2019 00:19:51 +0200
+Subject: [PATCH 1199/1200] usb: hub: increase usb port reset time as a W/A for
+ some usb hubs
+
+Some usb hubs are causing problems during usb hub port reset. Work-around
+for this issue is increasing the HUB_SHORT_RESET_TIME and was recommended
+by HW team.
+
+Change-Id: I147847bd2672f771b9691dfd302cf5efbee5aa7b
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/13151
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Nadav Haklai <nadavh@marvell.com>
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+---
+ common/usb_hub.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/common/usb_hub.c b/common/usb_hub.c
+index e350ec22e0..8ee3c4d570 100644
+--- a/common/usb_hub.c
++++ b/common/usb_hub.c
+@@ -43,7 +43,7 @@ DECLARE_GLOBAL_DATA_PTR;
+ 
+ #define USB_BUFSIZ	512
+ 
+-#define HUB_SHORT_RESET_TIME	20
++#define HUB_SHORT_RESET_TIME	100
+ #define HUB_LONG_RESET_TIME	200
+ 
+ #define PORT_OVERCURRENT_MAX_SCAN_COUNT		3
+-- 
+2.22.0
+

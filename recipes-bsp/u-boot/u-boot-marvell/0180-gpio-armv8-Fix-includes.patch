@@ -1,0 +1,25 @@
+From 1d84193085c72726db3663f2a4b711b2c71402e7 Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Mon, 16 May 2016 20:40:28 -0400
+Subject: [PATCH 0180/1200] gpio: armv8: Fix includes
+
+Fix includes as ARM64 has no specific GPIO header
+
+Signed-off-by: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+---
+ arch/arm/include/asm/gpio.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/include/asm/gpio.h b/arch/arm/include/asm/gpio.h
+index 1c5e87340c..2f92f8986c 100644
+--- a/arch/arm/include/asm/gpio.h
++++ b/arch/arm/include/asm/gpio.h
+@@ -1,4 +1,4 @@
+-#if !defined(CONFIG_ARCH_UNIPHIER) && !defined(CONFIG_ARCH_STI)
++#if !defined(CONFIG_ARCH_UNIPHIER) && !defined(CONFIG_ARCH_STI) && !defined(CONFIG_ARM64)
+ #include <asm/arch/gpio.h>
+ #endif
+ #include <asm-generic/gpio.h>
+-- 
+2.22.0
+

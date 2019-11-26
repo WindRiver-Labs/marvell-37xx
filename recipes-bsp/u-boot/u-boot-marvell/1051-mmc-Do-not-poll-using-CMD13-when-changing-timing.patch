@@ -1,0 +1,88 @@
+From 8f4d6a11a1c5f77bceb042fe7d0515598c3251ee Mon Sep 17 00:00:00 2001
+From: Marek Vasut <marek.vasut+renesas@gmail.com>
+Date: Wed, 6 Feb 2019 11:34:27 +0100
+Subject: [PATCH 1051/1200] mmc: Do not poll using CMD13 when changing timing
+
+When using CMD6 to switch eMMC card timing from HS200/HS400 to HS/legacy,
+do not poll for the completion status using CMD13, but rather wait 50mS.
+
+Once the card receives the CMD6 and starts executing it, the bus is in
+undefined state until both the card finishes executing the command and
+until the controller switches the bus to matching timing configuration.
+During this time, it is not possible to transport any commands or data
+across the bus, which includes the CMD13.
+
+Change-Id: I186fea8cb0fec3c9b4ffe985dbe3ac93da619df4
+Signed-off-by: Marek Vasut <marek.vasut+renesas@gmail.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
+Reviewed-on: https://sj1git1.cavium.com/5418
+Reviewed-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+Tested-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+---
+ drivers/mmc/mmc.c | 28 ++++++++++++++++++++--------
+ 1 file changed, 20 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/mmc.c b/drivers/mmc/mmc.c
+index 3d437cefe2..cf44cee7ca 100644
+--- a/drivers/mmc/mmc.c
++++ b/drivers/mmc/mmc.c
+@@ -724,7 +724,8 @@ static int mmc_send_ext_csd(struct mmc *mmc, u8 *ext_csd)
+ 	return err;
+ }
+ 
+-int mmc_switch(struct mmc *mmc, u8 set, u8 index, u8 value)
++static int __mmc_switch(struct mmc *mmc, u8 set, u8 index, u8 value,
++			bool send_status)
+ {
+ 	struct mmc_cmd cmd;
+ 	int timeout = 1000;
+@@ -740,19 +741,29 @@ int mmc_switch(struct mmc *mmc, u8 set, u8 index, u8 value)
+ 	while (retries > 0) {
+ 		ret = mmc_send_cmd(mmc, &cmd, NULL);
+ 
+-		/* Waiting for the ready status */
+-		if (!ret) {
+-			ret = mmc_send_status(mmc, timeout);
+-			return ret;
++		if (ret) {
++			retries--;
++			continue;
++		}
++
++		if (!send_status) {
++			mdelay(50);
++			return 0;
+ 		}
+ 
+-		retries--;
++		/* Waiting for the ready status */
++		return mmc_send_status(mmc, timeout);
+ 	}
+ 
+ 	return ret;
+ 
+ }
+ 
++int mmc_switch(struct mmc *mmc, u8 set, u8 index, u8 value)
++{
++	return __mmc_switch(mmc, set, index, value, true);
++}
++
+ #if !CONFIG_IS_ENABLED(MMC_TINY)
+ static int mmc_set_card_speed(struct mmc *mmc, enum bus_mode mode,
+ 			      bool hsdowngrade)
+@@ -784,8 +795,9 @@ static int mmc_set_card_speed(struct mmc *mmc, enum bus_mode mode,
+ 	default:
+ 		return -EINVAL;
+ 	}
+-	err = mmc_switch(mmc, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
+-			 speed_bits);
++
++	err = __mmc_switch(mmc, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
++			   speed_bits, !hsdowngrade);
+ 	if (err)
+ 		return err;
+ 
+-- 
+2.22.0
+

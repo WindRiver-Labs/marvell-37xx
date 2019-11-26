@@ -1,0 +1,36 @@
+From 4c944b6352158dae7e82fa1d9579c4f8a0441c6b Mon Sep 17 00:00:00 2001
+From: Simon Glass <sjg@chromium.org>
+Date: Wed, 14 Jun 2017 21:28:28 -0600
+Subject: [PATCH 0400/1200] dm: scsi: Rearrange header file for driver model
+
+Put the driver-model declarations first since we are migrating to that.
+Also drop scsi_init() when driver model is used.
+
+Signed-off-by: Simon Glass <sjg@chromium.org>
+Reviewed-by: Bin Meng <bmeng.cn@gmail.com>
+---
+ include/scsi.h | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/include/scsi.h b/include/scsi.h
+index 7173912de4..90bedabffc 100644
+--- a/include/scsi.h
++++ b/include/scsi.h
+@@ -232,6 +232,14 @@ void scsi_low_level_init(int busdevfunc);
+ void scsi_init(void);
+ #endif
+ 
++int scsi_exec(ccb *pccb);
++void scsi_bus_reset(void);
++
++/***************************************************************************
++ * functions residing inside cmd_scsi.c
++ */
++int scsi_scan(int mode);
++
+ #define SCSI_IDENTIFY					0xC0  /* not used */
+ 
+ /* Hardware errors  */
+-- 
+2.22.0
+

@@ -1,0 +1,77 @@
+From 42cafc80629e7aeb07a96f8bb42589db772fc7c0 Mon Sep 17 00:00:00 2001
+From: Marcin Wojtas <mw@semihalf.com>
+Date: Mon, 25 Feb 2019 16:02:11 +0100
+Subject: [PATCH 1038/1200] arm64: dts: cn913x: allow proper SD/MMC PHY MUX
+ setting in CP115
+
+SD/MMC PHY usage requires additional setting in MPP registers.
+For standalone CP115 chips it wasn't done, due to wrong compatible
+strings for the pinctrl. Update it to be on par with Linux DT and
+modify the MPP driver accordingly.
+
+Change-Id: If456573189758e8b6dcb484ecb3e34756757665e
+Signed-off-by: Marcin Wojtas <mw@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/4868
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Grzegorz Jaszczyk <Grzegorz.Jaszczyk@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/cn9131-db.dtsi           | 3 ++-
+ arch/arm/dts/cn9132-db.dtsi           | 3 ++-
+ drivers/pinctrl/mvebu/pinctrl-mvebu.c | 5 ++++-
+ 3 files changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/dts/cn9131-db.dtsi b/arch/arm/dts/cn9131-db.dtsi
+index 0065c12e03..67490fe357 100644
+--- a/arch/arm/dts/cn9131-db.dtsi
++++ b/arch/arm/dts/cn9131-db.dtsi
+@@ -126,7 +126,8 @@
+ };
+ 
+ &cp1_pinctl {
+-	compatible = "marvell,mvebu-pinctrl", "marvell,armada-8k-cps-pinctrl";
++	compatible = "marvell,mvebu-pinctrl",
++		     "marvell,cp115-standalone-pinctrl";
+ 	bank-name ="cp1-110";
+ 
+ 	/* MPP Bus:
+diff --git a/arch/arm/dts/cn9132-db.dtsi b/arch/arm/dts/cn9132-db.dtsi
+index 73b3f22820..76e9029a94 100644
+--- a/arch/arm/dts/cn9132-db.dtsi
++++ b/arch/arm/dts/cn9132-db.dtsi
+@@ -97,7 +97,8 @@
+ };
+ 
+ &cp2_pinctl {
+-	compatible = "marvell,mvebu-pinctrl", "marvell,armada-8k-cps-pinctrl";
++	compatible = "marvell,mvebu-pinctrl",
++		     "marvell,cp115-standalone-pinctrl";
+ 	bank-name ="cp2-110";
+ 
+ 	cp2_i2c0_pins: cp2-i2c-pins-0 {
+diff --git a/drivers/pinctrl/mvebu/pinctrl-mvebu.c b/drivers/pinctrl/mvebu/pinctrl-mvebu.c
+index 720f7e3271..3bb3fee22c 100644
+--- a/drivers/pinctrl/mvebu/pinctrl-mvebu.c
++++ b/drivers/pinctrl/mvebu/pinctrl-mvebu.c
+@@ -52,7 +52,9 @@ void mvebu_pinctl_emmc_set_mux(struct udevice *dev, u32 pin, u32 func)
+ 	} else if (!fdt_node_check_compatible(blob, node,
+ 					"marvell,armada-8k-cpm-pinctrl") ||
+ 		   !fdt_node_check_compatible(blob, node,
+-					"marvell,armada-7k-pinctrl")) {
++					"marvell,armada-7k-pinctrl") ||
++		   !fdt_node_check_compatible(blob, node,
++					"marvell,cp115-standalone-pinctrl")) {
+ 		if ((pin == CP110_EMMC_CLK_PIN_ID) &&
+ 		    (func == CP110_EMMC_CLK_FUNC)) {
+ 			clrbits_le32(priv->base_reg + CP_EMMC_PHY_CTRL_REG,
+@@ -223,6 +225,7 @@ static const struct udevice_id mvebu_pinctrl_ids[] = {
+ 	{ .compatible = "marvell,armada-7k-pinctrl" },
+ 	{ .compatible = "marvell,armada-8k-cpm-pinctrl" },
+ 	{ .compatible = "marvell,armada-8k-cps-pinctrl" },
++	{ .compatible = "marvell,cp115-standalone-pinctrl" },
+ 	{ }
+ };
+ 
+-- 
+2.22.0
+

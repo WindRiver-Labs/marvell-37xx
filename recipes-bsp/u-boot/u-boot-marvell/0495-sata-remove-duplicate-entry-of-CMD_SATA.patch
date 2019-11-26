@@ -1,0 +1,37 @@
+From 9b2363d3ecf2b35e19a7f1520395dd67a9d4735a Mon Sep 17 00:00:00 2001
+From: Suneel Garapati <sgarapati@caviumnetworks.com>
+Date: Tue, 14 Nov 2017 17:25:02 -0800
+Subject: [PATCH 0495/1200] sata: remove duplicate entry of CMD_SATA
+
+Signed-off-by: Suneel Garapati <sgarapati@caviumnetworks.com>
+---
+ cmd/Kconfig | 13 -------------
+ 1 file changed, 13 deletions(-)
+
+diff --git a/cmd/Kconfig b/cmd/Kconfig
+index f0fbadd314..19c839aa14 100644
+--- a/cmd/Kconfig
++++ b/cmd/Kconfig
+@@ -985,19 +985,6 @@ config CMD_USB_MASS_STORAGE
+ 	help
+ 	  USB mass storage support
+ 
+-config CMD_SATA
+-	bool "sata - Access SATA subsystem"
+-	select SATA
+-	help
+-	  SATA (Serial Advanced Technology Attachment) is a serial bus
+-	  standard for connecting to hard drives and other storage devices.
+-	  This command provides information about attached devices and allows
+-	  reading, writing and other operations.
+-
+-	  SATA replaces PATA (originally just ATA), which stands for Parallel AT
+-	  Attachment, where AT refers to an IBM AT (Advanced Technology)
+-	  computer released in 1984.
+-
+ endmenu
+ 
+ 
+-- 
+2.22.0
+

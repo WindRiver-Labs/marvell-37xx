@@ -1,0 +1,30 @@
+From 1041f7791ba9c4de1da9bc5ab522b5ff29aa4ff0 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Fri, 1 Feb 2019 12:19:22 +0100
+Subject: [PATCH 1006/1200] arm64: mvebu: cn9131: use proper utmi port
+
+Change-Id: I682e873763f3aba78ee0837b5093595accbbf584
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/3167
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/cn9131-db.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/cn9131-db.dtsi b/arch/arm/dts/cn9131-db.dtsi
+index 0683af8809..57ec09729b 100644
+--- a/arch/arm/dts/cn9131-db.dtsi
++++ b/arch/arm/dts/cn9131-db.dtsi
+@@ -207,7 +207,7 @@
+ 	status = "okay";
+ };
+ 
+-&cp1_utmi0 {
++&cp1_utmi1 {
+ 	status = "okay";
+ };
+ 
+-- 
+2.22.0
+

@@ -1,0 +1,29 @@
+From 54ca8e005fee5eeeff693bbb3773c5440efa7c01 Mon Sep 17 00:00:00 2001
+From: Zuohai Xu <zouhaix@marvell.com>
+Date: Mon, 20 May 2019 19:51:01 +0800
+Subject: [PATCH 1126/1200] arm: dts:  remove speed limitation on PP port 2
+
+Change-Id: I9704ce502dbd4d1324b79ec50b4cf09ff7cad1f6
+Signed-off-by: Zuohai Xu <zouhaix@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/9269
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+---
+ arch/arm/dts/cn9130-crb.dtsi | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/arch/arm/dts/cn9130-crb.dtsi b/arch/arm/dts/cn9130-crb.dtsi
+index 2706f0e364..2b82bbd883 100644
+--- a/arch/arm/dts/cn9130-crb.dtsi
++++ b/arch/arm/dts/cn9130-crb.dtsi
+@@ -215,6 +215,5 @@
+ &cp0_eth2 {
+ 	status = "okay";
+ 	phy = <&nbaset_phy0>;
+-	phy-speed = <2500>;
+ 	phy-mode = "sgmii";
+ };
+-- 
+2.22.0
+

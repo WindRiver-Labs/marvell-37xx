@@ -1,0 +1,59 @@
+From 6641fecfba0f2bef62f11712f9920e68fd1b8dcb Mon Sep 17 00:00:00 2001
+From: Marcin Wojtas <mw@semihalf.com>
+Date: Wed, 20 Feb 2019 13:11:37 +0100
+Subject: [PATCH 1031/1200] arm64: dts: cn913x: add CP0 SD regulator
+ description
+
+This patch adds missing vmmc-supply responsible for
+enabling main V_3.3_SD supply for the CP0 SD connector
+(CON28).
+
+Change-Id: Ic899292cad9c9e423c5373edbd5d99048d0a509b
+Signed-off-by: Marcin Wojtas <mw@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/4413
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Grzegorz Jaszczyk <Grzegorz.Jaszczyk@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/cn9130-db.dtsi | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/cn9130-db.dtsi b/arch/arm/dts/cn9130-db.dtsi
+index 26e8f40dd9..f933ed50b8 100644
+--- a/arch/arm/dts/cn9130-db.dtsi
++++ b/arch/arm/dts/cn9130-db.dtsi
+@@ -24,6 +24,7 @@
+ 			};
+ 			sdhci@780000 {
+ 				vqmmc-supply = <&cp0_reg_sd_vccq>;
++				vmmc-supply = <&cp0_reg_sd_vcc>;
+ 			};
+ 
+ 			cp0_reg_usb3_vbus0: cp0_usb3_vbus@0 {
+@@ -47,13 +48,22 @@
+ 			};
+ 			cp0_reg_sd_vccq: cp0_sd_vccq@0 {
+ 				compatible = "regulator-gpio";
+-				regulator-name = "cp0_sd_vcc";
++				regulator-name = "cp0_sd_vccq";
+ 				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <3300000>;
+ 				gpios = <&expander0 15 GPIO_ACTIVE_HIGH>;
+ 				states = <1800000 0x1
+ 					  3300000 0x0>;
+ 			};
++			cp0_reg_sd_vcc: cp0_sd_vcc@0 {
++				compatible = "regulator-fixed";
++				regulator-name = "cp0_sd_vcc";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				gpio = <&expander0 14 GPIO_ACTIVE_HIGH>;
++				enable-active-high;
++				regulator-always-on;
++			};
+ 			cp0_reg_usb3_current_lim0:cp0_usb3_current_limiter@0 {
+ 				compatible = "regulator-fixed";
+ 				regulator-min-microamp = <900000>;
+-- 
+2.22.0
+

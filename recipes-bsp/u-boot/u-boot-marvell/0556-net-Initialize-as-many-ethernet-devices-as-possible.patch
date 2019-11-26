@@ -1,0 +1,45 @@
+From dbc2c7407c7122ea95d80cd76fccf1966591150a Mon Sep 17 00:00:00 2001
+From: Mario Six <mario.six@gdsys.cc>
+Date: Fri, 27 Apr 2018 14:52:56 +0200
+Subject: [PATCH 0556/1200] net: Initialize as many ethernet devices as
+ possible
+
+On devices that have their first network interface provided by a FPGA,
+the initialization of further interfaces will fail if the FPGA is not
+yet programmed. This leads to problems during factory setup when the
+data is supposed to be loaded over secondary netowork interfaces.
+
+To avoid this, use the uclass_{first,next}_device_check functions to
+initialize as many ethernet devices as possible.
+
+Signed-off-by: Mario Six <mario.six@gdsys.cc>
+Acked-by: Joe Hershberger <joe.hershberger@ni.com>
+---
+ net/eth-uclass.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/net/eth-uclass.c b/net/eth-uclass.c
+index 25db4111d9..45ddd5a04e 100644
+--- a/net/eth-uclass.c
++++ b/net/eth-uclass.c
+@@ -397,7 +397,7 @@ int eth_initialize(void)
+ 	 * This is accomplished by attempting to probe each device and calling
+ 	 * their write_hwaddr() operation.
+ 	 */
+-	uclass_first_device(UCLASS_ETH, &dev);
++	uclass_first_device_check(UCLASS_ETH, &dev);
+ 	if (!dev) {
+ 		printf("No ethernet found.\n");
+ 		bootstage_error(BOOTSTAGE_ID_NET_ETH_START);
+@@ -426,7 +426,7 @@ int eth_initialize(void)
+ 
+ 			eth_write_hwaddr(dev);
+ 
+-			uclass_next_device(&dev);
++			uclass_next_device_check(&dev);
+ 			num_devices++;
+ 		} while (dev);
+ 
+-- 
+2.22.0
+

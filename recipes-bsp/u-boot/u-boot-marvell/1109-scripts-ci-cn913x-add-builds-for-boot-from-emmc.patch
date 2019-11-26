@@ -1,0 +1,87 @@
+From 805cc6a72c8f5c875689567178eba88a1c243afc Mon Sep 17 00:00:00 2001
+From: Alex Leibovich <alexl@marvell.com>
+Date: Mon, 6 May 2019 16:56:10 +0300
+Subject: [PATCH 1109/1200] scripts/ci: cn913x: add builds for boot from emmc
+
+Add builds for boot from emmc
+
+Change-Id: I075d79ad2b140e3edad5ec9580759c141b814d42
+Signed-off-by: Alex Leibovich <alexl@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/8646
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+---
+ scripts/ci/compile.sh           | 15 ++++++++++++++-
+ scripts/ci/supported_builds.txt |  3 +++
+ 2 files changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index f5beba37fc..93ffa556b2 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -124,13 +124,16 @@ case $build_name in
+ 	uboot_2018_cn9130_A ) device_tree="cn9130-db-A"; ;;
+ 	uboot_2018_cn9130_B ) device_tree="cn9130-db-B"; ;;
+ 	uboot_2018_cn9130_ddr32_A ) device_tree="cn9130-db-A"; ;;
++	uboot_2018_cn9130_emmc_A ) device_tree="cn9130-db-A"; ;;
+ 	uboot_2018_cn9130_crb_A ) device_tree="cn9130-crb-A"; ;;
+ 	uboot_2018_cn9130_crb_B ) device_tree="cn9130-crb-B"; ;;
+ 	uboot_2018_cn9131_A ) device_tree="cn9131-db-A"; ;;
+ 	uboot_2018_cn9131_B ) device_tree="cn9131-db-B"; ;;
+ 	uboot_2018_cn9131_ddr32_A ) device_tree="cn9131-db-A"; ;;
++	uboot_2018_cn9131_emmc_A ) device_tree="cn9131-db-A"; ;;
+ 	uboot_2018_cn9132_A ) device_tree="cn9132-db-A"; ;;
+ 	uboot_2018_cn9132_ddr32_A ) device_tree="cn9132-db-A"; ;;
++	uboot_2018_cn9132_emmc_A ) device_tree="cn9132-db-A"; ;;
+ 
+ 	uboot_2018*_a37xx_ddr3_v2_A_* )
+ 		device_tree="armada-3720-db"; ;;
+@@ -176,13 +179,23 @@ if [[ $build_name == "uboot_2018_a70x0_D" ||
+ 	./scripts/config -e CONFIG_ENV_IS_IN_NAND
+ 	"""
+ elif [[ $build_name == "uboot_2018_a37xx_espressobin_ddr4_v7_1G_emmc" ||
+-	$build_name == "uboot_2018_a37xx_espressobin_ddr4_v7_2G_emmc" ]]; then
++	$build_name == "uboot_2018_a37xx_espressobin_ddr4_v7_2G_emmc" ||
++	$build_name == "uboot_2018_cn9130_emmc_A" ||
++	$build_name == "uboot_2018_cn9131_emmc_A" ||
++	$build_name == "uboot_2018_cn9132_emmc_A" ]]; then
+ 	config_cmd="""
+ 	./scripts/config -d CONFIG_MVEBU_SPI_BOOT
+ 	./scripts/config -e CONFIG_MVEBU_MMC_BOOT
+ 	./scripts/config -d CONFIG_ENV_IS_IN_SPI_FLASH
+ 	./scripts/config -e CONFIG_ENV_IS_IN_MMC
++	./scripts/config --set-val 1 MVEBU_BOOT_PART
++	"""
++	if [[ $build_name == "uboot_2018_a37xx_espressobin_ddr4_v7_1G_emmc" ||
++	$build_name == "uboot_2018_a37xx_espressobin_ddr4_v7_2G_emmc" ]]; then
++	config_cmd=$config_cmd"""
++		./scripts/config --set-val 1 MVEBU_BOOT_DEVICE
+ 	"""
++	fi
+ fi
+ 
+ build_flags="" # not used in u-boot-2018
+diff --git a/scripts/ci/supported_builds.txt b/scripts/ci/supported_builds.txt
+index f82f025f89..41ebdb075f 100644
+--- a/scripts/ci/supported_builds.txt
++++ b/scripts/ci/supported_builds.txt
+@@ -36,13 +36,16 @@ uboot_2018_a3900_B
+ uboot_2018_cn9130_A
+ uboot_2018_cn9130_B
+ uboot_2018_cn9130_ddr32_A
++uboot_2018_cn9130_emmc_A
+ uboot_2018_cn9130_crb_A
+ uboot_2018_cn9130_crb_B
+ uboot_2018_cn9131_A
+ uboot_2018_cn9132_A
+ uboot_2018_cn9131_ddr32_A
++uboot_2018_cn9131_emmc_A
+ uboot_2018_cn9132_A
+ uboot_2018_cn9132_ddr32_A
++uboot_2018_cn9132_emmc_A
+ 
+ uboot_2018_a37xx_ddr3_v2_A_1000_800
+ uboot_2018_a37xx_ddr3_v2_B_1000_800
+-- 
+2.22.0
+

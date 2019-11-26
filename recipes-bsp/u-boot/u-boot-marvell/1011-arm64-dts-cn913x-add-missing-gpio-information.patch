@@ -1,0 +1,48 @@
+From 8d0c87c3021fc1faabf6524e8138f6a1103eb9fd Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Fri, 1 Feb 2019 11:14:01 +0100
+Subject: [PATCH 1011/1200] arm64: dts: cn913x: add missing gpio information
+
+Change-Id: I5222546f59e2b404e6cd756f5e06c67db86fa043
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/3169
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/cn9130-db-A.dts | 3 +++
+ arch/arm/dts/cn9131-db.dtsi  | 5 +++++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/arch/arm/dts/cn9130-db-A.dts b/arch/arm/dts/cn9130-db-A.dts
+index 37702f5613..a2855928a0 100644
+--- a/arch/arm/dts/cn9130-db-A.dts
++++ b/arch/arm/dts/cn9130-db-A.dts
+@@ -20,6 +20,9 @@
+ 	aliases {
+ 		i2c0 = &cp0_i2c0;
+ 		spi0 = &cp0_spi1;
++		gpio0 = &ap_gpio0;
++		gpio1 = &cp0_gpio0;
++		gpio2 = &cp0_gpio1;
+ 	};
+ 
+ 	memory@00000000 {
+diff --git a/arch/arm/dts/cn9131-db.dtsi b/arch/arm/dts/cn9131-db.dtsi
+index 57ec09729b..0065c12e03 100644
+--- a/arch/arm/dts/cn9131-db.dtsi
++++ b/arch/arm/dts/cn9131-db.dtsi
+@@ -26,6 +26,11 @@
+ 	model = "Marvell CN9131 development board";
+ 	compatible = "marvell,cn9131-db";
+ 
++	aliases {
++		gpio3 = &cp1_gpio0;
++		gpio4 = &cp1_gpio1;
++	};
++
+ 	cp1 {
+ 		config-space {
+ 			cp1_reg_usb3_vbus0: cp1_usb3_vbus@0 {
+-- 
+2.22.0
+

@@ -1,0 +1,82 @@
+From 4935c9cdf6d08dcf8321e053955f8f9948dcf15b Mon Sep 17 00:00:00 2001
+From: Ken Ma <make@marvell.com>
+Date: Wed, 28 Jun 2017 16:16:58 +0800
+Subject: [PATCH 0608/1200] arm64: a37xx: dts: Add additional pinctrl
+ definition
+
+Add mmc pins, pcie pins and sdio pins definition and do these pins'
+configuration for DB board and espressobin board;
+Add uart2 pins configuration for DB board.
+
+Change-Id: I3a35f6ac94ce100c5a0fc910f2f7afadfb8b8da6
+Reviewed-on: http://vgitil04.il.marvell.com:8080/40914
+Reviewed-by: Wilson Ding <dingwei@marvell.com>
+Tested-by: Wilson Ding <dingwei@marvell.com>
+Cc: Simon Glass <sjg@chromium.org>
+Cc: Stefan Roese <sr@denx.de>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/52523
+Tested-by: Hua Jing <jinghua@marvell.com>
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+---
+ arch/arm/dts/armada-3720-db.dts |  4 ++++
+ arch/arm/dts/armada-37xx.dtsi   | 14 ++++++++++++++
+ 2 files changed, 18 insertions(+)
+
+diff --git a/arch/arm/dts/armada-3720-db.dts b/arch/arm/dts/armada-3720-db.dts
+index 5f06252e4e..88baf33f6b 100644
+--- a/arch/arm/dts/armada-3720-db.dts
++++ b/arch/arm/dts/armada-3720-db.dts
+@@ -100,6 +100,8 @@
+ 
+ &sdhci0 {
+ 	bus-width = <4>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&sdio_pins>;
+ 	status = "okay";
+ };
+ 
+@@ -109,6 +111,8 @@
+ 	mmc-ddr-1_8v;
+ 	mmc-hs400-1_8v;
+ 	marvell,pad-type = "fixed-1-8v";
++	pinctrl-names = "default";
++	pinctrl-0 = <&mmc_pins>;
+ 	status = "okay";
+ 
+ 	#address-cells = <1>;
+diff --git a/arch/arm/dts/armada-37xx.dtsi b/arch/arm/dts/armada-37xx.dtsi
+index 75a22deb4a..fab95bbc12 100644
+--- a/arch/arm/dts/armada-37xx.dtsi
++++ b/arch/arm/dts/armada-37xx.dtsi
+@@ -155,6 +155,11 @@
+ 					groups = "uart2";
+ 					function = "uart";
+ 				};
++
++				mmc_pins: mmc-pins {
++					groups = "emmc_nb";
++					function = "emmc";
++				};
+ 			};
+ 
+ 			pinctrl_sb: pinctrl-sb@18800 {
+@@ -178,6 +183,15 @@
+ 					function = "mii";
+ 				};
+ 
++				sdio_pins: sdio-pins {
++					groups = "sdio_sb";
++					function = "sdio";
++				};
++
++				pcie_pins: pcie-pins {
++					groups = "pcie1";
++					function = "pcie";
++				};
+ 			};
+ 
+ 			usb3: usb@58000 {
+-- 
+2.22.0
+

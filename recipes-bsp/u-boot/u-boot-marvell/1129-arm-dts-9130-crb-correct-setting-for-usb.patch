@@ -1,0 +1,36 @@
+From 61053e4f45411fed65f21da0b11db369dc4eed2f Mon Sep 17 00:00:00 2001
+From: Zuohai Xu <zouhaix@marvell.com>
+Date: Mon, 20 May 2019 16:39:02 +0800
+Subject: [PATCH 1129/1200] arm: dts: 9130-crb: correct setting for usb
+
+The usb 2.0 should be enabled in config A of cn9130-crb
+
+Change-Id: Ic1c5273f339891c941c10ee98a152f522c5d9950
+Signed-off-by: Zuohai Xu <zouhaix@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/9412
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+---
+ arch/arm/dts/cn9130-crb-A.dts | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/arch/arm/dts/cn9130-crb-A.dts b/arch/arm/dts/cn9130-crb-A.dts
+index ef04181ef1..e3fd22746f 100644
+--- a/arch/arm/dts/cn9130-crb-A.dts
++++ b/arch/arm/dts/cn9130-crb-A.dts
+@@ -47,3 +47,11 @@
+ 	ranges =<0x82000000 0 0xc0000000 0 0xc0000000 0 0x2000000>;
+ 	status = "okay";
+ };
++
++&cp0_usb3_0 {
++	status = "okay";
++};
++
++&cp0_usb3_1 {
++	status = "okay";
++};
+-- 
+2.22.0
+

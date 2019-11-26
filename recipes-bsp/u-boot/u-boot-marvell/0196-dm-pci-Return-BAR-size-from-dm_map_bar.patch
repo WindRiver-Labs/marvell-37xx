@@ -1,0 +1,46 @@
+From 31da3356ee506bb1b489ac43fcef4b51bd10049a Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Wed, 18 May 2016 23:21:35 -0400
+Subject: [PATCH 0196/1200] dm: pci: Return BAR size from dm_map_bar()
+
+Return BAR size from dm_map_bar() to support advanced features
+
+Signed-off-by: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+---
+ drivers/pci/pci-uclass.c | 2 +-
+ include/pci.h            | 3 ++-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/pci/pci-uclass.c b/drivers/pci/pci-uclass.c
+index eaf802ae13..f71fd4231f 100644
+--- a/drivers/pci/pci-uclass.c
++++ b/drivers/pci/pci-uclass.c
+@@ -1391,7 +1391,7 @@ pci_addr_t dm_pci_phys_to_bus(struct udevice *dev, phys_addr_t phys_addr,
+ 	return bus_addr;
+ }
+ 
+-void *dm_pci_map_bar(struct udevice *dev, int bar, int flags)
++void *dm_pci_map_bar(struct udevice *dev, int bar, size_t *size, int flags)
+ {
+ 	int ea_pos;
+ 	pci_addr_t pci_bus_start;
+diff --git a/include/pci.h b/include/pci.h
+index 1dfb94bed4..6b70013532 100644
+--- a/include/pci.h
++++ b/include/pci.h
+@@ -1552,10 +1552,11 @@ pci_addr_t dm_pci_phys_to_bus(struct udevice *dev, phys_addr_t addr,
+  *
+  * @dev:	Device to check
+  * @bar:	Bar number to read (numbered from 0)
++ * @size:	BAR size
+  * @flags:	Flags for the region type (PCI_REGION_...)
+  * @return: pointer to the virtual address to use
+  */
+-void *dm_pci_map_bar(struct udevice *dev, int bar, int flags);
++void *dm_pci_map_bar(struct udevice *dev, int bar, size_t *size, int flags);
+ 
+ #define dm_pci_virt_to_bus(dev, addr, flags) \
+ 	dm_pci_phys_to_bus(dev, (virt_to_phys(addr)), (flags))
+-- 
+2.22.0
+

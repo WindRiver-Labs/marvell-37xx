@@ -1,0 +1,167 @@
+From 07750c85efeb92249a1c41e3ff9671f34967cea5 Mon Sep 17 00:00:00 2001
+From: Chandrakala Chavva <cchavva@caviumnetworks.com>
+Date: Thu, 18 Oct 2018 12:44:18 -0700
+Subject: [PATCH 0600/1200] Revert "octeontx_nand.c"
+
+This reverts commit 905f7ed49bd788d67083f897f70dcb2129f37a05.
+---
+ drivers/mtd/nand/octeontx_nand.c | 51 ++++----------------------------
+ 1 file changed, 5 insertions(+), 46 deletions(-)
+
+diff --git a/drivers/mtd/nand/octeontx_nand.c b/drivers/mtd/nand/octeontx_nand.c
+index 8844d0ee44..f7f88da3fa 100644
+--- a/drivers/mtd/nand/octeontx_nand.c
++++ b/drivers/mtd/nand/octeontx_nand.c
+@@ -957,7 +957,7 @@ static int ndf_build_post_cmd(struct octeontx_nfc *tn, int hold_time)
+ 	int rc;
+ 
+ 	/* Deselect chip */
+-	rc = ndf_queue_cmd_chip(tn, 0, tn->selected_chip, 1);
++	rc = ndf_queue_cmd_chip(tn, 0, 0, 0);
+ 	if (rc)
+ 		return rc;
+ 
+@@ -1029,7 +1029,6 @@ static int ndf_read(struct octeontx_nfc *tn, int cmd1, int addr_bytes,
+ 		timing_mode = default_onfi_timing;
+ 	else
+ 		timing_mode = nand->onfi_timing_mode_default;
+-	debug("  addr: %llu\n", bus_addr);
+ 
+ 	/* Build the command and address cycles */
+ 	rc = ndf_build_pre_cmd(tn, cmd1, addr_bytes, page, col, cmd2);
+@@ -1260,17 +1259,10 @@ static void octeontx_nand_cmdfunc(struct mtd_info *mtd, unsigned int command,
+ 		tn->buf.data_index = 0;
+ 		octeontx_nand->oob_only = false;
+ 		rc = ndf_read(tn, command, 1, column, 0, 0, 8);
+-		debug("%s: ndf_read returned %d bytes for NAND_CMD_READID\n",
+-		      __func__, rc);
+ 		if (rc < 0)
+ 			dev_err(tn->dev, "READID failed with %d\n", rc);
+ 		else
+ 			tn->buf.data_len = rc;
+-#ifdef DEBUG
+-		debug("%s: NAND_CMD_PARAM: buf: %llx (%p)\n",
+-		      __func__, tn->buf.dmaaddr, tn->buf.dmabuf);
+-		print_buffer(0, tn->buf.dmabuf, 1, rc > 0 ? rc : 3 * 512, 0);
+-#endif
+ 		break;
+ 
+ 	case NAND_CMD_READOOB:
+@@ -1322,11 +1314,6 @@ static void octeontx_nand_cmdfunc(struct mtd_info *mtd, unsigned int command,
+ 			dev_err(tn->dev, "PARAM failed with %d\n", rc);
+ 		else
+ 			tn->buf.data_len = rc;
+-#ifdef DEBUG
+-		debug("%s: NAND_CMD_PARAM: buf: %llx (%p)\n",
+-		      __func__, tn->buf.dmaaddr, tn->buf.dmabuf);
+-		print_buffer(0, tn->buf.dmabuf, 1, rc > 0 ? rc : 3 * 512, 0);
+-#endif
+ 		break;
+ 
+ 	case NAND_CMD_RNDOUT:
+@@ -1797,14 +1784,6 @@ static int octeontx_nand_read_oob_std(struct mtd_info *mtd,
+ 	return 0;
+ }
+ 
+-/**
+- * Caluculates the ECC strength to use given the parameters of the NAND
+- * device.
+- *
+- * @param	nand	nand chip to check
+- *
+- * @return	0 for success otherwise error
+- */
+ static int octeontx_nand_calc_bch_ecc_strength(struct nand_chip *nand)
+ {
+ 	struct mtd_info *mtd = nand_to_mtd(nand);
+@@ -1819,14 +1798,6 @@ static int octeontx_nand_calc_bch_ecc_strength(struct nand_chip *nand)
+ 	int index = ARRAY_SIZE(strengths) - 1;
+ 	int need;
+ 
+-	if (!ecc->strength) {
+-		debug("%s: ECC not required for this device\n", __func__);
+-		ecc->strength = 0;
+-		ecc->bytes = 0;
+-		ecc->mode = NAND_ECC_NONE;
+-		return 0;
+-	}
+-
+ 	while (index > 0 && !(ecc->options & NAND_ECC_MAXIMIZE) &&
+ 			strengths[index - 1] >= ecc->strength)
+ 		index--;
+@@ -1937,8 +1908,7 @@ static void octeontx_nfc_chip_sizing(struct nand_chip *nand)
+ #if defined(CONFIG_OCTEONTX_BCH)
+ 		debug("%s: ecc mode: %d\n", __func__, ecc->mode);
+ 		if (ecc->mode != NAND_ECC_SOFT &&
+-		    !octeontx_nand_calc_bch_ecc_strength(nand) &&
+-		    ecc->mode != NAND_ECC_NONE) {
++		    !octeontx_nand_calc_bch_ecc_strength(nand)) {
+ 			struct octeontx_nfc *tn = to_otx_nfc(nand->controller);
+ 
+ 			debug("Using hardware BCH engine support\n");
+@@ -2017,10 +1987,8 @@ static int octeontx_nfc_chip_init(struct octeontx_nfc *tn, struct udevice *dev,
+ 	/* TODO: support more then 1 chip */
+ 	debug("%s: Scanning identification\n", __func__);
+ 	ret = nand_scan_ident(mtd, 1, NULL);
+-	if (ret) {
+-		debug("%s: ident scan returned %d\n", __func__, ret);
++	if (ret)
+ 		return ret;
+-	}
+ 
+ 	debug("%s: Sizing chip\n", __func__);
+ 	octeontx_nfc_chip_sizing(nand);
+@@ -2128,7 +2096,6 @@ static int octeontx_pci_nand_probe(struct udevice *dev)
+ 			return -ENOMEM;
+ 		}
+ 		probe_dev->dev = dev;
+-		debug("%s: Adding deferred probing...\n", __func__);
+ 		INIT_LIST_HEAD(&probe_dev->list);
+ 		list_add_tail(&probe_dev->list,
+ 			      &octeontx_pci_nand_deferred_devices);
+@@ -2136,7 +2103,6 @@ static int octeontx_pci_nand_probe(struct udevice *dev)
+ 		      __func__);
+ 		return 0;
+ 	}
+-	debug("%s: BCH VF already allocated\n", __func__);
+ #endif
+ 
+ 	tn->dev = dev;
+@@ -2250,12 +2216,9 @@ void board_nand_init(void)
+ 	int ret;
+ 
+ #ifdef CONFIG_OCTEONTX_BCH
+-	debug("%s: Getting BCH driver...\n", __func__);
+ 	ret = uclass_get_device_by_driver(UCLASS_MISC,
+ 					  DM_GET_DRIVER(octeontx_pci_bchpf),
+ 					  &dev);
+-	debug("%s: uclass_get_device_by_driver returned %d for bch dpf river\n",
+-	      __func__, ret);
+ 	if (ret && ret != -ENODEV) {
+ 		pr_err("Failed to initialize OcteonTX BCH PF controller. (error %d)\n",
+ 		       ret);
+@@ -2263,19 +2226,15 @@ void board_nand_init(void)
+ 	ret = uclass_get_device_by_driver(UCLASS_MISC,
+ 					  DM_GET_DRIVER(octeontx_pci_bchvf),
+ 					  &dev);
+-	debug("%s: uclass_get_device_by_driver returned %d for bch vf driver\n",
+-	      __func__, ret);
+ 	if (ret && ret != -ENODEV) {
+ 		pr_err("Failed to initialize OcteonTX BCH VF controller. (error %d)\n",
+ 		       ret);
+ 	}
+-	debug("%s: BCH driver acquired.\n", __func__);
+ #endif
+-	ret = uclass_get_device_by_driver(UCLASS_MTD,
++
++	ret = uclass_get_device_by_driver(UCLASS_MISC,
+ 					  DM_GET_DRIVER(octeontx_pci_nand),
+ 					  &dev);
+-	debug("%s: uclass_get_device_by_driver returned %d for nand driver\n",
+-	      __func__, ret);
+ 	if (ret && ret != -ENODEV)
+ 		pr_err("Failed to initialize OcteonTX NAND controller. (error %d)\n",
+ 		       ret);
+-- 
+2.22.0
+

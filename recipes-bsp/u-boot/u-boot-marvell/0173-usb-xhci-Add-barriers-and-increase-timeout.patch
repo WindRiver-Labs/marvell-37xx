@@ -1,0 +1,77 @@
+From f4774e674b986439881d298a92289549a9f59458 Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Mon, 16 May 2016 14:52:02 -0400
+Subject: [PATCH 0173/1200] usb: xhci: Add barriers and increase timeout
+
+Increase timeout and add barriers before reading and after
+writing registers - just reassuring
+
+Signed-off-by: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+---
+ drivers/usb/host/xhci-ring.c | 5 +++++
+ drivers/usb/host/xhci.h      | 6 +++++-
+ 2 files changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/usb/host/xhci-ring.c b/drivers/usb/host/xhci-ring.c
+index 7599c9183a..1b5f5203f6 100644
+--- a/drivers/usb/host/xhci-ring.c
++++ b/drivers/usb/host/xhci-ring.c
+@@ -492,6 +492,11 @@ static void abort_td(struct usb_device *udev, int ep_index)
+ 	xhci_queue_command(ctrl, NULL, udev->slot_id, ep_index, TRB_STOP_RING);
+ 
+ 	event = xhci_wait_for_event(ctrl, TRB_TRANSFER);
++	if (!event) {
++		printf("TRB_TRANSFER timeout\n");
++		return;
++	}
++
+ 	field = le32_to_cpu(event->trans_event.flags);
+ 	BUG_ON(TRB_TO_SLOT_ID(field) != udev->slot_id);
+ 	BUG_ON(TRB_TO_EP_INDEX(field) != ep_index);
+diff --git a/drivers/usb/host/xhci.h b/drivers/usb/host/xhci.h
+index ba5f650144..408aa290da 100644
+--- a/drivers/usb/host/xhci.h
++++ b/drivers/usb/host/xhci.h
+@@ -26,7 +26,7 @@
+ #define MAX_EP_CTX_NUM		31
+ #define XHCI_ALIGNMENT		64
+ /* Generic timeout for XHCI events */
+-#define XHCI_TIMEOUT		5000
++#define XHCI_TIMEOUT		200000
+ /* Max number of USB devices for any host controller - limit in section 6.1 */
+ #define MAX_HC_SLOTS            256
+ /* Section 5.3.3 - MaxPorts */
+@@ -1094,12 +1094,14 @@ struct xhci_virt_device {
+ /* xHCI spec says all registers are little endian */
+ static inline unsigned int xhci_readl(uint32_t volatile *regs)
+ {
++	mb();
+ 	return readl(regs);
+ }
+ 
+ static inline void xhci_writel(uint32_t volatile *regs, const unsigned int val)
+ {
+ 	writel(val, regs);
++	mb();
+ }
+ 
+ /*
+@@ -1112,6 +1114,7 @@ static inline void xhci_writel(uint32_t volatile *regs, const unsigned int val)
+  */
+ static inline u64 xhci_readq(__le64 volatile *regs)
+ {
++	mb();
+ #if BITS_PER_LONG == 64
+ 	return readq(regs);
+ #else
+@@ -1134,6 +1137,7 @@ static inline void xhci_writeq(__le64 volatile *regs, const u64 val)
+ 	writel(val_lo, ptr);
+ 	writel(val_hi, ptr + 1);
+ #endif
++	mb();
+ }
+ 
+ int xhci_hcd_init(int index, struct xhci_hccr **ret_hccr,
+-- 
+2.22.0
+

@@ -1,0 +1,80 @@
+From ddce9bc9e7cc03f7cb9a32b2fd284e7d2acd877d Mon Sep 17 00:00:00 2001
+From: Ken Ma <make@marvell.com>
+Date: Thu, 8 Mar 2018 15:40:08 +0800
+Subject: [PATCH 0614/1200] arm64: a37xx: dts: Correct mpp definitions
+
+This patch corrects below mpp definitions for armada 3720 DB board
+and ESPRESSOBin board:
+- "smi" pins group is added and "smi" function is set for eth0;
+- Now pcie pins are used as gpio to implement PCIe function in
+  hardware, so "pcie" group function is changed to "gpio".
+
+Change-Id: I897583799ef8fa17765dce66c8bd3b2221b2639b
+Reviewed-on: http://vgitil04.il.marvell.com:8080/43287
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Cc: Simon Glass <sjg@chromium.org>
+Cc: Stefan Roese <sr@denx.de>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/52529
+Tested-by: Hua Jing <jinghua@marvell.com>
+---
+ arch/arm/dts/armada-3720-db.dts          | 2 +-
+ arch/arm/dts/armada-3720-espressobin.dts | 2 +-
+ arch/arm/dts/armada-37xx.dtsi            | 7 ++++++-
+ 3 files changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/dts/armada-3720-db.dts b/arch/arm/dts/armada-3720-db.dts
+index 88baf33f6b..52fc134bad 100644
+--- a/arch/arm/dts/armada-3720-db.dts
++++ b/arch/arm/dts/armada-3720-db.dts
+@@ -82,7 +82,7 @@
+ 
+ &eth0 {
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&rgmii_pins>;
++	pinctrl-0 = <&rgmii_pins>, <&smi_pins>;
+ 	status = "okay";
+ 	phy-mode = "rgmii";
+ };
+diff --git a/arch/arm/dts/armada-3720-espressobin.dts b/arch/arm/dts/armada-3720-espressobin.dts
+index 5d8d27ebd1..4e70d885bc 100644
+--- a/arch/arm/dts/armada-3720-espressobin.dts
++++ b/arch/arm/dts/armada-3720-espressobin.dts
+@@ -90,7 +90,7 @@
+ &eth0 {
+ 	status = "okay";
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&rgmii_pins>;
++	pinctrl-0 = <&rgmii_pins>, <&smi_pins>;
+ 	phy-mode = "rgmii";
+ 	phy_addr = <0x1>;
+ 	fixed-link {
+diff --git a/arch/arm/dts/armada-37xx.dtsi b/arch/arm/dts/armada-37xx.dtsi
+index d139a617a9..301f9eecc4 100644
+--- a/arch/arm/dts/armada-37xx.dtsi
++++ b/arch/arm/dts/armada-37xx.dtsi
+@@ -183,6 +183,11 @@
+ 					function = "mii";
+ 				};
+ 
++				smi_pins: smi-pins {
++					groups = "smi";
++					function = "smi";
++				};
++
+ 				sdio_pins: sdio-pins {
+ 					groups = "sdio_sb";
+ 					function = "sdio";
+@@ -190,7 +195,7 @@
+ 
+ 				pcie_pins: pcie-pins {
+ 					groups = "pcie1";
+-					function = "pcie";
++					function = "gpio";
+ 				};
+ 			};
+ 
+-- 
+2.22.0
+

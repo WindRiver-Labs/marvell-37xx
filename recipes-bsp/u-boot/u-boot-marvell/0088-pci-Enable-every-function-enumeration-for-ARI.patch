@@ -1,0 +1,81 @@
+From 2c3aefc4f1675053d002d4fced46977555a4479a Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Mon, 9 Nov 2015 14:18:46 -0800
+Subject: [PATCH 0088/1200] pci: Enable every function enumeration for ARI
+
+---
+ drivers/pci/pci_auto_old.c | 40 ++++++++++++++++++++++++++++++++++----
+ 1 file changed, 36 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/pci/pci_auto_old.c b/drivers/pci/pci_auto_old.c
+index 49944ce6e9..caf19dc1f9 100644
+--- a/drivers/pci/pci_auto_old.c
++++ b/drivers/pci/pci_auto_old.c
+@@ -362,6 +362,33 @@ void pciauto_postscan_setup_bridge(struct pci_controller *hose,
+ }
+ 
+ 
++int pci_bridge_read_config(struct pci_controller *hose, pci_dev_t dev,
++			   u8 *pri, u8 *sec, u8 *sub)
++{
++	int res;
++	u32 reg;
++
++	pci_hose_read_config_byte(hose, dev, PCI_PRIMARY_BUS, pri);
++
++	res = pci_hose_find_capability(hose, dev, PCI_CAP_ID_EA);
++
++	if (res) {
++		pci_hose_read_config_dword(hose, dev,
++					   res + sizeof(u32), &reg);
++		*sec = (reg >> 0) & 0xff;
++		*sub = (reg >> 8) & 0xff;
++	} else {
++		pci_hose_read_config_byte(hose, dev,
++					  PCI_SECONDARY_BUS, sec);
++		pci_hose_read_config_byte(hose, dev,
++					  PCI_SUBORDINATE_BUS, sub);
++	}
++
++	debug("pri: %d, sec: %d, sub: %d\n", *pri, *sec, *sub);
++
++	return 0;
++}
++
+ extern int pci_config_fixed(struct pci_controller *hose, pci_dev_t dev);
+ extern int pci_prescan_config(struct pci_controller *hose, pci_dev_t dev);
+ extern int pci_postscan_config(struct pci_controller *hose, pci_dev_t dev);
+@@ -398,14 +425,16 @@ int pciauto_config_device(struct pci_controller *hose, pci_dev_t dev)
+ 
+ 		/* Passing in current_busno allows for sibling P2P bridges */
+ 		pciauto_prescan_setup_bridge(hose, dev, hose->current_busno);
++
+ 		if (!pci_config_fixed(hose, dev)) {
+-			pciauto_prescan_setup_bridge(hose, dev, hose->current_busno);
++			/* Passing in current_busno allows for sibling P2P bridges */
++			pciauto_prescan_setup_bridge(hose, dev,
++						     hose->current_busno);
+ 		} else {
+-			pci_hose_read_config_byte(hose, dev, PCI_PRIMARY_BUS, &pri_bus);
++			pci_bridge_read_config(hose, dev, &pri_bus,
++					       &sec_bus, &sub_bus);
+ 			pri_bus += hose->first_busno;
+-			pci_hose_read_config_byte(hose, dev, PCI_SECONDARY_BUS, &sec_bus);
+ 			sec_bus += hose->first_busno;
+-			pci_hose_read_config_byte(hose, dev, PCI_SUBORDINATE_BUS, &sub_bus);
+ 			sub_bus += hose->first_busno;
+ 
+ 			hose->current_busno = sec_bus;
+@@ -416,6 +445,9 @@ int pciauto_config_device(struct pci_controller *hose, pci_dev_t dev)
+ 		 */
+ 		n = pci_hose_scan_bus(hose, hose->current_busno);
+ 
++		debug("hose->current_busno: %d, n: %d, sub_bus: %d\n",
++			hose->current_busno, n, sub_bus);
++
+ 		/* figure out the deepest we've gone for this leg */
+ 		sub_bus = max((unsigned int)n, (unsigned int)sub_bus);
+ 		if (!pci_config_fixed(hose, dev)) {
+-- 
+2.22.0
+

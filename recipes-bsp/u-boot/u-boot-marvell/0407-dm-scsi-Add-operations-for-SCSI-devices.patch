@@ -1,0 +1,49 @@
+From cae65b38f82fb004f84bf5eea4e4d1fc511b782d Mon Sep 17 00:00:00 2001
+From: Simon Glass <sjg@chromium.org>
+Date: Wed, 14 Jun 2017 21:28:43 -0600
+Subject: [PATCH 0407/1200] dm: scsi: Add operations for SCSI devices
+
+The SCSI uclass currently has no operations. It just uses the global SCSI
+functions. Fix this by adding operations to the only two drivers that use
+the uclass, and replacing the global functions with those defined locally
+in the SCSI code.
+
+Signed-off-by: Simon Glass <sjg@chromium.org>
+Reviewed-by: Bin Meng <bmeng.cn@gmail.com>
+---
+ include/scsi.h | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/include/scsi.h b/include/scsi.h
+index 4108e3a8a9..573007bfd5 100644
+--- a/include/scsi.h
++++ b/include/scsi.h
+@@ -232,7 +232,12 @@ void scsi_low_level_init(int busdevfunc);
+ void scsi_init(void);
+ #endif
+ 
+-int scsi_exec(struct udevice *dev, struct scsi_cmd *pccb);
++/**
++ * scsi_bus_reset() - reset the bus
++ *
++ * @dev:	SCSI bus to reset
++ * @return 0 if OK, -ve on error
++ */
+ int scsi_bus_reset(struct udevice *dev);
+ 
+ /**
+@@ -242,6 +247,11 @@ int scsi_bus_reset(struct udevice *dev);
+  */
+ int scsi_scan(bool verbose);
+ 
++#ifndef CONFIG_DM_SCSI
++void scsi_low_level_init(int busdevfunc);
++void scsi_init(void);
++#endif
++
+ #define SCSI_IDENTIFY					0xC0  /* not used */
+ 
+ /* Hardware errors  */
+-- 
+2.22.0
+

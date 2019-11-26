@@ -1,0 +1,53 @@
+From c353c42b16b2903891165404ad85d9ec0e3cf23a Mon Sep 17 00:00:00 2001
+From: Aaron Williams <aaron.williams@cavium.com>
+Date: Wed, 1 Jun 2016 21:50:26 -0700
+Subject: [PATCH 0218/1200] Added setenv_force to override the read only flag
+ when setting an environment variable.
+
+Signed-off-by: Aaron Williams <aaron.williams@cavium.com>
+---
+ cmd/nvedit.c     | 14 ++++++++++++++
+ include/common.h |  2 ++
+ 2 files changed, 16 insertions(+)
+
+diff --git a/cmd/nvedit.c b/cmd/nvedit.c
+index 4cb25b8248..81645f77e6 100644
+--- a/cmd/nvedit.c
++++ b/cmd/nvedit.c
+@@ -296,6 +296,20 @@ int env_set(const char *varname, const char *varvalue)
+ 		return _do_env_set(0, 3, (char * const *)argv, H_PROGRAMMATIC);
+ }
+ 
++int setenv_force(const char *varname, const char *varvalue)
++{
++	const char * const argv[5] = { "setenv", "-f", varname, varvalue, NULL };
++
++	/* before import into hashtable */
++	if (!(gd->flags & GD_FLG_ENV_READY))
++		return 1;
++
++	if (varvalue == NULL || varvalue[0] == '\0')
++		return _do_env_set(0, 3, (char * const *)argv, H_FORCE);
++	else
++		return _do_env_set(0, 4, (char * const *)argv, H_FORCE);
++}
++
+ /**
+  * Set an environment variable to an integer value
+  *
+diff --git a/include/common.h b/include/common.h
+index 0fe9439a93..b09c1adbb2 100644
+--- a/include/common.h
++++ b/include/common.h
+@@ -338,6 +338,8 @@ int env_set_ulong(const char *varname, ulong value);
+  */
+ int env_set_hex(const char *varname, ulong value);
+ 
++int setenv_force (const char *, const char *);
++
+ /**
+  * env_set_addr - Set an environment variable to an address in hex
+  *
+-- 
+2.22.0
+

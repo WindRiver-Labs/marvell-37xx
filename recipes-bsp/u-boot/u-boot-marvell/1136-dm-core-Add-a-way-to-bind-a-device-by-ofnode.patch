@@ -1,0 +1,55 @@
+From 4297d25d25e1837e2fa8c055a326b5aa215d3d84 Mon Sep 17 00:00:00 2001
+From: Simon Glass <sjg@chromium.org>
+Date: Mon, 11 Jun 2018 13:07:15 -0600
+Subject: [PATCH 1136/1200] dm: core: Add a way to bind a device by ofnode
+
+Add a new device_bind_ofnode() function which can bind a device given its
+ofnode. This allows binding devices more easily with livetree nodes.
+
+Change-Id: I08e040f82ac7e95140df93fa315bc7d984ee0137
+Signed-off-by: Simon Glass <sjg@chromium.org>
+Reviewed-on: https://sj1git1.cavium.com/9923
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ drivers/core/device.c        | 8 ++++++++
+ include/dm/device-internal.h | 4 ++++
+ 2 files changed, 12 insertions(+)
+
+diff --git a/drivers/core/device.c b/drivers/core/device.c
+index 940a153c58..16d8769b75 100644
+--- a/drivers/core/device.c
++++ b/drivers/core/device.c
+@@ -231,6 +231,14 @@ int device_bind(struct udevice *parent, const struct driver *drv,
+ 				  offset_to_ofnode(of_offset), 0, devp);
+ }
+ 
++int device_bind_ofnode(struct udevice *parent, const struct driver *drv,
++		       const char *name, void *platdata, ofnode node,
++		       struct udevice **devp)
++{
++	return device_bind_common(parent, drv, name, platdata, 0, node, 0,
++				  devp);
++}
++
+ int device_bind_by_name(struct udevice *parent, bool pre_reloc_only,
+ 			const struct driver_info *info, struct udevice **devp)
+ {
+diff --git a/include/dm/device-internal.h b/include/dm/device-internal.h
+index eaeadd48d2..28f1137a2e 100644
+--- a/include/dm/device-internal.h
++++ b/include/dm/device-internal.h
+@@ -41,6 +41,10 @@ int device_bind(struct udevice *parent, const struct driver *drv,
+ 		const char *name, void *platdata, int of_offset,
+ 		struct udevice **devp);
+ 
++int device_bind_ofnode(struct udevice *parent, const struct driver *drv,
++		       const char *name, void *platdata, ofnode node,
++		       struct udevice **devp);
++
+ /**
+  * device_bind_with_driver_data() - Create a device and bind it to a driver
+  *
+-- 
+2.22.0
+

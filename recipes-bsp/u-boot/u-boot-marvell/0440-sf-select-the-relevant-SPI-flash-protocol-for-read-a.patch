@@ -1,0 +1,119 @@
+From 1e01d49435d2ac16df628a05c293bfabeea02fbe Mon Sep 17 00:00:00 2001
+From: Cyrille Pitchen <cyrille.pitchen@atmel.com>
+Date: Tue, 25 Jul 2017 15:00:57 +0800
+Subject: [PATCH 0440/1200] sf: select the relevant SPI flash protocol for read
+ and write commands
+
+SPI controller drivers should not check the instruction op code byte to
+guess which SPI x-y-z protocol is to be used for Fast Read or Page Program
+operations.
+
+Indeed, the op code values are not so reliable. For instance, the 32h op
+code is generally used for Page Program 1-1-4 operations. However
+Microchip SST26 memories use this 32h op code for their Page Program 1-4-4
+operations. There are many other examples of those SPI flash manufacturer
+quirks.
+
+Instead, the SPI FLASH sub-system now fills the 'proto' member
+of 'struct spi_flash_command' with flash->read_proto for Fast Read
+operations and flash->write_proto for Page Program operations.
+
+Signed-off-by: Cyrille Pitchen <cyrille.pitchen@atmel.com>
+Signed-off-by: Wenyou Yang <wenyou.yang@microchip.com>
+---
+ drivers/mtd/spi/spi_flash.c | 24 ++++++++++++++++--------
+ include/spi_flash.h         |  5 +++++
+ 2 files changed, 21 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mtd/spi/spi_flash.c b/drivers/mtd/spi/spi_flash.c
+index e6e75959a8..2c4752ce90 100644
+--- a/drivers/mtd/spi/spi_flash.c
++++ b/drivers/mtd/spi/spi_flash.c
+@@ -404,6 +404,7 @@ int spi_flash_cmd_write_ops(struct spi_flash *flash, u32 offset,
+ 
+ 	spi_flash_command_init(&cmd, flash->write_cmd, SPI_FLASH_3B_ADDR_LEN,
+ 			       SPI_FCMD_WRITE);
++	cmd.proto = flash->write_proto;
+ 	for (actual = 0; actual < len; actual += chunk_len) {
+ 		write_addr = offset;
+ 
+@@ -511,6 +512,7 @@ int spi_flash_cmd_read_ops(struct spi_flash *flash, u32 offset,
+ 
+ 	spi_flash_command_init(&cmd, flash->read_cmd, SPI_FLASH_3B_ADDR_LEN,
+ 			       SPI_FCMD_READ);
++	cmd.proto = flash->read_proto;
+ 	cmd.num_wait_states = flash->dummy_byte * 8;
+ 	while (len) {
+ 		read_addr = offset;
+@@ -1094,24 +1096,30 @@ int spi_flash_scan(struct spi_flash *flash)
+ 
+ 	/* Look for read commands */
+ 	flash->read_cmd = CMD_READ_ARRAY_FAST;
+-	if (spi->mode & SPI_RX_SLOW)
++	flash->read_proto = SPI_FPROTO_1_1_1;
++	if (spi->mode & SPI_RX_SLOW) {
+ 		flash->read_cmd = CMD_READ_ARRAY_SLOW;
+-	else if (spi->mode & SPI_RX_QUAD && info->flags & RD_QUAD)
++	} else if (spi->mode & SPI_RX_QUAD && info->flags & RD_QUAD) {
+ 		flash->read_cmd = CMD_READ_QUAD_OUTPUT_FAST;
+-	else if (spi->mode & SPI_RX_DUAL && info->flags & RD_DUAL)
++		flash->read_proto = SPI_FPROTO_1_1_4;
++	} else if (spi->mode & SPI_RX_DUAL && info->flags & RD_DUAL) {
+ 		flash->read_cmd = CMD_READ_DUAL_OUTPUT_FAST;
++		flash->read_proto = SPI_FPROTO_1_1_2;
++	}
+ 
+ 	/* Look for write commands */
+-	if (info->flags & WR_QPP && spi->mode & SPI_TX_QUAD)
++	if (info->flags & WR_QPP && spi->mode & SPI_TX_QUAD) {
+ 		flash->write_cmd = CMD_QUAD_PAGE_PROGRAM;
+-	else
++		flash->write_proto = SPI_FPROTO_1_1_4;
++	} else {
+ 		/* Go for default supported write cmd */
+ 		flash->write_cmd = CMD_PAGE_PROGRAM;
++		flash->write_proto = SPI_FPROTO_1_1_1;
++	}
+ 
+ 	/* Set the quad enable bit - only for quad commands */
+-	if ((flash->read_cmd == CMD_READ_QUAD_OUTPUT_FAST) ||
+-	    (flash->read_cmd == CMD_READ_QUAD_IO_FAST) ||
+-	    (flash->write_cmd == CMD_QUAD_PAGE_PROGRAM)) {
++	if (spi_flash_protocol_get_data_nbits(flash->read_proto) == 4 ||
++	    spi_flash_protocol_get_data_nbits(flash->write_proto) == 4) {
+ 		ret = set_quad_mode(flash, info);
+ 		if (ret) {
+ 			debug("SF: Fail to set QEB for %02x\n",
+diff --git a/include/spi_flash.h b/include/spi_flash.h
+index f3c4e83424..32da4e3396 100644
+--- a/include/spi_flash.h
++++ b/include/spi_flash.h
+@@ -11,6 +11,7 @@
+ #define _SPI_FLASH_H_
+ 
+ #include <dm.h>	/* Because we dereference struct udevice here */
++#include <spi.h>
+ #include <linux/types.h>
+ 
+ #ifndef CONFIG_SF_DEFAULT_SPEED
+@@ -48,6 +49,8 @@ struct spi_slave;
+  * @read_cmd:		Read cmd - Array Fast, Extn read and quad read.
+  * @write_cmd:		Write cmd - page and quad program.
+  * @dummy_byte:		Dummy cycles for read operation.
++ * @read_proto:		SPI x-y-z protocol for flash read ops
++ * @write_proto:	SPI x-y-z protocol for flash write ops
+  * @memory_map:		Address of read-only SPI flash access
+  * @flash_lock:		lock a region of the SPI Flash
+  * @flash_unlock:	unlock a region of the SPI Flash
+@@ -83,6 +86,8 @@ struct spi_flash {
+ 	u8 read_cmd;
+ 	u8 write_cmd;
+ 	u8 dummy_byte;
++	enum spi_flash_protocol read_proto;
++	enum spi_flash_protocol write_proto;
+ 
+ 	void *memory_map;
+ 
+-- 
+2.22.0
+

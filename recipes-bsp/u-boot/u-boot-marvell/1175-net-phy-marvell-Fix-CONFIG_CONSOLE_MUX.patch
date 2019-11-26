@@ -1,0 +1,35 @@
+From 14fe935b4690b7b9fe0acd3109ee99039224c547 Mon Sep 17 00:00:00 2001
+From: Aaron Williams <aaron.williams@cavium.com>
+Date: Tue, 18 Jun 2019 19:00:44 -0700
+Subject: [PATCH 1175/1200] net: phy: marvell: Fix CONFIG_CONSOLE_MUX
+
+When CONFIG_CONSOLE_MUX is defined console.h fails
+to compile if coommon.h is not included before it.
+This fixes the include order.
+
+Change-Id: I39ce47cfad1f9210f4b7ef088d3fcb84eff0ed0e
+Signed-off-by: Aaron Williams <aaron.williams@cavium.com>
+Reviewed-on: https://sj1git1.cavium.com/11240
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Chandrakala Chavva <cchavva@marvell.com>
+---
+ drivers/net/phy/marvell.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/net/phy/marvell.c b/drivers/net/phy/marvell.c
+index fd034a5833..79152ea33b 100644
+--- a/drivers/net/phy/marvell.c
++++ b/drivers/net/phy/marvell.c
+@@ -8,8 +8,8 @@
+  */
+ 
+ #include <config.h>
+-#include <console.h>
+ #include <common.h>
++#include <console.h>
+ #include <errno.h>
+ #include <phy.h>
+ 
+-- 
+2.22.0
+

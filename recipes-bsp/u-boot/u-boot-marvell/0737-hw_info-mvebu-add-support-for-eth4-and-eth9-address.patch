@@ -1,0 +1,57 @@
+From d5d0f2748aa28cdea0f6fa7870b9cf8e13a9d423 Mon Sep 17 00:00:00 2001
+From: zachary zhang <zhangzg@marvell.com>
+Date: Thu, 14 Dec 2017 16:18:31 +0800
+Subject: [PATCH 0737/1200] hw_info: mvebu: add support for eth4 and eth9
+ address
+
+Currently, HW INFO only supports 4 eth addresses, but sometimes it
+needs to support 10 eth addresses like Armada 7K/8K/8KP.
+This patch adds the support for eth4 to eth9 address.
+
+Change-Id: I5c76621192fc5924c0868247cc3fd870b9bb140c
+Signed-off-by: zachary zhang <zhangzg@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55278
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ board/Marvell/common/cfg_eeprom.c | 8 +++++++-
+ cmd/mvebu/hw_info.c               | 6 ++++++
+ 2 files changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/board/Marvell/common/cfg_eeprom.c b/board/Marvell/common/cfg_eeprom.c
+index a9ef9ad434..6091568c04 100644
+--- a/board/Marvell/common/cfg_eeprom.c
++++ b/board/Marvell/common/cfg_eeprom.c
+@@ -19,7 +19,13 @@ static char hw_info_param_list[][HW_INFO_MAX_NAME_LEN] = {
+ 	"ethaddr",
+ 	"eth1addr",
+ 	"eth2addr",
+-	"eth3addr"
++	"eth3addr",
++	"eth4addr",
++	"eth5addr",
++	"eth6addr",
++	"eth7addr",
++	"eth8addr",
++	"eth9addr"
+ };
+ 
+ static int hw_info_param_num = (sizeof(hw_info_param_list) /
+diff --git a/cmd/mvebu/hw_info.c b/cmd/mvebu/hw_info.c
+index b167085d19..15759c8015 100644
+--- a/cmd/mvebu/hw_info.c
++++ b/cmd/mvebu/hw_info.c
+@@ -287,4 +287,10 @@ U_BOOT_CMD(
+ 	"\teth1addr      second MAC address\n"
+ 	"\teth2addr      third MAC address\n"
+ 	"\teth3addr      fourth MAC address\n"
++	"\teth4addr      fifth MAC address\n"
++	"\teth5addr      sixth MAC address\n"
++	"\teth6addr      seventh MAC address\n"
++	"\teth7addr      eighth MAC address\n"
++	"\teth8addr      ninth MAC address\n"
++	"\teth9addr      tenth MAC address\n"
+ );
+-- 
+2.22.0
+

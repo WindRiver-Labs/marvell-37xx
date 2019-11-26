@@ -1,0 +1,42 @@
+From 0d015d8cdcf4e3e3eb1449bac0621ae090028d28 Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Thu, 19 May 2016 13:54:36 -0400
+Subject: [PATCH 0202/1200] dm: pci: Set PF information for VF devices
+
+Set the PF reference to allow information retrieval from PF
+
+Signed-off-by: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+---
+ drivers/pci/pci-uclass.c | 2 ++
+ include/pci.h            | 2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/drivers/pci/pci-uclass.c b/drivers/pci/pci-uclass.c
+index f71fd4231f..5f51f9c031 100644
+--- a/drivers/pci/pci-uclass.c
++++ b/drivers/pci/pci-uclass.c
+@@ -832,6 +832,8 @@ int pci_sriov_init(struct udevice *pdev, int vf_en)
+ 		pplat->device = device;
+ 		pplat->class = class;
+ 		pplat->is_phys = false;
++		pplat->pf = dm_pci_get_bdf(pdev);
++		pplat->vf_id = vf;
+ 
+ 		bdf += PCI_BDF(0, 0, vf_stride);
+ 	}
+diff --git a/include/pci.h b/include/pci.h
+index 6b70013532..ea6f914d58 100644
+--- a/include/pci.h
++++ b/include/pci.h
+@@ -1084,6 +1084,8 @@ struct pci_child_platdata {
+ 	unsigned int class;
+ 
+ 	bool is_phys;
++	int pf;
++	int vf_id;
+ };
+ 
+ /* PCI bus operations */
+-- 
+2.22.0
+

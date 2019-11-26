@@ -1,0 +1,47 @@
+From 1adfcb889b9b302c60d0e8da8e20b5a7df253f38 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Sun, 28 May 2017 14:08:50 +0300
+Subject: [PATCH 0669/1200] arm64: dts: mcbin: Adjust the mcbin USB regulator
+ parameters
+
+Add "regulator-force-boot-off" to USB 3.0 regulator in order
+to align the configuration with the rest of A8K platforms and
+saving USB power.
+Reduce the "startup-delay-us" value to 300mS for fixing
+USB storage detection problems on first "usb start"/"usb reset"
+command issuance observed with some large USB 3.0 disk on key
+devices.
+Remove "always-on" and "boot-on" definitions from the USB3
+VBUS regulator entry.
+This regulator turned ON and OFF on demand and controlled by GPIO.
+
+Change-Id: Ib55e801b32955114ff154fd8c15311b5482978bf
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55232
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/armada-8040-mcbin.dts | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/dts/armada-8040-mcbin.dts b/arch/arm/dts/armada-8040-mcbin.dts
+index 669272b967..0942010f09 100644
+--- a/arch/arm/dts/armada-8040-mcbin.dts
++++ b/arch/arm/dts/armada-8040-mcbin.dts
+@@ -42,10 +42,8 @@
+ 			regulator-name = "reg-usb3h0-vbus";
+ 			regulator-min-microvolt = <5000000>;
+ 			regulator-max-microvolt = <5000000>;
+-			startup-delay-us = <500000>;
+-			enable-active-high;
+-			regulator-always-on;
+-			regulator-boot-on;
++			startup-delay-us = <300000>;
++			regulator-force-boot-off;
+ 			gpio = <&cpm_gpio1 15 GPIO_ACTIVE_HIGH>; /* GPIO[47] */
+ 		};
+ 	};
+-- 
+2.22.0
+

@@ -1,0 +1,34 @@
+From 14c99e6fd15d72e2f89681166a4a18db81d479f2 Mon Sep 17 00:00:00 2001
+From: Ken Ma <make@marvell.com>
+Date: Mon, 15 Jan 2018 10:17:01 +0800
+Subject: [PATCH 0676/1200] dts: mvebu: a375: Enable mdio node
+
+Since there is only 1 mdio bus, there is no need to define the mdi
+name to distinguish different mdio buses, this patch enables the
+mdio node to align marvell mdio driver.
+
+Change-Id: Ia92cf68cb9160b8af74c02a45bc1c1dd4c76d581
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55403
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/armada-375-db.dts | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm/dts/armada-375-db.dts b/arch/arm/dts/armada-375-db.dts
+index 343349b8fd..7571bacd60 100644
+--- a/arch/arm/dts/armada-375-db.dts
++++ b/arch/arm/dts/armada-375-db.dts
+@@ -171,6 +171,8 @@
+ 			};
+ 
+ 			mdio {
++				status = "okay";
++
+ 				phy0: ethernet-phy@0 {
+ 					reg = <0>;
+ 				};
+-- 
+2.22.0
+

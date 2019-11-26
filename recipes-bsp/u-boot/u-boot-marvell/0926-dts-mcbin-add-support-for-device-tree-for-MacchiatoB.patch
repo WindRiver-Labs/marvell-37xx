@@ -1,0 +1,101 @@
+From 7b613d6b2efee30397a81a223d500d5d9318c31b Mon Sep 17 00:00:00 2001
+From: Ben Peled <bpeled@marvell.com>
+Date: Mon, 3 Dec 2018 12:18:35 +0200
+Subject: [PATCH 0926/1200] dts: mcbin: add support for device tree for
+ MacchiatoBin single shot board
+
+- networking: MacchiatoBin single shot board doesn't have
+              two 3310 PHY's connected to port 0 on each CP
+
+Change-Id: Ic606c66bb1b3190986a75e9ae305d7a36a69e8ad
+Signed-off-by: Ben Peled <bpeled@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/61404
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Stefan Chulski <stefanc@marvell.com>
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+---
+ arch/arm/dts/Makefile                         |  1 +
+ .../arm/dts/armada-8040-mcbin-single-shot.dts | 28 +++++++++++++++++++
+ configs/mvebu_mcbin-88f8040_defconfig         |  1 -
+ doc/mvebu/build.txt                           |  6 ++--
+ 4 files changed, 33 insertions(+), 3 deletions(-)
+ create mode 100644 arch/arm/dts/armada-8040-mcbin-single-shot.dts
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index 04476dadf1..1bc0961df7 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -122,6 +122,7 @@ dtb-$(CONFIG_ARCH_MVEBU) +=			\
+ 	armada-8040-db-G.dtb			\
+ 	armada-8040-db-H.dtb			\
+ 	armada-8040-mcbin.dtb			\
++	armada-8040-mcbin-single-shot.dtb	\
+ 	armada-8040-ocp.dtb			\
+ 	armada-8040-ucpe.dtb			\
+ 	armada-xp-gp.dtb			\
+diff --git a/arch/arm/dts/armada-8040-mcbin-single-shot.dts b/arch/arm/dts/armada-8040-mcbin-single-shot.dts
+new file mode 100644
+index 0000000000..44135daba7
+--- /dev/null
++++ b/arch/arm/dts/armada-8040-mcbin-single-shot.dts
+@@ -0,0 +1,28 @@
++/*
++ * Copyright (C) 2018 Marvell International Ltd.
++ *
++ * SPDX-License-Identifier:	GPL-2.0
++ * https://spdx.org/licenses
++ */
++
++#include "armada-8040-mcbin.dts"
++
++/{
++	model = "Marvell 8040 MACHIATOBin SingleShot";
++	compatible = "marvell,armada8040-mcbin-single-shot",
++		     "marvell,armada8040-mcbin",
++		     "marvell,armada8040";
++};
++
++/* 10G SFI/copper */
++&cp0_eth0 {
++	/delete-property/phy;
++};
++
++/* 10G SFI/copper */
++&cp1_eth0 {
++	/delete-property/phy;
++};
++
++/delete-node/ &sfi_phy0;
++/delete-node/ &sfi_phy8;
+diff --git a/configs/mvebu_mcbin-88f8040_defconfig b/configs/mvebu_mcbin-88f8040_defconfig
+index 40d893f8b5..bccbc8903f 100644
+--- a/configs/mvebu_mcbin-88f8040_defconfig
++++ b/configs/mvebu_mcbin-88f8040_defconfig
+@@ -4,7 +4,6 @@ CONFIG_SYS_TEXT_BASE=0x00000000
+ CONFIG_SYS_MALLOC_F_LEN=0x2000
+ CONFIG_TARGET_MVEBU_ARMADA_8K=y
+ CONFIG_MVEBU_SAR=y
+-CONFIG_DEFAULT_DEVICE_TREE="armada-8040-mcbin"
+ CONFIG_SMBIOS_PRODUCT_NAME=""
+ CONFIG_DEBUG_UART=y
+ CONFIG_AHCI=y
+diff --git a/doc/mvebu/build.txt b/doc/mvebu/build.txt
+index d4c4277f5e..b0fe41005e 100644
+--- a/doc/mvebu/build.txt
++++ b/doc/mvebu/build.txt
+@@ -88,8 +88,10 @@ Manual build procedure
+ 	  "make DEVICE_TREE=armada-3720-espressobin"
+ 	- For the EspressoBin board with populated eMMC device use
+ 	  "make DEVICE_TREE=armada-3720-espressobin-emmc"
+-
+-	No need to set this for Armada-80x0 MacchiatoBin.
++	- For the Armada-80x0 MacchiatoBin use
++	  "make DEVICE_TREE=armada-8040-mcbin"
++	- For the Armada-80x0 MacchiatoBin Single Shot use
++	  "make DEVICE_TREE=armada-8040-mcbin-single-shot"
+ 
+ 	The U-Boot compilation generates u-boot.bin - the U-Boot image
+ 
+-- 
+2.22.0
+

@@ -1,0 +1,39 @@
+From 23152f9305df633b643cd43c50f0af20b563a44d Mon Sep 17 00:00:00 2001
+From: Ken Ma <make@marvell.com>
+Date: Mon, 21 Aug 2017 16:04:28 +0800
+Subject: [PATCH 0610/1200] arm64: a37xx: dts: Fix the number of GPIO on south
+ bridge
+
+The number of pins in South Bridge is 30 and not 29. There is a fix for
+the driver for the pinctrl, but a fix is also need at device tree level
+for the GPIO.
+
+Change-Id: Ie41b45051da11cc8ee9bd573a6145d3270c8af53
+Reviewed-on: http://vgitil04.il.marvell.com:8080/43286
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Cc: Simon Glass <sjg@chromium.org>
+Cc: Stefan Roese <sr@denx.de>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/52525
+Tested-by: Hua Jing <jinghua@marvell.com>
+---
+ arch/arm/dts/armada-37xx.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/armada-37xx.dtsi b/arch/arm/dts/armada-37xx.dtsi
+index fab95bbc12..d139a617a9 100644
+--- a/arch/arm/dts/armada-37xx.dtsi
++++ b/arch/arm/dts/armada-37xx.dtsi
+@@ -168,7 +168,7 @@
+ 				reg = <0x18800 0x100>, <0x18C00 0x20>;
+ 				gpiosb: gpiosb {
+ 					#gpio-cells = <2>;
+-					gpio-ranges = <&pinctrl_sb 0 0 29>;
++					gpio-ranges = <&pinctrl_sb 0 0 30>;
+ 					gpio-controller;
+ 					interrupts =
+ 					<GIC_SPI 160 IRQ_TYPE_LEVEL_HIGH>,
+-- 
+2.22.0
+

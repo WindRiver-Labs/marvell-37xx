@@ -1,0 +1,100 @@
+From 38fab5c07f3fbb30a079f2acdbca55529fc43796 Mon Sep 17 00:00:00 2001
+From: Peng Fan <peng.fan@nxp.com>
+Date: Fri, 10 Aug 2018 14:07:54 +0800
+Subject: [PATCH 1056/1200] mmc: add HS400 support
+
+Add HS400 support.
+Selecting HS400 needs first select HS200 according to spec, so use
+a dedicated function for HS400.
+Add HS400 related macros.
+Remove the restriction of only using the low 6 bits of
+EXT_CSD_CARD_TYPE, using all the 8 bits.
+
+Change-Id: Ifd9e3929fc9cb1ae392674e0f7af4bea33146591
+Signed-off-by: Peng Fan <peng.fan@nxp.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Jean-Jacques Hiblot <jjhiblot@ti.com>
+Cc: Stefano Babic <sbabic@denx.de>
+Cc: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Faiz Abbas <faiz_abbas@ti.com>
+Cc: Marek Vasut <marex@denx.de>
+Signed-off-by: Peng Fan <peng.fan@nxp.com>
+Signed-off-by: aaronw <aaron.williams@cavium.com>
+Reviewed-on: https://sj1git1.cavium.com/5423
+Reviewed-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+Tested-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+---
+ drivers/mmc/Kconfig | 13 +++++++++++++
+ include/mmc.h       | 11 +++++++++--
+ 2 files changed, 22 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/Kconfig b/drivers/mmc/Kconfig
+index 1006600b82..d831eb5576 100644
+--- a/drivers/mmc/Kconfig
++++ b/drivers/mmc/Kconfig
+@@ -114,6 +114,19 @@ config SPL_MMC_UHS_SUPPORT
+ 	  cards. The IO voltage must be switchable from 3.3v to 1.8v. The bus
+ 	  frequency can go up to 208MHz (SDR104)
+ 
++config MMC_HS400_SUPPORT
++	bool "enable HS400 support"
++	select MMC_HS200_SUPPORT
++	help
++	  The HS400 mode is support by some eMMC. The bus frequency is up to
++	  200MHz. This mode requires tuning the IO.
++
++config SPL_MMC_HS400_SUPPORT
++	bool "enable HS400 support in SPL"
++	help
++	  The HS400 mode is support by some eMMC. The bus frequency is up to
++	  200MHz. This mode requires tuning the IO.
++
+ config MMC_HS200_SUPPORT
+ 	bool "enable HS200 support"
+ 	help
+diff --git a/include/mmc.h b/include/mmc.h
+index e40873ff05..d3786f6e03 100644
+--- a/include/mmc.h
++++ b/include/mmc.h
+@@ -259,8 +259,6 @@ static inline bool mmc_is_tuning_cmd(uint cmdidx)
+ #define EXT_CSD_CARD_TYPE_52	(1 << 1)	/* Card can run at 52MHz */
+ #define EXT_CSD_CARD_TYPE_DDR_1_8V	(1 << 2)
+ #define EXT_CSD_CARD_TYPE_DDR_1_2V	(1 << 3)
+-#define EXT_CSD_CARD_TYPE_HS400_1_8V	(1 << 6)	/* HS400 DDR, 1.8V */
+-#define EXT_CSD_CARD_TYPE_HS400_1_2V	(1 << 7)	/* HS400 DDR, 1.2V */
+ #define EXT_CSD_CARD_TYPE_DDR_52	(EXT_CSD_CARD_TYPE_DDR_1_8V \
+ 					| EXT_CSD_CARD_TYPE_DDR_1_2V)
+ 
+@@ -270,6 +268,10 @@ static inline bool mmc_is_tuning_cmd(uint cmdidx)
+ 						/* SDR mode @1.2V I/O */
+ #define EXT_CSD_CARD_TYPE_HS200		(EXT_CSD_CARD_TYPE_HS200_1_8V | \
+ 					 EXT_CSD_CARD_TYPE_HS200_1_2V)
++#define EXT_CSD_CARD_TYPE_HS400_1_8V	BIT(6)
++#define EXT_CSD_CARD_TYPE_HS400_1_2V	BIT(7)
++#define EXT_CSD_CARD_TYPE_HS400		(EXT_CSD_CARD_TYPE_HS400_1_8V | \
++					 EXT_CSD_CARD_TYPE_HS400_1_2V)
+ 
+ #define EXT_CSD_BUS_WIDTH_1	0	/* Card is in 1 bit mode */
+ #define EXT_CSD_BUS_WIDTH_4	1	/* Card is in 4 bit mode */
+@@ -281,6 +283,7 @@ static inline bool mmc_is_tuning_cmd(uint cmdidx)
+ #define EXT_CSD_TIMING_LEGACY	0	/* no high speed */
+ #define EXT_CSD_TIMING_HS	1	/* HS */
+ #define EXT_CSD_TIMING_HS200	2	/* HS200 */
++#define EXT_CSD_TIMING_HS400	3	/* HS400 */
+ 
+ #define EXT_CSD_BOOT_ACK_ENABLE			(1 << 6)
+ #define EXT_CSD_BOOT_PARTITION_ENABLE		(1 << 3)
+@@ -555,6 +558,10 @@ static inline bool mmc_is_mode_ddr(enum bus_mode mode)
+ #if CONFIG_IS_ENABLED(MMC_UHS_SUPPORT)
+ 	else if (mode == UHS_DDR50)
+ 		return true;
++#endif
++#if CONFIG_IS_ENABLED(MMC_HS400_SUPPORT)
++	else if (mode == MMC_HS_400)
++		return true;
+ #endif
+ 	else
+ 		return false;
+-- 
+2.22.0
+

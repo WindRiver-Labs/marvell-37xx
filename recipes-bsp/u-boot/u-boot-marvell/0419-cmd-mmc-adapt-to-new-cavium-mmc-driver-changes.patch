@@ -1,0 +1,80 @@
+From 9f33b390d03eefcd8ab2f76c205382648502b6f1 Mon Sep 17 00:00:00 2001
+From: Suneel Garapati <sgarapati@caviumnetworks.com>
+Date: Tue, 1 Aug 2017 12:54:16 -0700
+Subject: [PATCH 0419/1200] cmd: mmc: adapt to new cavium mmc driver changes
+
+Signed-off-by: Suneel Garapati <sgarapati@caviumnetworks.com>
+---
+ cmd/mmc.c | 19 +++++++++----------
+ 1 file changed, 9 insertions(+), 10 deletions(-)
+
+diff --git a/cmd/mmc.c b/cmd/mmc.c
+index ad73a16ef6..8541077b43 100644
+--- a/cmd/mmc.c
++++ b/cmd/mmc.c
+@@ -10,13 +10,11 @@
+ #include <console.h>
+ #include <mmc.h>
+ 
+-#ifdef CONFIG_CAVIUM_MMC
+-extern void print_mmc_device_info(struct mmc *mmc);
+-#endif
+-
+ static int curr_device = -1;
+ 
+-#ifndef CONFIG_CAVIUM_MMC
++#ifdef CONFIG_MMC_CAVIUM
++extern void print_mmc_device_info(struct mmc *mmc);
++#else
+ static void print_mmcinfo(struct mmc *mmc)
+ {
+ 	int i;
+@@ -130,7 +128,7 @@ static int do_mmcinfo(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+ 	if (!mmc)
+ 		return CMD_RET_FAILURE;
+ 
+-#ifdef CONFIG_CAVIUM_MMC
++#ifdef CONFIG_MMC_CAVIUM
+ 	print_mmc_device_info(mmc);
+ #else
+ 	print_mmcinfo(mmc);
+@@ -312,7 +310,7 @@ static int do_mmc_read(cmd_tbl_t *cmdtp, int flag,
+ 	printf("\nMMC read: dev # %d, block # %d, count %d ... ",
+ 	       curr_device, blk, cnt);
+ 
+-	n = blk_dread(mmc_get_blk_desc(mmc), blk, cnt, addr);
++	n = blk_dread(mmc_get_blk_desc(mmc, curr_device), blk, cnt, addr);
+ 	printf("%d blocks read: %s\n", n, (n == cnt) ? "OK" : "ERROR");
+ 
+ 	return (n == cnt) ? CMD_RET_SUCCESS : CMD_RET_FAILURE;
+@@ -344,7 +342,7 @@ static int do_mmc_write(cmd_tbl_t *cmdtp, int flag,
+ 		printf("Error: card is write protected!\n");
+ 		return CMD_RET_FAILURE;
+ 	}
+-	n = blk_dwrite(mmc_get_blk_desc(mmc), blk, cnt, addr);
++	n = blk_dwrite(mmc_get_blk_desc(mmc, curr_device), blk, cnt, addr);
+ 	printf("%d blocks written: %s\n", n, (n == cnt) ? "OK" : "ERROR");
+ 
+ 	return (n == cnt) ? CMD_RET_SUCCESS : CMD_RET_FAILURE;
+@@ -372,7 +370,7 @@ static int do_mmc_erase(cmd_tbl_t *cmdtp, int flag,
+ 		printf("Error: card is write protected!\n");
+ 		return CMD_RET_FAILURE;
+ 	}
+-	n = blk_derase(mmc_get_blk_desc(mmc), blk, cnt);
++	n = blk_derase(mmc_get_blk_desc(mmc, curr_device), blk, cnt);
+ 	printf("%d blocks erased: %s\n", n, (n == cnt) ? "OK" : "ERROR");
+ 
+ 	return (n == cnt) ? CMD_RET_SUCCESS : CMD_RET_FAILURE;
+@@ -446,7 +444,8 @@ static int do_mmc_dev(cmd_tbl_t *cmdtp, int flag,
+ 		printf("mmc%d is current device\n", curr_device);
+ 	else
+ 		printf("mmc%d(part %d) is current device\n",
+-		       curr_device, mmc_get_blk_desc(mmc)->hwpart);
++		       curr_device,
++		       mmc_get_blk_desc(mmc, curr_device)->hwpart);
+ 
+ 	return CMD_RET_SUCCESS;
+ }
+-- 
+2.22.0
+

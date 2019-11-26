@@ -1,0 +1,59 @@
+From cd11dd3c01cf7c3231e1fdc2cdb44c404e316f06 Mon Sep 17 00:00:00 2001
+From: Marek Vasut <marek.vasut+renesas@gmail.com>
+Date: Sun, 18 Nov 2018 03:25:08 +0100
+Subject: [PATCH 1048/1200] mmc: Do not issue CMD 6 on SD 1.00 and SD 1.01
+
+According to SD Specifications Part 1 Physical Layer Simplified Specification
+Version 6.00 August 29, 2018, section 4.3.10 (Switch Function Command) and
+section 5.6 (SCR register), SD cards version 1.00 and 1.01 do not support the
+SD CMD 6.
+
+Currently, U-Boot will issue CMD 6 unconditionally in sd_set_card_speed()
+while configuring the bus for selected frequency. This will make SD cards
+version 1.00 and 1.01 time out and thus fail detection altogether.
+
+Fix this by not sending CMD 6 on such cards. Tested on Matsushita Electric
+Industrial Co., Ltd. Japan RP-SD008B / Victor 8MB SD card, CU-SD008, which
+is correctly detected with this patch as:
+
+Device: sd@ee160000
+Manufacturer ID: 1
+OEM: 5041
+Name: S008B
+Bus Speed: 25000000
+Mode : SD Legacy
+Rd Block Len: 512
+SD version 1.0
+High Capacity: No
+Capacity: 6.5 MiB
+Bus Width: 4-bit
+Erase Group Size: 512 Bytes
+
+Change-Id: I1906a0042d0e600d3d29921e2f4a4ab77684ebf4
+Signed-off-by: Marek Vasut <marek.vasut+renesas@gmail.com>
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
+Reviewed-on: https://sj1git1.cavium.com/5415
+Reviewed-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+Tested-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+---
+ drivers/mmc/mmc.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/mmc/mmc.c b/drivers/mmc/mmc.c
+index 2924b72d7f..c575c5e191 100644
+--- a/drivers/mmc/mmc.c
++++ b/drivers/mmc/mmc.c
+@@ -1279,6 +1279,10 @@ static int sd_set_card_speed(struct mmc *mmc, enum bus_mode mode)
+ 	ALLOC_CACHE_ALIGN_BUFFER(uint, switch_status, 16);
+ 	int speed;
+ 
++	/* SD version 1.00 and 1.01 does not support CMD 6 */
++	if (mmc->version == SD_VERSION_1_0)
++		return 0;
++
+ 	switch (mode) {
+ 	case SD_LEGACY:
+ 		speed = UHS_SDR12_BUS_SPEED;
+-- 
+2.22.0
+

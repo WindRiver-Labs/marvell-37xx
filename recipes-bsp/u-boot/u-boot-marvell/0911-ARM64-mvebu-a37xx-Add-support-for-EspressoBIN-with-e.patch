@@ -1,0 +1,308 @@
+From 244611defcbdd37f0666387717ec976d948a0401 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Sun, 25 Nov 2018 18:23:53 +0200
+Subject: [PATCH 0911/1200] ARM64: mvebu: a37xx: Add support for EspressoBIN
+ with eMMC
+
+Add support for additional EspressoBIN board with installed
+eMMC device (U11).
+Starting from this patch the DEVICE_TREE= must be added to
+"make" in order to distinguish between platforms wth and without
+eMMC on board.
+Regualr (no eMMC) EspressoBIN builds should use DTS file named
+armada-3720-espressobin and build for boards with eMMC installed
+the DTS named armada-3720-espressobin-emmc.
+The default device tree string is now removed from
+mvebu_espressobin-88f3720_defconfig config file.
+Update build documentation accordingly.
+
+Change-Id: Id1a4f3ca01a6e52df57bf7279f33f0fe45f8ed18
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/61290
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+---
+ arch/arm/dts/Makefile                         |   1 +
+ arch/arm/dts/armada-3720-espressobin-emmc.dts | 206 ++++++++++++++++++
+ arch/arm/dts/armada-3720-espressobin.dts      |   2 +
+ configs/mvebu_espressobin-88f3720_defconfig   |   1 -
+ doc/mvebu/build.txt                           |   6 +-
+ 5 files changed, 214 insertions(+), 2 deletions(-)
+ create mode 100644 arch/arm/dts/armada-3720-espressobin-emmc.dts
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index eb52927990..04476dadf1 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -98,6 +98,7 @@ dtb-$(CONFIG_ARCH_MVEBU) +=			\
+ 	armada-3720-ddr4-db-v1-A.dtb		\
+ 	armada-3720-ddr4-db-v1-B.dtb		\
+ 	armada-3720-espressobin.dtb		\
++	armada-3720-espressobin-emmc.dtb	\
+ 	armada-375-db.dtb			\
+ 	armada-388-clearfog.dtb			\
+ 	armada-388-gp.dtb			\
+diff --git a/arch/arm/dts/armada-3720-espressobin-emmc.dts b/arch/arm/dts/armada-3720-espressobin-emmc.dts
+new file mode 100644
+index 0000000000..87793ec624
+--- /dev/null
++++ b/arch/arm/dts/armada-3720-espressobin-emmc.dts
+@@ -0,0 +1,206 @@
++/*
++ * Device Tree file for Marvell Armada 3720 community board
++ * (ESPRESSOBin)
++ * Copyright (C) 2016 Marvell
++ *
++ * Gregory CLEMENT <gregory.clement@free-electrons.com>
++ * Konstantin Porotchkin <kostap@marvell.com>
++ *
++ * This file is dual-licensed: you can use it either under the terms
++ * of the GPL or the X11 license, at your option. Note that this dual
++ * licensing only applies to this file, and not this project as a
++ * whole.
++ *
++ *  a) This file is free software; you can redistribute it and/or
++ *     modify it under the terms of the GNU General Public License as
++ *     published by the Free Software Foundation; either version 2 of the
++ *     License, or (at your option) any later version.
++ *
++ *     This file is distributed in the hope that it will be useful
++ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *     GNU General Public License for more details.
++ *
++ * Or, alternatively
++ *
++ *  b) Permission is hereby granted, free of charge, to any person
++ *     obtaining a copy of this software and associated documentation
++ *     files (the "Software"), to deal in the Software without
++ *     restriction, including without limitation the rights to use
++ *     copy, modify, merge, publish, distribute, sublicense, and/or
++ *     sell copies of the Software, and to permit persons to whom the
++ *     Software is furnished to do so, subject to the following
++ *     conditions:
++ *
++ *     The above copyright notice and this permission notice shall be
++ *     included in all copies or substantial portions of the Software.
++ *
++ *     THE SOFTWARE IS PROVIDED , WITHOUT WARRANTY OF ANY KIND
++ *     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
++ *     OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
++ *     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
++ *     HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
++ *     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ *     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
++ *     OTHER DEALINGS IN THE SOFTWARE.
++ */
++
++/dts-v1/;
++
++#include "armada-372x.dtsi"
++
++/ {
++	model = "Marvell Armada 3720 Community Board ESPRESSOBin (eMMC)";
++	compatible = "marvell,armada-3720-espressobin",
++		     "marvell,armada3720", "marvell,armada3710";
++
++	chosen {
++		stdout-path = "serial0:115200n8";
++	};
++
++	aliases {
++		ethernet0 = &eth0;
++		i2c0 = &i2c0;
++		spi0 = &spi0;
++	};
++
++	memory {
++		device_type = "memory";
++		reg = <0x00000000 0x00000000 0x00000000 0x20000000>;
++	};
++
++	vcc_sd_reg0: regulator@0 {
++		compatible = "regulator-gpio";
++		regulator-name = "vcc_sd0";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-type = "voltage";
++		states = <1800000 0x1
++			  3300000 0x0>;
++		gpios = <&gpionb 4 GPIO_ACTIVE_HIGH>;
++	};
++
++	mdio@32004 {
++		#address-cells = <1>;
++		#size-cells = <0>;
++		status = "okay";
++
++		mvswitch: switch@000000{
++			compatible = "marvell,mv88e6xxx";
++			status = "okay";
++			phy-addr = <1>;
++			cpu-port = <0x0>;
++			port-mask = <0xf>;
++		};
++	};
++};
++
++&comphy {
++	max-lanes = <3>;
++	phy0 {
++		phy-type = <COMPHY_TYPE_USB3>;
++		phy-speed = <COMPHY_SPEED_5G>;
++	};
++
++	phy1 {
++		phy-type = <COMPHY_TYPE_PEX0>;
++		phy-speed = <COMPHY_SPEED_2_5G>;
++	};
++
++	phy2 {
++		phy-type = <COMPHY_TYPE_SATA0>;
++		phy-speed = <COMPHY_SPEED_6G>;
++	};
++};
++
++&eth0 {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&rgmii_pins>, <&smi_pins>;
++	phy-mode = "rgmii";
++	phy_addr = <0x1>;
++	phy = <&mvswitch>;
++
++	fixed-link {
++		speed = <1000>;
++		full-duplex;
++	};
++};
++
++&i2c0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&i2c1_pins>;
++	status = "okay";
++};
++
++/* CON3 */
++&sata {
++	status = "okay";
++};
++
++/* J1 */
++&sdhci0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&sdio_pins>;
++	bus-width = <4>;
++	vqmmc-supply = <&vcc_sd_reg0>;
++	status = "okay";
++};
++
++/* U11 */
++&sdhci1 {
++	non-removable;
++	bus-width = <8>;
++	mmc-ddr-1_8v;
++	mmc-hs400-1_8v;
++	marvell,pad-type = "fixed-1-8v";
++	pinctrl-names = "default";
++	pinctrl-0 = <&mmc_pins>;
++	status = "okay";
++
++	#address-cells = <1>;
++	#size-cells = <0>;
++	mmccard: mmccard@0 {
++		compatible = "mmc-card";
++		reg = <0>;
++	};
++};
++
++&spi0 {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&spi_quad_pins>;
++
++	spi-flash@0 {
++		#address-cells = <1>;
++		#size-cells = <1>;
++		compatible = "st,m25p128", "spi-flash";
++		reg = <0>; /* Chip select 0 */
++		spi-max-frequency = <50000000>;
++		m25p,fast-read;
++	};
++};
++
++/* Exported on the micro USB connector CON32 through an FTDI */
++&uart0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart1_pins>;
++	status = "okay";
++};
++
++/* CON29 */
++&usb2 {
++	status = "okay";
++};
++
++/* CON31 */
++&usb3 {
++	status = "okay";
++};
++
++&pcie0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pcie_pins>;
++	reset-gpio = <&gpiosb 3 GPIO_ACTIVE_HIGH>;
++	status = "okay";
++};
+diff --git a/arch/arm/dts/armada-3720-espressobin.dts b/arch/arm/dts/armada-3720-espressobin.dts
+index 22fd23153a..94fe501f33 100644
+--- a/arch/arm/dts/armada-3720-espressobin.dts
++++ b/arch/arm/dts/armada-3720-espressobin.dts
+@@ -137,6 +137,7 @@
+ 	status = "okay";
+ };
+ 
++/* J1 */
+ &sdhci0 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&sdio_pins>;
+@@ -145,6 +146,7 @@
+ 	status = "okay";
+ };
+ 
++/* U11 */
+ &sdhci1 {
+ 	non-removable;
+ 	bus-width = <8>;
+diff --git a/configs/mvebu_espressobin-88f3720_defconfig b/configs/mvebu_espressobin-88f3720_defconfig
+index 4a77f1b89f..56b8899672 100644
+--- a/configs/mvebu_espressobin-88f3720_defconfig
++++ b/configs/mvebu_espressobin-88f3720_defconfig
+@@ -3,7 +3,6 @@ CONFIG_ARCH_MVEBU=y
+ CONFIG_SYS_TEXT_BASE=0x00000000
+ CONFIG_SYS_MALLOC_F_LEN=0x2000
+ CONFIG_TARGET_MVEBU_ARMADA_37XX=y
+-CONFIG_DEFAULT_DEVICE_TREE="armada-3720-espressobin"
+ CONFIG_DEBUG_UART=y
+ CONFIG_AHCI=y
+ CONFIG_DISTRO_DEFAULTS=y
+diff --git a/doc/mvebu/build.txt b/doc/mvebu/build.txt
+index 5f6c775d32..84f190fbef 100644
+--- a/doc/mvebu/build.txt
++++ b/doc/mvebu/build.txt
+@@ -84,8 +84,12 @@ Manual build procedure
+ 	- For the Armada-80x0 DB use "make DEVICE_TREE=armada-8040-db[-X]"
+ 	- For the Armada-37x0 DB use "make DEVICE_TREE=armada-3720-ddrX-db[-X]"
+ 	  (X represents possible board configuration)
++	- For the EspressoBin board without soldered eMMC device use
++	  "make DEVICE_TREE=armada-3720-espressobin"
++	- For the EspressoBin board with populated eMMC device use
++	  "make DEVICE_TREE=armada-3720-espressobin-emmc"
+ 
+-	No need to set this for Armada-80x0 MacchiatoBin and Armada-37x0 EsspressoBin.
++	No need to set this for Armada-80x0 MacchiatoBin.
+ 
+ 	The U-Boot compilation generates u-boot.bin - the U-Boot image
+ 
+-- 
+2.22.0
+

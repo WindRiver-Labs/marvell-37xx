@@ -1,0 +1,91 @@
+From 6b00ea2db5c846bb118506e8678439e5f6bd3e30 Mon Sep 17 00:00:00 2001
+From: Ken Ma <make@marvell.com>
+Date: Wed, 16 May 2018 17:23:44 +0800
+Subject: [PATCH 0625/1200] ata: mvebu: move mvebu sata driver to drivers/ata
+ directory
+
+Currently mvebu sata driver is in arch/arm/mach_mvebu directory, this
+patch moves it to drivers/ata directory with renaming "sata.c" to
+"ahci_mvebu.c" which is aligned to Linux.
+New ahci driver's kconfig option is added as AHCI_MVEBU which selects
+DM_SCSI.
+
+Change-Id: Icdd6fb6bf50ec4bd3a4b394e62b022af3a348421
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55262
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/mach-mvebu/Makefile                           | 1 -
+ drivers/ata/Kconfig                                    | 9 +++++++++
+ drivers/ata/Makefile                                   | 1 +
+ arch/arm/mach-mvebu/sata.c => drivers/ata/ahci_mvebu.c | 4 +---
+ 4 files changed, 11 insertions(+), 4 deletions(-)
+ rename arch/arm/mach-mvebu/sata.c => drivers/ata/ahci_mvebu.c (93%)
+
+diff --git a/arch/arm/mach-mvebu/Makefile b/arch/arm/mach-mvebu/Makefile
+index d4210af9d2..7f0d69287c 100644
+--- a/arch/arm/mach-mvebu/Makefile
++++ b/arch/arm/mach-mvebu/Makefile
+@@ -9,7 +9,6 @@ ifdef CONFIG_ARM64
+ obj-$(CONFIG_ARMADA_3700) += armada3700/
+ obj-$(CONFIG_ARMADA_8K) += armada8k/
+ obj-y += arm64-common.o
+-obj-y += sata.o
+ 
+ else # CONFIG_ARM64
+ 
+diff --git a/drivers/ata/Kconfig b/drivers/ata/Kconfig
+index 86ec628104..9ef45892b8 100644
+--- a/drivers/ata/Kconfig
++++ b/drivers/ata/Kconfig
+@@ -99,4 +99,13 @@ config SATA_SIL3114
+ 	help
+ 	  Enable this driver to support the SIL3114 SATA controllers.
+ 
++config AHCI_MVEBU
++	bool "Marvell EBU AHCI SATA support"
++	depends on ARCH_MVEBU
++	select DM_SCSI
++	help
++	  This option enables support for the Marvell EBU SoC's
++	  onboard AHCI SATA.
++
++	  If unsure, say N.
+ endmenu
+diff --git a/drivers/ata/Makefile b/drivers/ata/Makefile
+index a94c804e7a..0254640319 100644
+--- a/drivers/ata/Makefile
++++ b/drivers/ata/Makefile
+@@ -19,3 +19,4 @@ obj-$(CONFIG_SATA_MV) += sata_mv.o
+ obj-$(CONFIG_SATA_SIL3114) += sata_sil3114.o
+ obj-$(CONFIG_SATA_SIL) += sata_sil.o
+ obj-$(CONFIG_SANDBOX) += sata_sandbox.o
++obj-$(CONFIG_AHCI_MVEBU) += ahci_mvebu.o
+diff --git a/arch/arm/mach-mvebu/sata.c b/drivers/ata/ahci_mvebu.c
+similarity index 93%
+rename from arch/arm/mach-mvebu/sata.c
+rename to drivers/ata/ahci_mvebu.c
+index 5d8032bd89..73af5670be 100644
+--- a/arch/arm/mach-mvebu/sata.c
++++ b/drivers/ata/ahci_mvebu.c
+@@ -1,15 +1,13 @@
++// SPDX-License-Identifier:	GPL-2.0+
+ /*
+  * Copyright (C) 2016 Stefan Roese <sr@denx.de>
+  *
+- * SPDX-License-Identifier:	GPL-2.0+
+  */
+ 
+ #include <common.h>
+ #include <ahci.h>
+ #include <dm.h>
+ 
+-DECLARE_GLOBAL_DATA_PTR;
+-
+ /*
+  * Dummy implementation that can be overwritten by a board
+  * specific function
+-- 
+2.22.0
+

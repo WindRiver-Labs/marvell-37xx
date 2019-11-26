@@ -1,0 +1,28 @@
+From 4ddd4cf8711b41a20e7ed84942dcb4596e05efad Mon Sep 17 00:00:00 2001
+From: Ganapatrao Kulkarni <ganapatrao.kulkarni@cavium.com>
+Date: Wed, 26 Oct 2016 00:07:27 +0530
+Subject: [PATCH 0261/1200] tx83, pci: increase MAX_PCI_REGIONS to 8.
+
+on 83xx, for ecam0 we have more than 7 pci ranges defined.
+
+Signed-off-by: Ganapatrao Kulkarni <ganapatrao.kulkarni@cavium.com>
+---
+ include/pci.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/pci.h b/include/pci.h
+index 926a6d6e31..762054a1f5 100644
+--- a/include/pci.h
++++ b/include/pci.h
+@@ -788,7 +788,7 @@ extern void pci_cfgfunc_do_nothing(struct pci_controller* hose, pci_dev_t dev,
+ extern void pci_cfgfunc_config_device(struct pci_controller* hose, pci_dev_t dev,
+ 				      struct pci_config_table *);
+ 
+-#define MAX_PCI_REGIONS		7
++#define MAX_PCI_REGIONS		8
+ 
+ #define INDIRECT_TYPE_NO_PCIE_LINK	1
+ 
+-- 
+2.22.0
+

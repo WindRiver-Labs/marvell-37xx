@@ -1,0 +1,37 @@
+From 92d78a9316ac65d12bd55f4036bd9e0f80fc4797 Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Thu, 4 Feb 2016 12:34:02 -0800
+Subject: [PATCH 0102/1200] Fix rebase residue
+
+---
+ board/cavium/thunderx/thunderx.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/board/cavium/thunderx/thunderx.c b/board/cavium/thunderx/thunderx.c
+index feee2e237c..c1952cac97 100644
+--- a/board/cavium/thunderx/thunderx.c
++++ b/board/cavium/thunderx/thunderx.c
+@@ -14,6 +14,7 @@
+ #include <linux/compiler.h>
+ 
+ #include "cavm-csr.h"
++#include <cavium/atf.h>
+ 
+ #ifdef CONFIG_OF_LIBFDT
+  #include <libfdt.h>
+@@ -48,11 +49,9 @@ U_BOOT_DEVICE(thunderx_serial1) = {
+ 	.name = "serial_pl01x",
+ 	.platdata = &serial1,
+ };
+-
+-#include <cavium/atf.h>
++#endif
+ 
+ #ifdef CONFIG_THUNDERX_VNIC
+- #include <cavium/atf.h>
+  #include <cavium/thunderx_smi.h>
+  #include <cavium/thunderx_vnic.h>
+ #endif
+-- 
+2.22.0
+

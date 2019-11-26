@@ -1,0 +1,31 @@
+From 97db61d8a2e0b394e1815c6cc86c66874abd08a9 Mon Sep 17 00:00:00 2001
+From: Simon Glass <sjg@chromium.org>
+Date: Wed, 14 Jun 2017 21:28:30 -0600
+Subject: [PATCH 0401/1200] dm: scsi: Drop the ccb typedef
+
+We should not be using typedefs in U-Boot and 'ccb' is a pretty short
+name. It is also used with variables. Drop the typedef and use 'struct'
+instead.
+
+Signed-off-by: Simon Glass <sjg@chromium.org>
+Reviewed-by: Bin Meng <bmeng.cn@gmail.com>
+---
+ include/scsi.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/scsi.h b/include/scsi.h
+index 90bedabffc..2edb563a5e 100644
+--- a/include/scsi.h
++++ b/include/scsi.h
+@@ -232,7 +232,7 @@ void scsi_low_level_init(int busdevfunc);
+ void scsi_init(void);
+ #endif
+ 
+-int scsi_exec(ccb *pccb);
++int scsi_exec(struct scsi_cmd *pccb);
+ void scsi_bus_reset(void);
+ 
+ /***************************************************************************
+-- 
+2.22.0
+

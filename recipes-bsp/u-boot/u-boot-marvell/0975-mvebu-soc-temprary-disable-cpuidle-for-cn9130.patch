@@ -1,0 +1,41 @@
+From 3878b0b2f87ccf93ad7cc495cbe56437031d404b Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Fri, 4 Jan 2019 13:55:28 +0200
+Subject: [PATCH 0975/1200] mvebu: soc: temprary disable cpuidle for cn9130
+
+Change-Id: I1c68156171ec0cd88ebee347e9b45e8412619cc7
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/62425
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Nadav Haklai <nadavh@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/1879
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/mach-mvebu/armada8k/soc.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-mvebu/armada8k/soc.c b/arch/arm/mach-mvebu/armada8k/soc.c
+index 1f9afd17a3..8e4860184a 100644
+--- a/arch/arm/mach-mvebu/armada8k/soc.c
++++ b/arch/arm/mach-mvebu/armada8k/soc.c
+@@ -19,6 +19,7 @@
+ #define SW_REV_STATUS_MASK		0xf
+ 
+ #define A8040_DEVICE_ID			0x8040
++#define CN9130_DEVICE_ID		0x7025
+ 
+ #define AP807_ID			0x807
+ 
+@@ -269,7 +270,7 @@ int arch_misc_init(void)
+ 	 * The variable 'type', which is returned by
+ 	 * get_soc_type_rev() holds these bits.
+ 	 */
+-	if (type == A8040_DEVICE_ID)
++	if (type == A8040_DEVICE_ID || type == CN9130_DEVICE_ID)
+ 		env_set("cpuidle", "cpuidle.off=1");
+ 
+ 	return 0;
+-- 
+2.22.0
+

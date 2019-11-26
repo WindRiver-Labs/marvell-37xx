@@ -1,0 +1,37 @@
+From 8f7e4974c64ef2b89056185672727b4cf2854df7 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Tue, 28 Aug 2018 18:17:14 +0300
+Subject: [PATCH 0851/1200] fix: cmd: mvebu: Exclude mvebu commands from SPL
+ builds
+
+Change-Id: I1095d5489332c09844c2cbbee72ec6bc5a610a95
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/59562
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ cmd/Makefile | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/cmd/Makefile b/cmd/Makefile
+index 8596a46511..f6af4fde20 100644
+--- a/cmd/Makefile
++++ b/cmd/Makefile
+@@ -153,12 +153,13 @@ obj-$(CONFIG_CMD_REGULATOR) += regulator.o
+ obj-$(CONFIG_CMD_BLOB) += blob.o
+ 
+ obj-$(CONFIG_X86) += x86/
++
++obj-$(CONFIG_ARCH_MVEBU) += mvebu/
+ endif # !CONFIG_SPL_BUILD
+ 
+ # core command
+ obj-y += nvedit.o
+ 
+-obj-$(CONFIG_ARCH_MVEBU) += mvebu/
+ obj-$(CONFIG_TI_COMMON_CMD_OPTIONS) += ti/
+ 
+ filechk_data_gz = (echo "static const char data_gz[] ="; cat $< | scripts/bin2c; echo ";")
+-- 
+2.22.0
+

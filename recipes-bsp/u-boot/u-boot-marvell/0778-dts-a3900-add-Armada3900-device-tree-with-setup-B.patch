@@ -1,0 +1,144 @@
+From 49847d515215b69bc53e17249ed3b2b9804851a7 Mon Sep 17 00:00:00 2001
+From: Christine Gharzuzi <chrisg@marvell.com>
+Date: Tue, 15 May 2018 16:53:04 +0300
+Subject: [PATCH 0778/1200] dts: a3900: add Armada3900 device tree with setup B
+
+- This configuration is for Armada3900-A0/1
+
+	topology for setup B:
+        CP0-SerDes:
+            - lane0: PCIe (x1)
+            - lane1: USB3_HOST0
+            - lane2: SFI0 (5G)
+            - lane3: UNCONNECTED
+            - lane4: SGMII1 (1G)
+            - lane5: PCIe (x1)
+
+Change-Id: If7ed34bd53da8ad3b753c9823b991f0f832da26d
+Signed-off-by: Christine Gharzuzi <chrisg@marvell.com>
+Signed-off-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55148
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/57625
+---
+ arch/arm/dts/Makefile             |  1 +
+ arch/arm/dts/armada-3900-vd-B.dts | 94 +++++++++++++++++++++++++++++++
+ 2 files changed, 95 insertions(+)
+ create mode 100644 arch/arm/dts/armada-3900-vd-B.dts
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index ca40d0d197..e28e22b161 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -107,6 +107,7 @@ dtb-$(CONFIG_ARCH_MVEBU) +=			\
+ 	armada-3900-vd.dtb			\
+ 	armada-3900-vd-nand.dtb			\
+ 	armada-3900-vd-A.dtb			\
++	armada-3900-vd-B.dtb			\
+ 	armada-7020-amc.dtb			\
+ 	armada-7040-pcac.dtb	                \
+ 	armada-7040-db.dtb			\
+diff --git a/arch/arm/dts/armada-3900-vd-B.dts b/arch/arm/dts/armada-3900-vd-B.dts
+new file mode 100644
+index 0000000000..b8d896ba51
+--- /dev/null
++++ b/arch/arm/dts/armada-3900-vd-B.dts
+@@ -0,0 +1,94 @@
++/*
++ * Copyright (C) 2018 Marvell International Ltd.
++ *
++ * SPDX-License-Identifier:    GPL-2.0
++ * https://spdx.org/licenses
++ */
++
++#include "armada-3900-db.dtsi"
++
++/ {
++	model = "Marvell Armada 3900 Validation Development board(CP NOR) setup(B)";
++	compatible = "marvell,armada3900-vd", "marvell,armada7040",
++		     "marvell,armada-ap806-quad", "marvell,armada-ap806";
++
++	aliases {
++		i2c1 = &ap_i2c0;
++		spi1 = &cp0_spi1;
++	};
++};
++
++/*
++ * AP related configuration
++ */
++&ap_i2c0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&ap_i2c0_pins>;
++	status = "okay";
++};
++
++/*
++ * CP related configuration
++ */
++&cp0_pinctl {
++		/* MPP Bus:
++		 *   SPI1	[13-16]
++		 *   SMI	[32,34]
++		 *   XSMI	[35-36]
++		 *   I2C0	[37-38]
++		 *   USB	[44-45]
++		 *   UART1	[46-47,49,58]
++		 *   IHB	[56-57]
++		 *   UART0	[59-62]
++		 */
++		/*   0   1   2   3   4   5   6   7   8   9 */
++	pin-func = < 0   0   0   0   0   0   0   0   0   0
++		     0   0   0   3   3   3   3   0   0   0
++		     0   0   0   0   0   0   0   0   0   0
++		     0   0   7   0   7   7   7   2   2   0
++		     0   0   0   0   0   0   7   7   0   7
++		     0   0   0   0   0   0   0   0   7   7
++		     7   7   7>;
++};
++
++&cp0_comphy {
++
++	phy0 {
++		phy-type = <COMPHY_TYPE_PEX0>;
++		/delete-property/phy-speed;
++	};
++
++	phy1 {
++		phy-type = <COMPHY_TYPE_USB3_HOST0>;
++		phy-speed = <COMPHY_SPEED_5G>;
++	};
++
++	phy2 {
++		phy-type = <COMPHY_TYPE_SFI0>;
++		phy-speed = <COMPHY_SPEED_5_15625G>;
++	};
++
++	phy3 {
++		phy-type = <COMPHY_TYPE_UNCONNECTED>;
++		/delete-property/phy-speed;
++	};
++
++	phy4 {
++		phy-type = <COMPHY_TYPE_SGMII1>;
++		phy-speed = <COMPHY_SPEED_1_25G>;
++	};
++};
++
++&cp0_spi1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&cp0_spi0_pins>;
++	status = "okay";
++};
++
++&cp0_eth0 {
++	phy-mode = "sfi";
++};
++
++&cp0_eth1 {
++	phy-mode = "sgmii";
++};
+-- 
+2.22.0
+

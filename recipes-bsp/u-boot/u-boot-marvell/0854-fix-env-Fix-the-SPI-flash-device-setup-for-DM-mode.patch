@@ -1,0 +1,40 @@
+From bc2de21e7c1a967e47af83b449f87df2824899b3 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Tue, 28 Aug 2018 17:57:12 +0300
+Subject: [PATCH 0854/1200] fix: env: Fix the SPI flash device setup for DM
+ mode
+
+For some reason the spi_flash_probe_bus_cs() is called
+inside the setup_flash_device() with zero values in place
+of configurated SPI flash mode and maximum flash speed.
+This code causes HALT error during startup environment
+relocation on some platforms - namely Armada-38x-GP board.
+Fix the function call by replacing zeros with the appropriate
+values - CONFIG_ENV_SPI_MAX_HZ and CONFIG_ENV_SPI_MODE.
+
+Change-Id: I9b53458bc1bc19ed0e816fcdc2497d09d3848551
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/59560
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ env/sf.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/env/sf.c b/env/sf.c
+index 6326b37e46..81f1adf519 100644
+--- a/env/sf.c
++++ b/env/sf.c
+@@ -59,7 +59,8 @@ static int setup_flash_device(void)
+ 
+ 	/* speed and mode will be read from DT */
+ 	ret = spi_flash_probe_bus_cs(CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS,
+-				     0, 0, &new);
++				     CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE,
++				     &new);
+ 	if (ret) {
+ 		set_default_env("!spi_flash_probe_bus_cs() failed");
+ 		return ret;
+-- 
+2.22.0
+

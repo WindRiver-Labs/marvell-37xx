@@ -1,0 +1,43 @@
+From b6790cf692204d46e23624111f837df7d532ca15 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Wed, 6 Mar 2019 15:27:00 +0100
+Subject: [PATCH 1080/1200] arm64: dts: cn9131: use correct address for phy
+ 3310
+
+The 3310 PHY address is 8 and not 4.
+
+Change-Id: I1450f4814ff8e80a9ca96f455b9d53b4c50400dc
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/5331
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/cn9131-db.dtsi | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/dts/cn9131-db.dtsi b/arch/arm/dts/cn9131-db.dtsi
+index 4a0c1a4503..d7a9d05a20 100644
+--- a/arch/arm/dts/cn9131-db.dtsi
++++ b/arch/arm/dts/cn9131-db.dtsi
+@@ -104,7 +104,7 @@
+ &cp1_eth1 {
+ 	status = "okay";
+ 	phy-mode = "sfi"; /* lane-2 */
+-	phy = <&sfi_phy4>; /* required by 3310 fw download */
++	phy = <&sfi_phy8>; /* required by 3310 fw download */
+ };
+ 
+ &cp1_i2c0 {
+@@ -219,7 +219,7 @@
+ 
+ &cp1_xmdio {
+ 	status = "okay";
+-	sfi_phy4: ethernet-phy@4 {
+-		reg = <4>;
++	sfi_phy8: ethernet-phy@8 {
++		reg = <8>;
+ 	};
+ };
+-- 
+2.22.0
+

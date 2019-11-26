@@ -1,0 +1,48 @@
+From 44a85b36b0b22faf95a2db8da2ac8604eccc65f7 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Sun, 2 Dec 2018 14:33:28 +0200
+Subject: [PATCH 0923/1200] mtd: spi: add support for ISSI flashes
+
+Add support for ISSI flashes enablement through Kconfig
+Add support for ISSI flash ID is25wp032
+
+Change-Id: I6b6ead19724512fdb789dd44bede1b1b3941c29b
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/61454
+Reviewed-by: Stefan Chulski <stefanc@marvell.com>
+---
+ drivers/mtd/spi/Kconfig         | 5 +++++
+ drivers/mtd/spi/spi_flash_ids.c | 1 +
+ 2 files changed, 6 insertions(+)
+
+diff --git a/drivers/mtd/spi/Kconfig b/drivers/mtd/spi/Kconfig
+index c7c1562603..5635de3d4d 100644
+--- a/drivers/mtd/spi/Kconfig
++++ b/drivers/mtd/spi/Kconfig
+@@ -105,6 +105,11 @@ config SPI_FLASH_WINBOND
+ 	help
+ 	  Add support for various Winbond SPI flash chips (W25xxx)
+ 
++config SPI_FLASH_ISSI
++	bool "ISSI SPI flash support"
++	help
++	  Add support for various ISSI SPI flash chips (is25xxx)
++
+ endif
+ 
+ config SPI_FLASH_USE_4K_SECTORS
+diff --git a/drivers/mtd/spi/spi_flash_ids.c b/drivers/mtd/spi/spi_flash_ids.c
+index e58c1e4674..8468db4309 100644
+--- a/drivers/mtd/spi/spi_flash_ids.c
++++ b/drivers/mtd/spi/spi_flash_ids.c
+@@ -69,6 +69,7 @@ const struct spi_flash_info spi_flash_ids[] = {
+ #ifdef CONFIG_SPI_FLASH_ISSI		/* ISSI */
+ 	{"is25lq040b",	   INFO(0x9d4013, 0x0, 64 * 1024,    8, 0)  },
+ 	{"is25lp032",	   INFO(0x9d6016, 0x0, 64 * 1024,    64, 0) },
++	{"is25wp032",	   INFO(0x9d7016, 0x0, 64 * 1024,    64, 0) },
+ 	{"is25lp064",	   INFO(0x9d6017, 0x0, 64 * 1024,   128, 0) },
+ 	{"is25lp128",	   INFO(0x9d6018, 0x0, 64 * 1024,   256, 0) },
+ 	{"is25lp256",	   INFO(0x9d6019, 0x0, 64 * 1024,   512, 0) },
+-- 
+2.22.0
+

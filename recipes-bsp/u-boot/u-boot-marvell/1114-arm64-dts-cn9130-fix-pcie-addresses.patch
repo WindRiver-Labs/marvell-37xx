@@ -1,0 +1,37 @@
+From a9be2cb35d3fef661c110ca409427be30f2a1a97 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Tue, 14 May 2019 10:34:19 +0200
+Subject: [PATCH 1114/1200] arm64: dts: cn9130: fix pcie addresses
+
+The pcie mem base address configured by firmware is:
+- 0xe0000000 for pcie1
+- 0xe1000000 for pcie2
+
+Fix the mem base macro so the addresses are aligned to fw settings.
+
+Change-Id: I8b56abb00d97ed20c8bc13217ce967dc45673524
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/8774
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+Reviewed-by: Nadav Haklai <Nadav.Haklai@cavium.com>
+---
+ arch/arm/dts/cn9130.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/cn9130.dtsi b/arch/arm/dts/cn9130.dtsi
+index d60fff239f..02446ef5f0 100644
+--- a/arch/arm/dts/cn9130.dtsi
++++ b/arch/arm/dts/cn9130.dtsi
+@@ -29,7 +29,7 @@
+ #define CP110_NUM			0
+ #define CP110_PCIEx_CPU_IO_BASE(iface)	(0xf8000000 + (iface) * 0x10000)
+ #define CP110_PCIEx_CPU_MEM_BASE(iface)	((iface == 0) ? 0xc0000000 : \
+-					   (0xe0000000 + (iface) * 0x1000000))
++					 (0xe0000000 + (iface - 1) * 0x1000000))
+ #define CP110_PCIEx_BUS_IO_BASE(iface)	(CP110_PCIEx_CPU_IO_BASE(iface))
+ #define CP110_PCIEx_BUS_MEM_BASE(iface)	(CP110_PCIEx_CPU_MEM_BASE(iface))
+ 
+-- 
+2.22.0
+

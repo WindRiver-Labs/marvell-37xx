@@ -1,0 +1,86 @@
+From 744d0cc761e3041e47f9added4d24a70a4cecb53 Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Thu, 27 Jul 2017 04:39:35 +0300
+Subject: [PATCH 0412/1200] ahci: Fix 64-bit support
+
+- Fill all address fields in descriptors with proper physical address
+  parts
+- Add memory synchronyzation barriers
+
+Signed-off-by: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+---
+ drivers/ata/ahci.c | 23 +++++++++++++++--------
+ 1 file changed, 15 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/ata/ahci.c b/drivers/ata/ahci.c
+index 40db7341dc..52e8a20858 100644
+--- a/drivers/ata/ahci.c
++++ b/drivers/ata/ahci.c
+@@ -27,13 +27,16 @@
+ #include <dm/device-internal.h>
+ #include <dm/lists.h>
+ 
++#define LOWER32(val)	(u32)((u64)(val) & 0xffffffff)
++#define UPPER32(val)	(u32)(((u64)(val) & 0xffffffff00000000) >> 32)
++
+ static int ata_io_flush(struct ahci_uc_priv *uc_priv, u8 port);
+ 
+ #ifndef CONFIG_DM_SCSI
+ struct ahci_uc_priv *probe_ent = NULL;
+ #endif
+ 
+-#define writel_with_flush(a,b)	do { writel(a,b); readl(b); } while (0)
++#define writel_with_flush(a,b)	do { writel(a,b); mb(); readl(b); } while (0)
+ 
+ /*
+  * Some controllers limit number of blocks they can read/write at once.
+@@ -515,8 +518,9 @@ static int ahci_fill_sg(struct ahci_uc_priv *uc_priv, u8 port,
+ 
+ 	for (i = 0; i < sg_count; i++) {
+ 		ahci_sg->addr =
+-		    cpu_to_le32((unsigned long) buf + i * MAX_DATA_BYTE_COUNT);
+-		ahci_sg->addr_hi = 0;
++			cpu_to_le32(LOWER32(buf + i * MAX_DATA_BYTE_COUNT));
++		ahci_sg->addr_hi =
++			cpu_to_le32(UPPER32(buf + i * MAX_DATA_BYTE_COUNT));
+ 		ahci_sg->flags_size = cpu_to_le32(0x3fffff &
+ 					  (buf_len < MAX_DATA_BYTE_COUNT
+ 					   ? (buf_len - 1)
+@@ -533,11 +537,8 @@ static void ahci_fill_cmd_slot(struct ahci_ioports *pp, u32 opts)
+ {
+ 	pp->cmd_slot->opts = cpu_to_le32(opts);
+ 	pp->cmd_slot->status = 0;
+-	pp->cmd_slot->tbl_addr = cpu_to_le32((u32)pp->cmd_tbl & 0xffffffff);
+-#ifdef CONFIG_PHYS_64BIT
+-	pp->cmd_slot->tbl_addr_hi =
+-	    cpu_to_le32((u32)(((pp->cmd_tbl) >> 16) >> 16));
+-#endif
++	pp->cmd_slot->tbl_addr = cpu_to_le32(LOWER32(pp->cmd_tbl));
++	pp->cmd_slot->tbl_addr_hi = cpu_to_le32(UPPER32(pp->cmd_tbl));
+ }
+ 
+ static int wait_spinup(void __iomem *port_mmio)
+@@ -662,14 +663,20 @@ static int ahci_device_data_io(struct ahci_uc_priv *uc_priv, u8 port, u8 *fis,
+ 	ahci_dcache_flush_sata_cmd(pp);
+ 	ahci_dcache_flush_range((unsigned long)buf, (unsigned long)buf_len);
+ 
++	mb();
++
+ 	writel_with_flush(1, port_mmio + PORT_CMD_ISSUE);
+ 
++	mb();
++
+ 	if (waiting_for_cmd_completed(port_mmio + PORT_CMD_ISSUE,
+ 				WAIT_MS_DATAIO, 0x1)) {
+ 		printf("timeout exit!\n");
+ 		return -1;
+ 	}
+ 
++	mb();
++
+ 	ahci_dcache_invalidate_range((unsigned long)buf,
+ 				     (unsigned long)buf_len);
+ 	debug("%s: %d byte transferred.\n", __func__, pp->cmd_slot->status);
+-- 
+2.22.0
+

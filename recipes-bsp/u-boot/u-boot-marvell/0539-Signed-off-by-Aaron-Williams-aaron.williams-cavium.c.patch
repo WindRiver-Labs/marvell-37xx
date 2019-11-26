@@ -1,0 +1,28 @@
+From f9218c5f2992afe059a00e92585a8adc6e9deb21 Mon Sep 17 00:00:00 2001
+From: Aaron Williams <aaron.williams@cavium.com>
+Date: Wed, 18 Jul 2018 23:13:55 -0700
+Subject: [PATCH 0539/1200] Signed-off-by: Aaron Williams
+ <aaron.williams@cavium.com> ext4: Size is in blocks, not bytes.
+
+signed-off-by: <aaron.williams@cavium.com>
+Signed-off-by: Aaron Williams <aaron.williams@cavium.com>
+---
+ fs/ext4/ext4_write.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fs/ext4/ext4_write.c b/fs/ext4/ext4_write.c
+index d710a86d59..b6e3e78f19 100644
+--- a/fs/ext4/ext4_write.c
++++ b/fs/ext4/ext4_write.c
+@@ -893,7 +893,7 @@ int ext4fs_write(const char *fname, unsigned char *buffer,
+ 	blks_reqd_for_file = lldiv(bytes_reqd_for_file, fs->blksz);
+ 	if (do_div(bytes_reqd_for_file, fs->blksz) != 0) {
+ 		blks_reqd_for_file++;
+-		debug("total bytes for a file %u\n", blks_reqd_for_file);
++		debug("total blocks for a file %u\n", blks_reqd_for_file);
+ 	}
+ 	blocks_remaining = blks_reqd_for_file;
+ 	/* test for available space in partition */
+-- 
+2.22.0
+

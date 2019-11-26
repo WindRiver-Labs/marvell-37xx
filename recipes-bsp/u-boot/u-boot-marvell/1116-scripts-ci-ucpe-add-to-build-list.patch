@@ -1,0 +1,32 @@
+From 15e4d23f17fbb51f1f540d4c4c3a5b7a0965f171 Mon Sep 17 00:00:00 2001
+From: Alex Leibovich <alexl@marvell.com>
+Date: Tue, 14 May 2019 10:29:55 +0300
+Subject: [PATCH 1116/1200] scripts/ci: ucpe: add to build list
+
+Adding ucpe to the bulid list
+
+Change-Id: I9f384f8e9da5c9894f40a36c0144fdfda8b1a9f8
+Signed-off-by: Alex Leibovich <alexl@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/8942
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Nadav Haklai <Nadav.Haklai@cavium.com>
+---
+ scripts/ci/compile.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index 93ffa556b2..c8c31d6a5b 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -117,7 +117,7 @@ case $build_name in
+ 	uboot_2018_a80x0_mcbin_single_shot* )
+ 	device_tree="armada-8040-mcbin-single-shot"; ;;
+ 	uboot_2018_a80x0_mcbin* ) device_tree="armada-8040-mcbin"; ;;
+-	uboot_2018_a80x0_ucpe* ) device_tree=""; ;;
++	uboot_2018_a80x0_ucpe* ) device_tree="armada-8040-ucpe"; ;;
+ 
+ 	uboot_2018_a3900_A ) device_tree="armada-3900-vd-A"; ;;
+ 	uboot_2018_a3900_B ) device_tree="armada-3900-vd-B"; ;;
+-- 
+2.22.0
+

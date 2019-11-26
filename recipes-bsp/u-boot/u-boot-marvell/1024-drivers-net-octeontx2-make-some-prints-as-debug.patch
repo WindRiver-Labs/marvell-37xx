@@ -1,0 +1,36 @@
+From be9f637a877a34b17c49911bff4a4d2d6694fed6 Mon Sep 17 00:00:00 2001
+From: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+Date: Sun, 17 Feb 2019 00:48:49 -0800
+Subject: [PATCH 1024/1200] drivers: net: octeontx2: make some prints as debug
+
+Change-Id: Ic8dfafbecc6d88a389c1d0b3f5810f3666a36fdf
+Signed-off-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+Reviewed-on: https://sj1git1.cavium.com/4209
+---
+ drivers/net/octeontx2/cgx.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/net/octeontx2/cgx.c b/drivers/net/octeontx2/cgx.c
+index ff5f192bed..bed25f7243 100644
+--- a/drivers/net/octeontx2/cgx.c
++++ b/drivers/net/octeontx2/cgx.c
+@@ -202,13 +202,13 @@ int cgx_lmac_link_enable(struct lmac *lmac, int lmac_id, bool enable)
+ 		ret = -1;
+ 	}
+ 
+-	printf("%d    %d    %s", lmac->cgx->cgx_id, lmac->lmac_id,
++	debug("%d    %d    %s", lmac->cgx->cgx_id, lmac->lmac_id,
+ 	       lmac_type_to_str[lmac->lmac_type]);
+ 	/* Print link speed */
+-	printf("  \t%s", lmac_speed_to_str[(u8)((status >> 2) & 0xf)]);
++	debug("  \t%s", lmac_speed_to_str[(u8)((status >> 2) & 0xf)]);
+ 	status &= 0x1;
+ 	/* Print link status */
+-	printf(" \t%s\n", status ? "Up" : "Down");
++	debug(" \t%s\n", status ? "Up" : "Down");
+ 	if (status != enable) {
+ 		debug("%s couldn't bring %s link cgx%d lmac%d\n",
+ 		      __func__, enable ? "up" : "down",
+-- 
+2.22.0
+

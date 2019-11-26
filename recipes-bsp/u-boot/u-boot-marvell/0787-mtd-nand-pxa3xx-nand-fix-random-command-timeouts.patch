@@ -1,0 +1,57 @@
+From 109427c78157a6c2ffcb1e7c0370ebd6917d1fa0 Mon Sep 17 00:00:00 2001
+From: Ofer Heifetz <oferh@marvell.com>
+Date: Thu, 23 Nov 2017 16:16:19 +0200
+Subject: [PATCH 0787/1200] mtd: nand: pxa3xx-nand: fix random command timeouts
+
+When 2 commands are submitted in a row, and the second is very quick,
+the completion of the second command might never come. This happens
+especially if the second command is quick, such as a status read
+after an erase
+
+This patch is taken from Linux:
+'commit 21fc0ef9652f'
+("mtd: nand: pxa3xx-nand: fix random command timeouts")
+
+Change-Id: Ib915e20d749b17df318f610fa6109f2b14ff750c
+Signed-off-by: Chris Packham <judge.packham@gmail.com>
+Signed-off-by: Ofer Heifetz <oferh@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/47031
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55773
+---
+ drivers/mtd/nand/pxa3xx_nand.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mtd/nand/pxa3xx_nand.c b/drivers/mtd/nand/pxa3xx_nand.c
+index dd75c7b55d..94c9de3b83 100644
+--- a/drivers/mtd/nand/pxa3xx_nand.c
++++ b/drivers/mtd/nand/pxa3xx_nand.c
+@@ -627,8 +627,14 @@ static irqreturn_t pxa3xx_nand_irq(struct pxa3xx_nand_info *info)
+ 		is_ready = 1;
+ 	}
+ 
++	/*
++	 * Clear all status bit before issuing the next command, which
++	 * can and will alter the status bits and will deserve a new
++	 * interrupt on its own. This lets the controller exit the IRQ
++	 */
++	nand_writel(info, NDSR, status);
++
+ 	if (status & NDSR_WRCMDREQ) {
+-		nand_writel(info, NDSR, NDSR_WRCMDREQ);
+ 		status &= ~NDSR_WRCMDREQ;
+ 		info->state = STATE_CMD_HANDLE;
+ 
+@@ -649,8 +655,6 @@ static irqreturn_t pxa3xx_nand_irq(struct pxa3xx_nand_info *info)
+ 			nand_writel(info, NDCB0, info->ndcb3);
+ 	}
+ 
+-	/* clear NDSR to let the controller exit the IRQ */
+-	nand_writel(info, NDSR, status);
+ 	if (is_completed)
+ 		info->cmd_complete = 1;
+ 	if (is_ready)
+-- 
+2.22.0
+

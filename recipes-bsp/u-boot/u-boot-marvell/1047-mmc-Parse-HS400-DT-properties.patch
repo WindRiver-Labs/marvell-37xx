@@ -1,0 +1,40 @@
+From 379ab640890343e512a4348330647e192d76ff54 Mon Sep 17 00:00:00 2001
+From: Marek Vasut <marek.vasut+renesas@gmail.com>
+Date: Wed, 13 Jun 2018 06:50:16 +0200
+Subject: [PATCH 1047/1200] mmc: Parse HS400 DT properties
+
+Add HS400 properties parsing support to mmc_of_parse().
+
+Change-Id: Idb7e61d59cd388bbe8d7c1a5bd3e3ba53a1a5a13
+Signed-off-by: Marek Vasut <marek.vasut+renesas@gmail.com>
+Cc: Bin Meng <bmeng.cn@gmail.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Jean-Jacques Hiblot <jjhiblot@ti.com>
+Cc: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Peng Fan <peng.fan@nxp.com>
+Cc: Simon Glass <sjg@chromium.org>
+Reviewed-on: https://sj1git1.cavium.com/5414
+Reviewed-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+Tested-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+---
+ drivers/mmc/mmc-uclass.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/mmc/mmc-uclass.c b/drivers/mmc/mmc-uclass.c
+index 012060375b..e9c2a51e71 100644
+--- a/drivers/mmc/mmc-uclass.c
++++ b/drivers/mmc/mmc-uclass.c
+@@ -169,6 +169,10 @@ int mmc_of_parse(struct udevice *dev, struct mmc_config *cfg)
+ 		cfg->host_caps |= MMC_CAP(MMC_HS_200);
+ 	if (dev_read_bool(dev, "mmc-hs200-1_2v"))
+ 		cfg->host_caps |= MMC_CAP(MMC_HS_200);
++	if (dev_read_bool(dev, "mmc-hs400-1_8v"))
++		cfg->host_caps |= MMC_CAP(MMC_HS_400);
++	if (dev_read_bool(dev, "mmc-hs400-1_2v"))
++		cfg->host_caps |= MMC_CAP(MMC_HS_400);
+ 
+ 	return 0;
+ }
+-- 
+2.22.0
+

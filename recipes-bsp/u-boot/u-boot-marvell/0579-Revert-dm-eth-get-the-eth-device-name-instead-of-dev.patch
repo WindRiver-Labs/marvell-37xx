@@ -1,0 +1,51 @@
+From 16b1de5af538648957f679d59d6936a02b004965 Mon Sep 17 00:00:00 2001
+From: Suneel Garapati <sgarapati@caviumnetworks.com>
+Date: Fri, 17 Aug 2018 09:36:10 -0700
+Subject: [PATCH 0579/1200] Revert "dm: eth: get the eth device name instead of
+ dev->name"
+
+This reverts commit 51244ba39a543f5680e6a9e68f7d54baeecb73d1.
+
+commit 4e8846916d73b8c3ae330384fd9178000b3fe2fc
+- net: octeontx2: fix dev name to include sequence number
+
+fixes the device name to include index which helps in fetch
+of specific instance while executing commands in net stack.
+Now eth0/1/2/..etc are in synonymous to rvu_pf#0/1/2..etc
+setenv ethact eth0 or setenv ethact rvu_pf#0 should use the same
+pf device instance.
+
+Signed-off-by: Suneel Garapati <sgarapati@caviumnetworks.com>
+---
+ net/eth_common.c | 8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
+
+diff --git a/net/eth_common.c b/net/eth_common.c
+index 3b74d0d014..66d0d22966 100644
+--- a/net/eth_common.c
++++ b/net/eth_common.c
+@@ -84,7 +84,6 @@ void eth_current_changed(void)
+ {
+ 	char *act = env_get("ethact");
+ 	char *ethrotate;
+-	char ename[6];
+ 
+ 	/*
+ 	 * The call to eth_get_dev() below has a side effect of rotating
+@@ -97,11 +96,8 @@ void eth_current_changed(void)
+ 
+ 	/* update current ethernet name */
+ 	if (eth_get_dev()) {
+-		if (act == NULL || strcmp(act, eth_get_name()) != 0) {
+-			sprintf(ename, "eth%d", eth_get_dev()->seq);
+-			env_set("ethact", ename);
+-			//env_set("ethact", eth_get_name());
+-		}
++		if (act == NULL || strcmp(act, eth_get_name()) != 0)
++			env_set("ethact", eth_get_name());
+ 	}
+ 	/*
+ 	 * remove the variable completely if there is no active
+-- 
+2.22.0
+

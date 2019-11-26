@@ -1,0 +1,23 @@
+From f8e5caee9ab74fcf681ae441c778026f877abfb4 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Tue, 4 Dec 2018 12:33:06 +0200
+Subject: [PATCH 0930/1200] Bump u-boot-2018.03 to release devel-18.12.3
+
+Change-Id: I7f309e2d51767f28cf022609314e4cea3e310b5c
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/61507
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+---
+ localversion | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/localversion b/localversion
+index edd95d6d23..e0412375e2 100644
+--- a/localversion
++++ b/localversion
+@@ -1 +1 @@
+--devel-18.12.2
++-devel-18.12.3
+-- 
+2.22.0
+

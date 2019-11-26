@@ -1,0 +1,36 @@
+From 017c96f36d12408d4b74f027286780788a213776 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Thu, 13 Dec 2018 12:42:54 +0100
+Subject: [PATCH 0969/1200] mvebu: soc: use new name for Armada7640-A1 SoC
+
+The "Armada7640-A1" is not relevant anymore. Use cn9130 instead.
+Update also the number of CP to 3 and the A807 rev number to 2.
+
+Change-Id: I282f198fd7eecea4cc3fb86bf3d248eba83df328
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/62084
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/1873
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/mach-mvebu/armada8k/soc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-mvebu/armada8k/soc.c b/arch/arm/mach-mvebu/armada8k/soc.c
+index f402756d32..1f944900a8 100644
+--- a/arch/arm/mach-mvebu/armada8k/soc.c
++++ b/arch/arm/mach-mvebu/armada8k/soc.c
+@@ -50,7 +50,7 @@ struct soc_info {
+ };
+ 
+ static struct soc_info soc_info_table[] = {
+-	{ {0x7025, 0}, "Armada7640-A1", {0x807, 1}, {0x115, 0}, 1, 1, 0},
++	{ {0x7025, 0}, "cn9130-A1",	{0x807, 2}, {0x115, 0}, 1, 3, 0},
+ 	{ {0x6025, 0}, "Armada3900-A1", {0x807, 1}, {0x115, 0}, 1, 1, 0},
+ 	{ {0x7045, 0}, "Armada3900-A0", {0x807, 0}, {0x115, 0}, 1, 1, 0},
+ 	{ {0x7040, 1}, "Armada7040-A1", {0x806, 1}, {0x110, 1}, 1, 1 },
+-- 
+2.22.0
+

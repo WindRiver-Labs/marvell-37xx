@@ -1,0 +1,25 @@
+From ddf3d82869ddb50a2f23f6d915bfe1c756c285fb Mon Sep 17 00:00:00 2001
+From: Aaron Williams <aaron.williams@cavium.com>
+Date: Wed, 29 Jun 2016 22:55:01 -0700
+Subject: [PATCH 0240/1200] Disabled debugging messages
+
+---
+ board/cavium/thunderx/thunderx.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/board/cavium/thunderx/thunderx.c b/board/cavium/thunderx/thunderx.c
+index cf6269e10d..872b03f13d 100644
+--- a/board/cavium/thunderx/thunderx.c
++++ b/board/cavium/thunderx/thunderx.c
+@@ -3,7 +3,7 @@
+  *
+  * SPDX-License-Identifier:	GPL-2.0+
+ **/
+-#define DEBUG
++
+ #include <common.h>
+ #include <dm.h>
+ #include <malloc.h>
+-- 
+2.22.0
+

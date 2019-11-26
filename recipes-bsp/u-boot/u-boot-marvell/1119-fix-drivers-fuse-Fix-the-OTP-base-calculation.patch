@@ -1,0 +1,51 @@
+From 50a4f71684846f141977e6d1fdbcb5c02ea59c80 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Sun, 5 May 2019 17:34:58 +0300
+Subject: [PATCH 1119/1200] fix: drivers/fuse: Fix the OTP base calculation
+
+Use the control register base address with OTP region offset
+instead of directly defining OTP base (not compatible with CP
+indexes greater than 0).
+
+Change-Id: I4894bd2cd1024b2359ed9bfd05c5becf506240b9
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/8591
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ drivers/fuse/fuse-mvebu.c | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/fuse/fuse-mvebu.c b/drivers/fuse/fuse-mvebu.c
+index 7f743468f0..8be854c20e 100644
+--- a/drivers/fuse/fuse-mvebu.c
++++ b/drivers/fuse/fuse-mvebu.c
+@@ -171,8 +171,9 @@ static int fuse_probe(struct udevice *dev)
+ 	priv->pdata =
+ 		(struct mvebu_fuse_platform_data *)dev_get_driver_data(dev);
+ 	priv->target_otp_mem =
+-		(void *)(((unsigned long)fdtdec_get_int(blob, node,
+-			"otp-mem", 0)) & 0xffffffff);
++		(void *)(((phys_addr_t)dev_read_addr(dev) & ~0x00ffffff) +
++		(((phys_addr_t)fdtdec_get_int(blob, node,
++			"otp-mem", 0)) & 0x00ffffff));
+ 
+ 	if (device_is_compatible(dev, "marvell,mvebu-fuse-hd"))
+ 		priv->hd_ld_flag = true;
+@@ -183,6 +184,12 @@ static int fuse_probe(struct udevice *dev)
+ 	priv->row_base = row_index;
+ 	row_index = priv->row_num + row_index;
+ 
++	debug("%s efuse OTP mem %p, row base = %d\n",
++	      priv->hd_ld_flag != 0 ? "HD " :
++	      (device_is_compatible(dev, "marvell,mvebu-fuse-ld-user") != 0 ?
++			"LD0" : "LD1"),
++	      priv->target_otp_mem, priv->row_base);
++
+ 	ops = device_get_ops(dev);
+ 	if (ops->fuse_init)
+ 		res = ops->fuse_init(dev);
+-- 
+2.22.0
+

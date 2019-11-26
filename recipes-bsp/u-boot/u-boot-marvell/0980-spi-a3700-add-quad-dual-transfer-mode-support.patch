@@ -1,0 +1,94 @@
+From 839fd3eba700c07c624d84b77db6fa76b31e2bdf Mon Sep 17 00:00:00 2001
+From: Ken Ma <make@marvell.com>
+Date: Thu, 29 Jun 2017 15:47:56 +0800
+Subject: [PATCH 0980/1200] spi: a3700: add quad/dual transfer mode support
+
+Now Address Register is used to send none 4 byte aligned header data
+at first while Data Out/In register is used to send remain 4 byte
+aligned data, so address transfer pins number should be same as data
+pins; otherwise some commands such as spi nor/nand's commands of
+READ_FROM_CACHE_DUAL_IO(0xeb) and READ_FROM_CACHE_DUAL_IO(0xbb) will
+fail because these commands must send address bytes, dummy bytes and
+data bytes in 4(quad)/2(dual) pins.
+This patch sets data transfer pins according to the transfer mode -
+quad: 4 pins, dual: 2 pins and single: 1 pin and sets address transfer
+pins number same as data pins number.
+
+Change-Id: I3f880c031cf3efd90ef2181f7ffa4c6dbaebc486
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/61671
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/1867
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ drivers/spi/mvebu_a3700_spi.c | 30 ++++++++++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
+
+diff --git a/drivers/spi/mvebu_a3700_spi.c b/drivers/spi/mvebu_a3700_spi.c
+index e52f2cd7ca..3e89abfe38 100644
+--- a/drivers/spi/mvebu_a3700_spi.c
++++ b/drivers/spi/mvebu_a3700_spi.c
+@@ -20,6 +20,9 @@ DECLARE_GLOBAL_DATA_PTR;
+ #define MVEBU_SPI_A3700_BYTE_LEN		BIT(5)
+ #define MVEBU_SPI_A3700_CLK_PHA			BIT(6)
+ #define MVEBU_SPI_A3700_CLK_POL			BIT(7)
++#define MVEBU_SPI_A3700_DATA_PIN_DUAL		BIT(10)
++#define MVEBU_SPI_A3700_DATA_PIN_QUAD		BIT(11)
++#define MVEBU_SPI_A3700_ADDR_PIN		BIT(12)
+ #define MVEBU_SPI_A3700_FIFO_EN			BIT(17)
+ #define MVEBU_SPI_A3700_SPI_EN_0		BIT(16)
+ #define MVEBU_SPI_A3700_WFIFO_FULL		BIT(7)
+@@ -68,6 +71,22 @@ static void spi_cs_deactivate(struct spi_reg *reg, int cs)
+ 	clrbits_le32(&reg->ctrl, MVEBU_SPI_A3700_SPI_EN_0 << cs);
+ }
+ 
++static void spi_pin_mode_set(struct spi_reg *reg, unsigned long flags)
++{
++	unsigned int data;
++
++	data = readl(&reg->cfg);
++	data &= ~(MVEBU_SPI_A3700_DATA_PIN_DUAL |
++		  MVEBU_SPI_A3700_DATA_PIN_QUAD);
++
++	if (flags & SPI_XFER_DUAL)
++		data = data | MVEBU_SPI_A3700_DATA_PIN_DUAL;
++	else if (flags & SPI_XFER_QUAD)
++		data = data | MVEBU_SPI_A3700_DATA_PIN_QUAD;
++
++	writel(data, &reg->cfg);
++}
++
+ static inline void spi_bytelen_set(struct spi_reg *reg, unsigned int len)
+ {
+ 	unsigned int data;
+@@ -351,6 +370,9 @@ static int mvebu_spi_xfer(struct udevice *dev, unsigned int bitlen,
+ 		spi_cs_activate(reg, spi_chip_select(dev));
+ 	}
+ 
++	/* Set data transfer pins number */
++	spi_pin_mode_set(reg, flags);
++
+ 	/* Flush read/write FIFO */
+ 	data = readl(&reg->cfg);
+ 	writel(data | MVEBU_SPI_A3700_FIFO_FLUSH, &reg->cfg);
+@@ -457,6 +479,14 @@ static int mvebu_spi_probe(struct udevice *bus)
+ 	data |= 0 << MVEBU_SPI_A3700_RFIFO_THRS_BIT;
+ 	data |= 7 << MVEBU_SPI_A3700_WFIFO_THRS_BIT;
+ 
++	/*
++	 * Address Register is used to send none 4 byte aligned
++	 * header data at first while Data Out/In register is used to
++	 * send remain 4 byte aligned data, so address transfer pins
++	 * number should be same as data pins;
++	 */
++	data |= MVEBU_SPI_A3700_ADDR_PIN;
++
+ 	writel(data, &reg->cfg);
+ 
+ 	/* set shift 4 bytes for writing and reading */
+-- 
+2.22.0
+

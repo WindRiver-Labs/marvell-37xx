@@ -1,0 +1,32 @@
+From 54f8e532511cb26369d2fbca09a667f005e176bd Mon Sep 17 00:00:00 2001
+From: Ben Peled <bpeled@marvell.com>
+Date: Thu, 17 Jan 2019 14:23:19 +0200
+Subject: [PATCH 0989/1200] dts: cn9130: sar: change default boot mode
+
+set default boot mode to CP1_SPI_1 24bits
+
+Change-Id: I15092fe17820fcf0506f53c2696d03a6f11213aa
+Signed-off-by: Ben Peled <bpeled@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/2305
+Reviewed-by: Nadav Haklai <Nadav.Haklai@cavium.com>
+Tested-by: Nadav Haklai <Nadav.Haklai@cavium.com>
+---
+ arch/arm/dts/cn9130-db-dev-info.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/cn9130-db-dev-info.dtsi b/arch/arm/dts/cn9130-db-dev-info.dtsi
+index d1631bb9e0..9eac906434 100644
+--- a/arch/arm/dts/cn9130-db-dev-info.dtsi
++++ b/arch/arm/dts/cn9130-db-dev-info.dtsi
+@@ -34,7 +34,7 @@
+ 				option-cnt = <2>;
+ 				options = "0x2A", "AP_EMMC",
+ 					  "0x32", "CP1_SPI_1 24bits";
+-				default = <0x2A>;
++				default = <0x32>;
+ 				status = "okay";
+ 			};
+ 		};
+-- 
+2.22.0
+

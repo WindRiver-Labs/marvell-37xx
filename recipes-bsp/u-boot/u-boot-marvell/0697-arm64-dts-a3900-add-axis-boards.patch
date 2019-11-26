@@ -1,0 +1,354 @@
+From d7456a06791c6bdafaea2dd27212b4ec04001d1e Mon Sep 17 00:00:00 2001
+From: Chih-Min Chao <cmchao@marvell.com>
+Date: Fri, 7 Jul 2017 18:13:55 +0800
+Subject: [PATCH 0697/1200] arm64: dts: a3900: add axis boards
+
+Armada3900 is a variant SoC of A7040 with different pin-out
+and some modification.
+
+The AXIS DB board is integrated with SC5 wifi through mochi interface.
+The basic configuration is the same as armada-3900-vd-nand.dts.
+The AXIS-BT board is similar to A3900 AXIS except for using MPP pin 53
+to reset the external SCBT chip connected via A3900 MoChi port 1 on
+board.
+The dts hierarchy is shown below and
+doc/mvebu/a7k-a8k/armada3900-db-setup.txt describes the configuration
+difference detailedly
+
+  |--- armada-70x0.dtsi, armada-70x0-dev-info.dtsi
+       |--- armada-3900-db.dtsi
+            |--- armada-3900-axis-common.dtsi
+                 |--- armada-3900-axis.dts
+                 |--- armada-3900-axisbt.dts
+
+topology difference between VD and AXIS
+  CP-MPPs:
+      - enable I2C1
+      - serdes phy1 is assigned to USB0
+      - USB0/USB1 vbus changed from mpp[44-45] to mpp[7,5]
+      - MPP[0] for iot reset
+      - MPP[1] for ethernet phy reset
+      - MPP[29] for W9068 PPS reset
+
+Change-Id: I438f32f9b5511f9ffd8d6732e514b0ca7326967e
+Signed-off-by: Chih-Min Chao <cmchao@marvell.com>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55250
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/Makefile                     |   2 +
+ arch/arm/dts/armada-3900-axis-common.dtsi | 122 ++++++++++++++++++++++
+ arch/arm/dts/armada-3900-axis.dts         |  17 +++
+ arch/arm/dts/armada-3900-axisbt.dts       |  27 +++++
+ doc/mvebu/a7k-a8k/armada3900-db-setup.txt |  82 +++++++--------
+ 5 files changed, 209 insertions(+), 41 deletions(-)
+ create mode 100644 arch/arm/dts/armada-3900-axis-common.dtsi
+ create mode 100644 arch/arm/dts/armada-3900-axis.dts
+ create mode 100644 arch/arm/dts/armada-3900-axisbt.dts
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index ec35d06b01..7e34eeaeb4 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -93,6 +93,8 @@ dtb-$(CONFIG_ARCH_MVEBU) +=			\
+ 	armada-388-clearfog.dtb			\
+ 	armada-388-gp.dtb			\
+ 	armada-385-amc.dtb			\
++	armada-3900-axis.dtb			\
++	armada-3900-axisbt.dtb			\
+ 	armada-3900-vd.dtb			\
+ 	armada-3900-vd-nand.dtb			\
+ 	armada-7020-amc.dtb			\
+diff --git a/arch/arm/dts/armada-3900-axis-common.dtsi b/arch/arm/dts/armada-3900-axis-common.dtsi
+new file mode 100644
+index 0000000000..29db3aacfa
+--- /dev/null
++++ b/arch/arm/dts/armada-3900-axis-common.dtsi
+@@ -0,0 +1,122 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2018 Marvell International Ltd.
++ */
++
++#include "armada-3900-db.dtsi"
++
++/ {
++	compatible = "marvell,armada3900-axis", "marvell,armada7040",
++		     "marvell,armada-ap806-quad", "marvell,armada-ap806";
++
++	aliases {
++		i2c1 = &cp0_i2c1;
++	};
++
++	cp0 {
++		config-space {
++			cp0_reg_usb3_vbus0: cp0_usb3_vbus@0 {
++				gpio = <&cp0_gpio0 7 GPIO_ACTIVE_HIGH>;
++			};
++
++			cp0_reg_usb3_vbus1: cp0_usb3_vbus@1 {
++				gpio = <&cp0_gpio0 5 GPIO_ACTIVE_HIGH>;
++			};
++
++			iot_radio_reset: iot-radio-reset {
++				compatible = "regulator-fixed";
++				pinctrl-names = "default";
++				pinctrl-0 = <&iot_radio_reset_pins>;
++				regulator-name = "iot-radio-reset";
++				enable-active-high;
++				regulator-boot-on;
++				gpio = <&cp0_gpio0 0 GPIO_ACTIVE_HIGH>;
++			};
++
++			eth_phy_reset: eth-phy-reset {
++				compatible = "regulator-fixed";
++				pinctrl-names = "default";
++				pinctrl-0 = <&eth_phy_reset_pins>;
++				regulator-name = "eth-phy-reset";
++				enable-active-high;
++				regulator-boot-on;
++				gpio = <&cp0_gpio0 1 GPIO_ACTIVE_HIGH>;
++			};
++
++			W9068_pps_reset: W9068-pps-reset {
++				compatible = "regulator-fixed";
++				pinctrl-names = "default";
++				pinctrl-0 = <&W9068_pps_pins>;
++				regulator-name = "w9068-pps";
++				enable-active-high;
++				regulator-boot-on;
++				gpio = <&cp0_gpio0 29 GPIO_ACTIVE_HIGH>;
++			};
++		};
++	};
++};
++
++/*
++ * CP related configuration
++ */
++&cp0_pinctl {
++		/* MPP Bus:
++		 *   I2C1    [2,3]
++		 *   USB     [5,7]
++		 *   NAND    [13,15-27]
++		 *   SMI     [32,34]
++		 *   XSMI    [35-36]
++		 *   I2C0    [37-38]
++		 *   UART1   [46-47,49,58]
++		 *   IHB     [56-57]
++		 *   UART0   [59-62]
++		 */
++		/*   0   1   2   3   4   5   6   7   8   9 */
++	pin-func = < 0   0   7   7   0   0   0   0   0   0
++		     0   0   0   2   0   1   1   1   1   1
++		     1   1   1   1   1   1   1   1   0   0
++		     0   0   7   0   7   7   7   2   2   0
++		     0   0   0   0   0   0   7   7   0   7
++		     0   0   0   0   0   0   0   0   7   7
++		     7   7   7>;
++
++	cp0_i2c1_pins: cp0-i2c-pins-1 {
++		marvell,pins = < 2 3 >;
++		marvell,function = <7>;
++	};
++
++	cp0_xhci0_vbus_pins: cp0-xhci0-vbus-pins {
++		marvell,pins = <7>;
++		marvell,function = <0>;
++	};
++
++	cp0_xhci1_vbus_pins: cp0-xhci1-vbus-pins {
++		marvell,pins = <5>;
++		marvell,function = <0>;
++	};
++
++	iot_radio_reset_pins: iot-radio-reset-pins {
++		marvell,pins = <0>;
++		marvell,function = <0>;
++	};
++
++	eth_phy_reset_pins: eth-phy-reset-pins {
++		marvell,pins = <1>;
++		marvell,function = <0>;
++	};
++
++	W9068_pps_pins: W9068-pps-pins {
++		marvell,pins = <29>;
++		marvell,function = <0>;
++	};
++};
++
++&cp0_i2c1 {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&cp0_i2c1_pins>;
++};
++
++&cp0_nand {
++	status = "okay";
++};
+diff --git a/arch/arm/dts/armada-3900-axis.dts b/arch/arm/dts/armada-3900-axis.dts
+new file mode 100644
+index 0000000000..7f096da2c3
+--- /dev/null
++++ b/arch/arm/dts/armada-3900-axis.dts
+@@ -0,0 +1,17 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2018 Marvell International Ltd.
++ */
++
++#include "armada-3900-axis-common.dtsi"
++
++/ {
++	model = "Marvell Armada 3900 AXIS board";
++};
++
++&cp0_comphy {
++	phy1 {
++		phy-type = <COMPHY_TYPE_USB3_HOST0>;
++		phy-speed = <COMPHY_SPEED_5G>;
++	};
++};
+diff --git a/arch/arm/dts/armada-3900-axisbt.dts b/arch/arm/dts/armada-3900-axisbt.dts
+new file mode 100644
+index 0000000000..8e1518522b
+--- /dev/null
++++ b/arch/arm/dts/armada-3900-axisbt.dts
+@@ -0,0 +1,27 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2018 Marvell International Ltd.
++ */
++
++#include "armada-3900-axis-common.dtsi"
++
++/ {
++	model = "Marvell Armada 3900 AXIS-BT board";
++};
++
++/*
++ * CP related configuration
++ */
++&cp0_pinctl {
++	cp0_mochi_enable_pins: cp0-mochi-enable-pins {
++		marvell,pins = <53>;
++		marvell,function = <0>;
++	};
++};
++
++&cp0_comphy {
++	phy1 {
++		phy-type = <COMPHY_TYPE_USB3_HOST0>;
++		phy-speed = <COMPHY_SPEED_5G>;
++	};
++};
+diff --git a/doc/mvebu/a7k-a8k/armada3900-db-setup.txt b/doc/mvebu/a7k-a8k/armada3900-db-setup.txt
+index 226dc6e677..9880860a3b 100644
+--- a/doc/mvebu/a7k-a8k/armada3900-db-setup.txt
++++ b/doc/mvebu/a7k-a8k/armada3900-db-setup.txt
+@@ -21,59 +21,59 @@ Booting Linux requires using the same Device Tree configuration as used in U-Boo
+ Board Target Usage and Setup Options
+ -------------------
+ 
+-|		| 1: VD				| 2: VD-NAND			|
+-|---------------|-------------------------------|-------------------------------|
+-|Device tree	| armada-3900-vd.dts		| armada-3900-vd-nand.dts	|
+-|Purpose	| internal test	with NOR boot	| internal test with nand boot	|
+-|PCB		| TB_A3900-BGA			| TB_A3900-BGA			|
+-|pcie x 2 iface	| stardard x2 interface		| startard x 2 interface	|
+-|pcie x 1 iface	| mini x2 interface		| mini x2 interface		|
+-|mochi 		| external through mcix4	| external through mcix4	|
++|		| 1: VD				| 2: VD-NAND			| 3: AXIS		|
++|---------------|-------------------------------|-------------------------------|-----------------------|
++|Device tree	| armada-3900-vd.dts		| armada-3900-vd-nand.dts	| armada-3900-axis.dts	|
++|Purpose	| internal test	with NOR boot	| internal test with nand boot	| for customer	 	|
++|PCB		| TB_A3900-BGA			| TB_A3900-BGA			| RD-9068-AXIS		|
++|pcie x 2 iface	| stardard x2 interface		| startard x 2 interface	| mini x 2 interface	|
++|pcie x 1 iface	| mini x2 interface		| mini x2 interface		| mini x 2 interface	|
++|mochi 		| external through mcix4	| external through mcix4	| hardwired with sc5	|
+ 
+ The tables below summarize the interface configuration of each setup.
+ 
+ SerDes Configuration
+ ---------------------
+- Lane	|  VD/VD-NAND/AXIS		|
+---------|-------------------------------|
+- 0	|  PCIe0 (x2)			|
+- 1	|  PCIe0 (x2)	        	|
+- 2	|  SGMII0 (auto-neg <= 1G) (*)	|
+- 3	|  SGMII1 (auto-neg <= 1G)	|
+- 4	|  USB3 HOST1	        	|
+- 5	|  PCIe2 (x1)	        	|
+------------------------------------------
++ Lane	|  VD/VD-NAND/AXIS		|  AXIS				|
++--------|-------------------------------|-------------------------------|
++ 0	|  PCIe0 (x2)			|  PCIe0 (x1)			|
++ 1	|  PCIe0 (x2)	        	|  USB3 HOST0	        	|
++ 2	|  SGMII0 (auto-neg <= 1G) (*)	|  SGMII0 (auto-neg <= 1G) (*)	|
++ 3	|  SGMII1 (auto-neg <= 1G)	|  SGMII1 (auto-neg <= 1G)	|
++ 4	|  USB3 HOST1	        	|  USB3 HOST1	        	|
++ 5	|  PCIe2 (x1)	        	|  PCIe2 (x1)	        	|
++-------------------------------------------------------------------------
+ 
+ Multi purpose pin configurations
+ --------------------------------
+- AP806 pin	| 1: VD		| 2: VD-NAND	|
+-----------------|---------------|---------------|
+-	AP-SDIO | N/C		| N/C		|
+-	AP-SPI0 | [0-3]		| [0-3]		|
+-	AP-I2C	| [4-5]		| [4-5]		|
+-	AP-UART0| [11,19]	| [11,19]	|
++ AP806 pin	| 1: VD		| 2: VD-NAND	| 3: AXIS	|
++----------------|---------------|---------------|---------------|
++	AP-SDIO | N/C		| N/C		| N/C		|
++	AP-SPI0 | [0-3]		| [0-3]		| [0-3]		|
++	AP-I2C	| [4-5]		| [4-5]		| [4-5]		|
++	AP-UART0| [11,19]	| [11,19]	| [11,19]	|
+ 
+- CP110 pin	| 1: VD		| 2: VD-NAND	|
+-----------------|---------------|---------------|
+- CP-SPI1	| [13-16]	| N/C		|
+- CP-I2C0	| N/C		| N/C		|
+- CP-I2C1	| [37-38]	| [37-38]	|
+- NAND		| N/C		| [13,15-27]	|
+- CP-UART0	| [59-62]	| [59-62]	|
+- CP-UART1	| [46-47,49,58]	| [46-47,49,58] |
+- SMI		| [32,34]	| [32,34]	|
+- XSMI		| [35-36]	| [35-36]	|
+- USB0_VDD 	| [44]		| [44]		|
+- USB1_VDD 	| [45]		| [45]		|
+- IHB-ENABLE     | [56]          | [56]		|
+- IHB-RESET      | [57]		| [57]		|
+- IOT-RESET      | N/C		| N/C		|
+- ETH-PHY-RESET  | N/C		| N/C		|
+- PPS-RESET      | N/C		| N/C		|
++ CP110 pin	| 1: VD		| 2: VD-NAND	| 3: AXIS	|
++----------------|---------------|---------------|---------------|
++ CP-SPI1	| [13-16]	| N/C		| N/C		|
++ CP-I2C0	| N/C		| N/C		| [2-3]		|
++ CP-I2C1	| [37-38]	| [37-38]	| [37-38]	|
++ NAND		| N/C		| [13,15-27]	| [13,15-27]	|
++ CP-UART0	| [59-62]	| [59-62]	| [59-62]	|
++ CP-UART1	| [46-47,49,58]	| [46-47,49,58] | [46-47,49,58] |
++ SMI		| [32,34]	| [32,34]	| [32,34]	|
++ XSMI		| [35-36]	| [35-36]	| [35-36]	|
++ USB0_VDD 	| [44]		| [44]		| [7]		|
++ USB1_VDD 	| [45]		| [45]		| [5]		|
++ IHB-ENABLE     | [56]          | [56]		| [56]		|
++ IHB-RESET      | [57]		| [57]		| [57]		|
++ IOT-RESET      | N/C		| N/C		| [0]		|
++ ETH-PHY-RESET  | N/C		| N/C		| [1]		|
++ PPS-RESET      | N/C		| N/C		| [29]		|
+ 
+ Network configuration
+ ---------------------
+-1: VD/VD-NAND
++1: VD/VD-NAND/AXIS
+ ---------------------
+  Interface	| GMAC Port	| Board Interface			|
+  ---------------|---------------|---------------------------------------|
+-- 
+2.22.0
+

@@ -1,0 +1,48 @@
+From 6ff271c335b2b08086d50acbd748612be276fc34 Mon Sep 17 00:00:00 2001
+From: Stefan Chulski <stefanc@marvell.com>
+Date: Mon, 3 Dec 2018 19:19:38 +0200
+Subject: [PATCH 0928/1200] ci: dts: a3700: add ci support for device tree
+ armada-3720-ddr4-db-v3-C
+
+Change-Id: I719b9a06ac1f5a2e31287747e4905b9f2ff8e2d0
+Signed-off-by: Stefan Chulski <stefanc@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/61483
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+---
+ scripts/ci/compile.sh           | 2 ++
+ scripts/ci/supported_builds.txt | 2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index f7ce995a92..e2ad764a7f 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -132,6 +132,8 @@ case $build_name in
+ 		device_tree="armada-3720-ddr4-db-v3-A"; ;;
+ 	uboot_2018_a37xx_ddr4_v3_B_* )
+ 		device_tree="armada-3720-ddr4-db-v3-B"; ;;
++	uboot_2018_a37xx_ddr4_v3_C_* )
++		device_tree="armada-3720-ddr4-db-v3-C"; ;;
+ 	uboot_2018_a37xx_espressobin_ddr3_* )
+ 		device_tree="armada-3720-espressobin"; ;;
+ 	uboot_2018_a37xx_espressobin_ddr4_v7_1G_emmc* )
+diff --git a/scripts/ci/supported_builds.txt b/scripts/ci/supported_builds.txt
+index d72eb6ffff..4a3c4d7df6 100644
+--- a/scripts/ci/supported_builds.txt
++++ b/scripts/ci/supported_builds.txt
+@@ -47,9 +47,11 @@ uboot_2018_a37xx_ddr3_v2_C_800_800
+ uboot_2018_a37xx_ddr4_v1_A_1000_800
+ uboot_2018_a37xx_ddr4_v3_A_1000_800
+ uboot_2018_a37xx_ddr4_v3_B_1000_800
++uboot_2018_a37xx_ddr4_v3_C_1000_800
+ uboot_2018_a37xx_ddr4_v1_A_800_800
+ uboot_2018_a37xx_ddr4_v3_A_800_800
+ uboot_2018_a37xx_ddr4_v3_B_800_800
++uboot_2018_a37xx_ddr4_v3_C_800_800
+ uboot_2018_a37xx_espressobin_ddr3_1cs_1000_800
+ uboot_2018_a37xx_espressobin_ddr3_2cs_1000_800
+ uboot_2018_a37xx_espressobin_ddr4_v7_1G_1000_800
+-- 
+2.22.0
+

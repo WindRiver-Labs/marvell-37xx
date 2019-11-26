@@ -1,0 +1,50 @@
+From c2874f2dddd46be5d4aacc191e56c1e656a2e6b5 Mon Sep 17 00:00:00 2001
+From: Alex Leibovich <alexl@marvell.com>
+Date: Thu, 11 Apr 2019 14:12:34 +0300
+Subject: [PATCH 1089/1200] dts: cn9131: disable PPv2 port 1 on CP1
+
+Port is currently not connected to lane.
+Causes board hang in cn9131 with DDR32 configuration.
+
+Change-Id: I4d27844f6fbaa72376a65a0b5cc02ad92f01e923
+Signed-off-by: Alex Leibovich <alexl@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/7232
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+---
+ arch/arm/dts/cn9131-db.dtsi | 14 --------------
+ 1 file changed, 14 deletions(-)
+
+diff --git a/arch/arm/dts/cn9131-db.dtsi b/arch/arm/dts/cn9131-db.dtsi
+index f1f03d3b5f..198229019a 100644
+--- a/arch/arm/dts/cn9131-db.dtsi
++++ b/arch/arm/dts/cn9131-db.dtsi
+@@ -101,13 +101,6 @@
+ 	marvell,sfp-tx-disable-gpio = <&cp1_gpio0 9 GPIO_ACTIVE_HIGH>;
+ };
+ 
+-/* 3310 RJ45 CON55 */
+-&cp1_eth1 {
+-	status = "okay";
+-	phy-mode = "sfi"; /* lane-2 */
+-	phy = <&sfi_phy8>; /* required by 3310 fw download */
+-};
+-
+ &cp1_i2c0 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&cp1_i2c0_pins>;
+@@ -217,10 +210,3 @@
+ &cp1_utmi1 {
+ 	status = "okay";
+ };
+-
+-&cp1_xmdio {
+-	status = "okay";
+-	sfi_phy8: ethernet-phy@8 {
+-		reg = <8>;
+-	};
+-};
+-- 
+2.22.0
+

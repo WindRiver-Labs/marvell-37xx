@@ -1,0 +1,94 @@
+From d46133c65088c70ab8daeacaa9185a755d5e8924 Mon Sep 17 00:00:00 2001
+From: Bin Meng <bmeng.cn@gmail.com>
+Date: Fri, 3 Aug 2018 01:14:35 -0700
+Subject: [PATCH 1139/1200] dm: core: Add ofnode function to read PCI vendor
+ and device id
+
+We don't have the live-tree version of fdtdec_get_pci_vendev().
+This adds the API.
+
+Change-Id: I7bcf48d9f826845d847a6da71282bd388fe74fc1
+Signed-off-by: Bin Meng <bmeng.cn@gmail.com>
+Reviewed-by: Simon Glass <sjg@chromium.org>
+Reviewed-on: https://sj1git1.cavium.com/9926
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ drivers/core/ofnode.c | 36 ++++++++++++++++++++++++++++++++++++
+ include/dm/ofnode.h   | 13 +++++++++++++
+ 2 files changed, 49 insertions(+)
+
+diff --git a/drivers/core/ofnode.c b/drivers/core/ofnode.c
+index 4e4532651f..78c97e79bc 100644
+--- a/drivers/core/ofnode.c
++++ b/drivers/core/ofnode.c
+@@ -589,6 +589,42 @@ fail:
+ 	return ret;
+ }
+ 
++int ofnode_read_pci_vendev(ofnode node, u16 *vendor, u16 *device)
++{
++	const char *list, *end;
++	int len;
++
++	list = ofnode_get_property(node, "compatible", &len);
++	if (!list)
++		return -ENOENT;
++
++	end = list + len;
++	while (list < end) {
++		len = strlen(list);
++		if (len >= strlen("pciVVVV,DDDD")) {
++			char *s = strstr(list, "pci");
++
++			/*
++			 * check if the string is something like pciVVVV,DDDD.RR
++			 * or just pciVVVV,DDDD
++			 */
++			if (s && s[7] == ',' &&
++			    (s[12] == '.' || s[12] == 0)) {
++				s += 3;
++				*vendor = simple_strtol(s, NULL, 16);
++
++				s += 5;
++				*device = simple_strtol(s, NULL, 16);
++
++				return 0;
++			}
++		}
++		list += (len + 1);
++	}
++
++	return -ENOENT;
++}
++
+ int ofnode_read_addr_cells(ofnode node)
+ {
+ 	if (ofnode_is_np(node))
+diff --git a/include/dm/ofnode.h b/include/dm/ofnode.h
+index 0d008404f9..8df00720cf 100644
+--- a/include/dm/ofnode.h
++++ b/include/dm/ofnode.h
+@@ -574,6 +574,19 @@ const uint8_t *ofnode_read_u8_array_ptr(ofnode node, const char *propname,
+ int ofnode_read_pci_addr(ofnode node, enum fdt_pci_space type,
+ 			 const char *propname, struct fdt_pci_addr *addr);
+ 
++/**
++ * ofnode_read_pci_vendev() - look up PCI vendor and device id
++ *
++ * Look at the compatible property of a device node that represents a PCI
++ * device and extract pci vendor id and device id from it.
++ *
++ * @param node		node to examine
++ * @param vendor	vendor id of the pci device
++ * @param device	device id of the pci device
++ * @return 0 if ok, negative on error
++ */
++int ofnode_read_pci_vendev(ofnode node, u16 *vendor, u16 *device);
++
+ /**
+  * ofnode_read_addr_cells() - Get the number of address cells for a node
+  *
+-- 
+2.22.0
+

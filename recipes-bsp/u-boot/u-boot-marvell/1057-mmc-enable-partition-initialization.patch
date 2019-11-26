@@ -1,0 +1,37 @@
+From 99262a7b46ac51fb62a1b1dd82a3028e20bd42be Mon Sep 17 00:00:00 2001
+From: aaronw <aaron.williams@cavium.com>
+Date: Thu, 7 Mar 2019 17:38:44 -0800
+Subject: [PATCH 1057/1200] mmc: enable partition initialization
+
+The defines used in the latest U-Boot for enabling the
+partition initialization are not compatible with the
+2018.03 U-Boot.  This forces the partition table
+to be read until such time we upgrade to a newer U-Boot
+release.
+
+Change-Id: I0970d6a3a2d4ac86fb44374f8ff58036139a302f
+Signed-off-by: aaronw <aaron.williams@cavium.com>
+Reviewed-on: https://sj1git1.cavium.com/5424
+Reviewed-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+Tested-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+---
+ drivers/mmc/mmc.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/mmc/mmc.c b/drivers/mmc/mmc.c
+index cf44cee7ca..868b8843a3 100644
+--- a/drivers/mmc/mmc.c
++++ b/drivers/mmc/mmc.c
+@@ -2488,9 +2488,7 @@ static int mmc_startup(struct mmc *mmc)
+ 	bdesc->revision[0] = 0;
+ #endif
+ 
+-#if !defined(CONFIG_DM_MMC) && (!defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_LIBDISK_SUPPORT))
+ 	part_init(bdesc);
+-#endif
+ 
+ 	return 0;
+ }
+-- 
+2.22.0
+

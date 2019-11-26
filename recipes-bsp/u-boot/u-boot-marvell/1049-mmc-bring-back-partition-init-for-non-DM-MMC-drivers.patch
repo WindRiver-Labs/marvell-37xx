@@ -1,0 +1,44 @@
+From 5b85b9e3bdc4ebb720d33c25f73f5e2068332478 Mon Sep 17 00:00:00 2001
+From: Andre Przywara <andre.przywara@arm.com>
+Date: Mon, 17 Dec 2018 10:05:45 +0000
+Subject: [PATCH 1049/1200] mmc: bring back partition init for non-DM MMC
+ drivers
+
+Commit d0851c893706 ("blk: Call part_init() in the post_probe() method")
+removed the call to part_init() in mmc.c, as this is done by the DM_MMC
+framework.
+However Allwinner is (still) relying on a non-DM MMC driver, so we are
+now missing the implicit partition init, leading to failing MMC accesses
+due to the missing partition information.
+
+Bring the call back just for non-DM MMC driver to fix this regression.
+
+Change-Id: Icfa1d2d2827ccfb10614445104c217d5b1928205
+Signed-off-by: Andre Przywara <andre.przywara@arm.com>
+Reviewed-by: Simon Glass <sjg@chromium.org>
+Tested-by: Soeren Moch <smoch@web.de>
+Reviewed-on: https://sj1git1.cavium.com/5416
+Reviewed-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+Tested-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+---
+ drivers/mmc/mmc.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/mmc/mmc.c b/drivers/mmc/mmc.c
+index c575c5e191..5642596980 100644
+--- a/drivers/mmc/mmc.c
++++ b/drivers/mmc/mmc.c
+@@ -2373,6 +2373,10 @@ static int mmc_startup(struct mmc *mmc)
+ 	part_init(bdesc);
+ #endif
+ 
++#if !defined(CONFIG_DM_MMC) && (!defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_LIBDISK_SUPPORT))
++	part_init(bdesc);
++#endif
++
+ 	return 0;
+ }
+ 
+-- 
+2.22.0
+

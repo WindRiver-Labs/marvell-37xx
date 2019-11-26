@@ -1,0 +1,29 @@
+From 199066f423f0dc7f9cb3458fd4c46e867da6950c Mon Sep 17 00:00:00 2001
+From: zachary zhang <zhangzg@marvell.com>
+Date: Tue, 22 May 2018 15:43:20 +0800
+Subject: [PATCH 0741/1200] config: a70x0: a80x0: enable sar command by default
+
+Change-Id: I81003a75a7e171bcbc2c679d790f97e57e43e14d
+Signed-off-by: zachary zhang <zhangzg@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55509
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ configs/mvebu_db_armada8k_defconfig | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/configs/mvebu_db_armada8k_defconfig b/configs/mvebu_db_armada8k_defconfig
+index 9609d6889e..49c98af8b2 100644
+--- a/configs/mvebu_db_armada8k_defconfig
++++ b/configs/mvebu_db_armada8k_defconfig
+@@ -1,5 +1,7 @@
+ CONFIG_ARM=y
+ CONFIG_ARCH_MVEBU=y
++CONFIG_MVEBU_SAR=y
++CONFIG_CMD_MVEBU_SAR=y
+ CONFIG_SYS_TEXT_BASE=0x00000000
+ CONFIG_SYS_MALLOC_F_LEN=0x2000
+ CONFIG_TARGET_MVEBU_ARMADA_8K=y
+-- 
+2.22.0
+

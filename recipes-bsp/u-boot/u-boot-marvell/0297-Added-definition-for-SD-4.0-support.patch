@@ -1,0 +1,25 @@
+From 43681f5e2cb37e0fb2f43eceeee14cd4584a2847 Mon Sep 17 00:00:00 2001
+From: Aaron Williams <aaron.williams@cavium.com>
+Date: Mon, 14 Nov 2016 06:27:40 -0800
+Subject: [PATCH 0297/1200] Added definition for SD 4.0 support.
+
+Signed-off-by: Aaron Williams <Aaron.Williams@cavium.com>
+---
+ include/mmc.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/mmc.h b/include/mmc.h
+index 056e3ce12f..05e219248a 100644
+--- a/include/mmc.h
++++ b/include/mmc.h
+@@ -40,6 +40,7 @@
+ #define EXTRACT_SDMMC_CHANGE_VERSION(x)	\
+ 	((u32)(x) & 0xff)
+ 
++#define SD_VERSION_4		MAKE_SD_VERSION(4, 0, 0)
+ #define SD_VERSION_3		MAKE_SD_VERSION(3, 0, 0)
+ #define SD_VERSION_2		MAKE_SD_VERSION(2, 0, 0)
+ #define SD_VERSION_1_0		MAKE_SD_VERSION(1, 0, 0)
+-- 
+2.22.0
+

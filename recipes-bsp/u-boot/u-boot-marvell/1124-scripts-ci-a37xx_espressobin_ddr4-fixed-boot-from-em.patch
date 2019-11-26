@@ -1,0 +1,33 @@
+From 1f6dc964c4214d4435f9ddc42ffa97fd6e1416f8 Mon Sep 17 00:00:00 2001
+From: Alex Leibovich <alexl@marvell.com>
+Date: Mon, 20 May 2019 10:22:55 +0300
+Subject: [PATCH 1124/1200] scripts/ci: a37xx_espressobin_ddr4: fixed boot from
+ emmc device 1
+
+Fixed boot from emmc device 1
+
+Change-Id: Id5e3f189277cdd6a0309f5b94dd6797b4117617e
+Signed-off-by: Alex Leibovich <alexl@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/9247
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ scripts/ci/compile.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index 518e562bae..299aa0f37b 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -193,7 +193,7 @@ elif [[ $build_name == "uboot_2018_a37xx_espressobin_ddr4_v7_1G_emmc" ||
+ 	if [[ $build_name == "uboot_2018_a37xx_espressobin_ddr4_v7_1G_emmc" ||
+ 	$build_name == "uboot_2018_a37xx_espressobin_ddr4_v7_2G_emmc" ]]; then
+ 	config_cmd=$config_cmd"""
+-		./scripts/config --set-val 1 MVEBU_BOOT_DEVICE
++		./scripts/config --set-val MVEBU_BOOT_DEVICE 1
+ 	"""
+ 	fi
+ fi
+-- 
+2.22.0
+

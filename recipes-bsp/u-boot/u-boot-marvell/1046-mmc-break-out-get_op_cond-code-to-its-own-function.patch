@@ -1,0 +1,129 @@
+From cf2f61ba0b575916db549101bff03e596c3a36b2 Mon Sep 17 00:00:00 2001
+From: Jon Nettleton <jon@solid-run.com>
+Date: Mon, 11 Jun 2018 15:26:19 +0300
+Subject: [PATCH 1046/1200] mmc: break out get_op_cond code to its own function
+
+This code is useful for testing the existance of devices that
+do not have card detect capabilities.  This breaks out the core
+functionality and leaves the actual init logic and error reporting
+in mmc_start_init().
+
+Change-Id: Ib566d23408ad07e288fdc5c87e3524892c8d0aa6
+Signed-off-by: Jon Nettleton <jon@solid-run.com>
+Signed-off-by: Baruch Siach <baruch@tkos.co.il>
+Reviewed-by: Stefano Babic <sbabic@denx.de>
+Reviewed-on: https://sj1git1.cavium.com/5413
+Reviewed-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+Tested-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+---
+ drivers/mmc/mmc.c | 61 +++++++++++++++++++++++++++--------------------
+ include/mmc.h     | 10 ++++++++
+ 2 files changed, 45 insertions(+), 26 deletions(-)
+
+diff --git a/drivers/mmc/mmc.c b/drivers/mmc/mmc.c
+index e7ff5e7a05..2924b72d7f 100644
+--- a/drivers/mmc/mmc.c
++++ b/drivers/mmc/mmc.c
+@@ -2495,36 +2495,11 @@ static int mmc_power_cycle(struct mmc *mmc)
+ 	return mmc_power_on(mmc);
+ }
+ 
+-int mmc_start_init(struct mmc *mmc)
++int mmc_get_op_cond(struct mmc *mmc)
+ {
+-	bool no_card;
+ 	bool uhs_en = supports_uhs(mmc->cfg->host_caps);
+ 	int err;
+ 
+-	/*
+-	 * all hosts are capable of 1 bit bus-width and able to use the legacy
+-	 * timings.
+-	 */
+-	mmc->host_caps = mmc->cfg->host_caps | MMC_CAP(SD_LEGACY) |
+-			 MMC_CAP(MMC_LEGACY) | MMC_MODE_1BIT;
+-
+-#if !defined(CONFIG_MMC_BROKEN_CD)
+-	/* we pretend there's no card when init is NULL */
+-	no_card = mmc_getcd(mmc) == 0;
+-#else
+-	no_card = 0;
+-#endif
+-#if !CONFIG_IS_ENABLED(DM_MMC)
+-	no_card = no_card || (mmc->cfg->ops->init == NULL);
+-#endif
+-	if (no_card) {
+-		mmc->has_init = 0;
+-#if !defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_LIBCOMMON_SUPPORT)
+-		pr_err("MMC: no card present\n");
+-#endif
+-		return -ENOMEDIUM;
+-	}
+-
+ 	if (mmc->has_init)
+ 		return 0;
+ 
+@@ -2601,6 +2576,40 @@ retry:
+ 		}
+ 	}
+ 
++	return err;
++}
++
++int mmc_start_init(struct mmc *mmc)
++{
++	bool no_card;
++	int err = 0;
++
++	/*
++	 * all hosts are capable of 1 bit bus-width and able to use the legacy
++	 * timings.
++	 */
++	mmc->host_caps = mmc->cfg->host_caps | MMC_CAP(SD_LEGACY) |
++			 MMC_CAP(MMC_LEGACY) | MMC_MODE_1BIT;
++
++#if !defined(CONFIG_MMC_BROKEN_CD)
++	/* we pretend there's no card when init is NULL */
++	no_card = mmc_getcd(mmc) == 0;
++#else
++	no_card = 0;
++#endif
++#if !CONFIG_IS_ENABLED(DM_MMC)
++	no_card = no_card || (mmc->cfg->ops->init == NULL);
++#endif
++	if (no_card) {
++		mmc->has_init = 0;
++#if !defined(CONFIG_SPL_BUILD) || defined(CONFIG_SPL_LIBCOMMON_SUPPORT)
++		pr_err("MMC: no card present\n");
++#endif
++		return -ENOMEDIUM;
++	}
++
++	err = mmc_get_op_cond(mmc);
++
+ 	if (!err)
+ 		mmc->init_in_progress = 1;
+ 
+diff --git a/include/mmc.h b/include/mmc.h
+index de5baf05fa..0866ee1b9f 100644
+--- a/include/mmc.h
++++ b/include/mmc.h
+@@ -775,6 +775,16 @@ int mmc_rpmb_write(struct mmc *mmc, void *addr, unsigned short blk,
+ int mmc_set_bkops_enable(struct mmc *mmc);
+ #endif
+ 
++/**
++ * Start device initialization and return immediately; it does not block on
++ * polling OCR (operation condition register) status. Useful for checking
++ * the presence of SD/eMMC when no card detect logic is available.
++ *
++ * @param mmc	Pointer to a MMC device struct
++ * @return 0 on success, <0 on error.
++ */
++int mmc_get_op_cond(struct mmc *mmc);
++
+ /**
+  * Start device initialization and return immediately; it does not block on
+  * polling OCR (operation condition register) status.  Then you should call
+-- 
+2.22.0
+

@@ -1,0 +1,156 @@
+From 6d6d6b03a00db814f3a77d822aba76c32c973661 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Mon, 29 May 2017 15:59:38 +0300
+Subject: [PATCH 0724/1200] regulator: Add support for regulator-force-boot-off
+ DT property
+
+Add suppor for regulator-force-boot-off DT property.
+This property can be used by the board/device drivers for
+turning off regulators on early init stages as pre-requisite
+fot the other components initialization.
+
+Change-Id: I82e9c46d218ee9edd656d70aebef80c90f5635f5
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/56303
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ .../regulator/regulator.txt                   |  1 +
+ drivers/power/regulator/regulator-uclass.c    | 38 +++++++++++++++++++
+ include/power/regulator.h                     | 23 +++++++++++
+ 3 files changed, 62 insertions(+)
+
+diff --git a/doc/device-tree-bindings/regulator/regulator.txt b/doc/device-tree-bindings/regulator/regulator.txt
+index 65b69c4278..e86eb9c331 100644
+--- a/doc/device-tree-bindings/regulator/regulator.txt
++++ b/doc/device-tree-bindings/regulator/regulator.txt
+@@ -35,6 +35,7 @@ Optional properties:
+ - regulator-max-microamp: a maximum allowed Current value
+ - regulator-always-on: regulator should never be disabled
+ - regulator-boot-on: enabled by bootloader/firmware
++- regulator-force-boot-off: disabled during the boot stage
+ 
+ Note
+ The "regulator-name" constraint is used for setting the device's uclass
+diff --git a/drivers/power/regulator/regulator-uclass.c b/drivers/power/regulator/regulator-uclass.c
+index 426a933d66..5a7f91e209 100644
+--- a/drivers/power/regulator/regulator-uclass.c
++++ b/drivers/power/regulator/regulator-uclass.c
+@@ -195,6 +195,17 @@ int regulator_autoset(struct udevice *dev)
+ 	return ret;
+ }
+ 
++int regulator_unset(struct udevice *dev)
++{
++	struct dm_regulator_uclass_platdata *uc_pdata;
++
++	uc_pdata = dev_get_uclass_platdata(dev);
++	if (uc_pdata->force_off)
++		return regulator_set_enable(dev, false);
++
++	return -EMEDIUMTYPE;
++}
++
+ static void regulator_show(struct udevice *dev, int ret)
+ {
+ 	struct dm_regulator_uclass_platdata *uc_pdata;
+@@ -322,6 +333,7 @@ static int regulator_pre_probe(struct udevice *dev)
+ 						-ENODATA);
+ 	uc_pdata->always_on = dev_read_bool(dev, "regulator-always-on");
+ 	uc_pdata->boot_on = dev_read_bool(dev, "regulator-boot-on");
++	uc_pdata->force_off = dev_read_bool(dev, "regulator-force-boot-off");
+ 
+ 	/* Those values are optional (-ENODATA if unset) */
+ 	if ((uc_pdata->min_uV != -ENODATA) &&
+@@ -364,6 +376,32 @@ int regulators_enable_boot_on(bool verbose)
+ 	return ret;
+ }
+ 
++int regulators_enable_boot_off(bool verbose)
++{
++	struct udevice *dev;
++	struct uclass *uc;
++	int ret;
++
++	ret = uclass_get(UCLASS_REGULATOR, &uc);
++	if (ret)
++		return ret;
++	for (uclass_first_device(UCLASS_REGULATOR, &dev);
++	     dev;
++	     uclass_next_device(&dev)) {
++		ret = regulator_unset(dev);
++		if (ret == -EMEDIUMTYPE) {
++			ret = 0;
++			continue;
++		}
++		if (verbose)
++			regulator_show(dev, ret);
++		if (ret == -ENOSYS)
++			ret = 0;
++	}
++
++	return ret;
++}
++
+ UCLASS_DRIVER(regulator) = {
+ 	.id		= UCLASS_REGULATOR,
+ 	.name		= "regulator",
+diff --git a/include/power/regulator.h b/include/power/regulator.h
+index 2bbc1e51b3..3592b945e5 100644
+--- a/include/power/regulator.h
++++ b/include/power/regulator.h
+@@ -150,6 +150,7 @@ enum regulator_flag {
+  * @max_uA*    - maximum amperage (micro Amps)
+  * @always_on* - bool type, true or false
+  * @boot_on*   - bool type, true or false
++ * @force_off* - bool type, true or false
+  * TODO(sjg@chromium.org): Consider putting the above two into @flags
+  * @flags:     - flags value (see REGULATOR_FLAG_...)
+  * @name**     - fdt regulator name - should be taken from the device tree
+@@ -172,6 +173,7 @@ struct dm_regulator_uclass_platdata {
+ 	int max_uA;
+ 	bool always_on;
+ 	bool boot_on;
++	bool force_off;
+ 	const char *name;
+ 	int flags;
+ 	u8 ctrl_reg;
+@@ -342,6 +344,15 @@ int regulator_set_mode(struct udevice *dev, int mode_id);
+  */
+ int regulators_enable_boot_on(bool verbose);
+ 
++/**
++ * regulators_enable_boot_off() - disable regulators needed for boot
++ *
++ * This disables all regulators which are marked to be off at boot time.
++ *
++ * This effectively calls regulator_unset() for every regulator.
++ */
++int regulators_enable_boot_off(bool verbose);
++
+ /**
+  * regulator_autoset: setup the voltage/current on a regulator
+  *
+@@ -361,6 +372,18 @@ int regulators_enable_boot_on(bool verbose);
+  */
+ int regulator_autoset(struct udevice *dev);
+ 
++/**
++ * regulator_unset: turn off a regulator
++ *
++ * The setup depends on constraints found in device's uclass's platform data
++ * (struct dm_regulator_uclass_platdata):
++ *
++ * - Disable - will set - if  'force_off' is set to true,
++ *
++ * The function returns on the first-encountered error.
++  */
++int regulator_unset(struct udevice *dev);
++
+ /**
+  * regulator_autoset_by_name: setup the regulator given by its uclass's
+  * platform data name field. The setup depends on constraints found in device's
+-- 
+2.22.0
+

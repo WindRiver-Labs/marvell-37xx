@@ -1,0 +1,958 @@
+From 1beabc7469d7fd0b8ddaa6e932d457dd5e0e7cf7 Mon Sep 17 00:00:00 2001
+From: Cyrille Pitchen <cyrille.pitchen@atmel.com>
+Date: Tue, 25 Jul 2017 15:00:56 +0800
+Subject: [PATCH 0439/1200] sf: describe all SPI flash commands with 'struct
+ spi_flash_command'
+
+Now that the SPI sub-system API has been extended with
+'struct spi_flash_command' and spi_is_flash_command_supported() /
+spi_exec_flash_command() functions, we update the SPI FLASH sub-system to
+use this new API.
+
+Signed-off-by: Cyrille Pitchen <cyrille.pitchen@atmel.com>
+Signed-off-by: Wenyou Yang <wenyou.yang@microchip.com>
+---
+ drivers/mtd/spi/sf.c           |  78 ++++++++++----
+ drivers/mtd/spi/sf_dataflash.c | 119 ++++++++++-----------
+ drivers/mtd/spi/sf_internal.h  |  24 ++---
+ drivers/mtd/spi/spi_flash.c    | 184 ++++++++++++++++++---------------
+ 4 files changed, 236 insertions(+), 169 deletions(-)
+
+diff --git a/drivers/mtd/spi/sf.c b/drivers/mtd/spi/sf.c
+index d5e175ca00..6178b0aa98 100644
+--- a/drivers/mtd/spi/sf.c
++++ b/drivers/mtd/spi/sf.c
+@@ -9,46 +9,88 @@
+ 
+ #include <common.h>
+ #include <spi.h>
++#include <spi_flash.h>
+ 
+-static int spi_flash_read_write(struct spi_slave *spi,
+-				const u8 *cmd, size_t cmd_len,
+-				const u8 *data_out, u8 *data_in,
+-				size_t data_len)
++#include "sf_internal.h"
++
++static void spi_flash_addr(u32 addr, u8 addr_len, u8 *cmd_buf)
+ {
++	u8 i;
++
++	for (i = 0; i < addr_len; i++)
++		cmd_buf[i] = addr >> ((addr_len - 1 - i) * 8);
++}
++
++static u8 spi_compute_num_dummy_bytes(enum spi_flash_protocol proto,
++				      u8 num_dummy_clock_cycles)
++{
++	int shift = fls(spi_flash_protocol_get_addr_nbits(proto)) - 1;
++
++	if (shift < 0)
++		shift = 0;
++	return (num_dummy_clock_cycles << shift) >> 3;
++}
++
++static int spi_flash_exec(struct spi_flash *flash,
++			  const struct spi_flash_command *cmd)
++{
++	struct spi_slave *spi = flash->spi;
++	u8 cmd_buf[SPI_FLASH_CMD_LEN];
++	size_t cmd_len, num_dummy_bytes;
+ 	unsigned long flags = SPI_XFER_BEGIN;
+ 	int ret;
+ 
+-	if (data_len == 0)
++	if (spi_is_flash_command_supported(spi, cmd))
++		return spi_exec_flash_command(spi, cmd);
++
++	if (cmd->data_len == 0)
+ 		flags |= SPI_XFER_END;
+ 
+-	ret = spi_xfer(spi, cmd_len * 8, cmd, NULL, flags);
++	cmd_buf[0] = cmd->inst;
++	spi_flash_addr(cmd->addr, cmd->addr_len, cmd_buf + 1);
++	cmd_len = 1 + cmd->addr_len;
++
++	num_dummy_bytes = spi_compute_num_dummy_bytes(cmd->proto,
++						      cmd->num_mode_cycles +
++						      cmd->num_wait_states);
++	memset(cmd_buf + cmd_len, 0xff, num_dummy_bytes);
++	cmd_len += num_dummy_bytes;
++
++	ret = spi_xfer(spi, cmd_len * 8, cmd_buf, NULL, flags);
+ 	if (ret) {
+ 		debug("SF: Failed to send command (%zu bytes): %d\n",
+ 		      cmd_len, ret);
+-	} else if (data_len != 0) {
+-		ret = spi_xfer(spi, data_len * 8, data_out, data_in,
+-					SPI_XFER_END);
++	} else if (cmd->data_len != 0) {
++		ret = spi_xfer(spi, cmd->data_len * 8,
++			       cmd->tx_data, cmd->rx_data,
++			       SPI_XFER_END);
+ 		if (ret)
+ 			debug("SF: Failed to transfer %zu bytes of data: %d\n",
+-			      data_len, ret);
++			      cmd->data_len, ret);
+ 	}
+ 
+ 	return ret;
+ }
+ 
+-int spi_flash_cmd_read(struct spi_slave *spi, const u8 *cmd,
+-		size_t cmd_len, void *data, size_t data_len)
++int spi_flash_cmd_read(struct spi_flash *flash,
++		       const struct spi_flash_command *cmd)
+ {
+-	return spi_flash_read_write(spi, cmd, cmd_len, NULL, data, data_len);
++	return spi_flash_exec(flash, cmd);
+ }
+ 
+-int spi_flash_cmd(struct spi_slave *spi, u8 cmd, void *response, size_t len)
++int spi_flash_cmd(struct spi_flash *flash, u8 instr, void *response, size_t len)
+ {
+-	return spi_flash_cmd_read(spi, &cmd, 1, response, len);
++	struct spi_flash_command cmd;
++	u8 flags = (response && len) ? SPI_FCMD_READ_REG : SPI_FCMD_WRITE_REG;
++
++	spi_flash_command_init(&cmd, instr, 0, flags);
++	cmd.data_len = len;
++	cmd.rx_data = response;
++	return spi_flash_exec(flash, &cmd);
+ }
+ 
+-int spi_flash_cmd_write(struct spi_slave *spi, const u8 *cmd, size_t cmd_len,
+-		const void *data, size_t data_len)
++int spi_flash_cmd_write(struct spi_flash *flash,
++			const struct spi_flash_command *cmd)
+ {
+-	return spi_flash_read_write(spi, cmd, cmd_len, data, NULL, data_len);
++	return spi_flash_exec(flash, cmd);
+ }
+diff --git a/drivers/mtd/spi/sf_dataflash.c b/drivers/mtd/spi/sf_dataflash.c
+index e5c0e12faa..a1a79a4d02 100644
+--- a/drivers/mtd/spi/sf_dataflash.c
++++ b/drivers/mtd/spi/sf_dataflash.c
+@@ -73,7 +73,7 @@ struct dataflash {
+ };
+ 
+ /* Return the status of the DataFlash device */
+-static inline int dataflash_status(struct spi_slave *spi)
++static inline int dataflash_status(struct spi_flash *spi_flash)
+ {
+ 	int ret;
+ 	u8 status;
+@@ -81,7 +81,7 @@ static inline int dataflash_status(struct spi_slave *spi)
+ 	 * NOTE:  at45db321c over 25 MHz wants to write
+ 	 * a dummy byte after the opcode...
+ 	 */
+-	ret = spi_flash_cmd(spi, OP_READ_STATUS, &status, 1);
++	ret = spi_flash_cmd(spi_flash, OP_READ_STATUS, &status, 1);
+ 	return ret ? -EIO : status;
+ }
+ 
+@@ -90,7 +90,7 @@ static inline int dataflash_status(struct spi_slave *spi)
+  * This usually takes 5-20 msec or so; more for sector erase.
+  * ready: return > 0
+  */
+-static int dataflash_waitready(struct spi_slave *spi)
++static int dataflash_waitready(struct spi_flash *spi_flash)
+ {
+ 	int status;
+ 	int timeout = 2 * CONFIG_SYS_HZ;
+@@ -98,7 +98,7 @@ static int dataflash_waitready(struct spi_slave *spi)
+ 
+ 	timebase = get_timer(0);
+ 	do {
+-		status = dataflash_status(spi);
++		status = dataflash_status(spi_flash);
+ 		if (status < 0)
+ 			status = 0;
+ 
+@@ -114,11 +114,11 @@ static int dataflash_waitready(struct spi_slave *spi)
+ /* Erase pages of flash */
+ static int spi_dataflash_erase(struct udevice *dev, u32 offset, size_t len)
+ {
++	struct spi_flash_command	cmd;
+ 	struct dataflash	*dataflash;
+ 	struct spi_flash	*spi_flash;
+ 	struct spi_slave	*spi;
+ 	unsigned		blocksize;
+-	uint8_t			*command;
+ 	uint32_t		rem;
+ 	int			status;
+ 
+@@ -128,9 +128,6 @@ static int spi_dataflash_erase(struct udevice *dev, u32 offset, size_t len)
+ 
+ 	blocksize = spi_flash->page_size << 3;
+ 
+-	memset(dataflash->command, 0 , sizeof(dataflash->command));
+-	command = dataflash->command;
+-
+ 	debug("%s: erase addr=0x%x len 0x%x\n", dev->name, offset, len);
+ 
+ 	div_u64_rem(len, spi_flash->page_size, &rem);
+@@ -152,6 +149,8 @@ static int spi_dataflash_erase(struct udevice *dev, u32 offset, size_t len)
+ 		return status;
+ 	}
+ 
++	spi_flash_command_init(&cmd, OP_ERASE_BLOCK, SPI_FLASH_3B_ADDR_LEN,
++			       SPI_FCMD_ERASE);
+ 	while (len > 0) {
+ 		unsigned int	pageaddr;
+ 		int		do_block;
+@@ -163,23 +162,24 @@ static int spi_dataflash_erase(struct udevice *dev, u32 offset, size_t len)
+ 		do_block = (pageaddr & 0x7) == 0 && len >= blocksize;
+ 		pageaddr = pageaddr << dataflash->page_offset;
+ 
+-		command[0] = do_block ? OP_ERASE_BLOCK : OP_ERASE_PAGE;
+-		command[1] = (uint8_t)(pageaddr >> 16);
+-		command[2] = (uint8_t)(pageaddr >> 8);
+-		command[3] = 0;
++		cmd.inst = do_block ? OP_ERASE_BLOCK : OP_ERASE_PAGE;
++		cmd.addr = pageaddr & 0x00FFFF00;
+ 
+ 		debug("%s ERASE %s: (%x) %x %x %x [%d]\n",
+ 		      dev->name, do_block ? "block" : "page",
+-		      command[0], command[1], command[2], command[3],
++		      cmd.inst,
++		      (cmd.addr >> 16) & 0xff,
++		      (cmd.addr >>  8) & 0xff,
++		      (cmd.addr >>  0) & 0xff,
+ 		      pageaddr);
+ 
+-		status = spi_flash_cmd_write(spi, command, 4, NULL, 0);
++		status = spi_flash_cmd_write(spi_flash, &cmd);
+ 		if (status < 0) {
+ 			debug("%s: erase send command error!\n", dev->name);
+ 			return -EIO;
+ 		}
+ 
+-		status = dataflash_waitready(spi);
++		status = dataflash_waitready(spi_flash);
+ 		if (status < 0) {
+ 			debug("%s: erase waitready error!\n", dev->name);
+ 			return status;
+@@ -208,23 +208,18 @@ static int spi_dataflash_erase(struct udevice *dev, u32 offset, size_t len)
+ static int spi_dataflash_read(struct udevice *dev, u32 offset, size_t len,
+ 			      void *buf)
+ {
++	struct spi_flash_command	cmd;
+ 	struct dataflash	*dataflash;
+ 	struct spi_flash	*spi_flash;
+ 	struct spi_slave	*spi;
+ 	unsigned int		addr;
+-	uint8_t			*command;
+ 	int			status;
+ 
+ 	dataflash = dev_get_priv(dev);
+ 	spi_flash = dev_get_uclass_priv(dev);
+ 	spi = spi_flash->spi;
+ 
+-	memset(dataflash->command, 0 , sizeof(dataflash->command));
+-	command = dataflash->command;
+-
+-	debug("%s: erase addr=0x%x len 0x%x\n", dev->name, offset, len);
+-	debug("READ: (%x) %x %x %x\n",
+-	      command[0], command[1], command[2], command[3]);
++	debug("%s: read addr=0x%x len 0x%x\n", dev->name, offset, len);
+ 
+ 	/* Calculate flash page/byte address */
+ 	addr = (((unsigned)offset / spi_flash->page_size)
+@@ -242,13 +237,15 @@ static int spi_dataflash_read(struct udevice *dev, u32 offset, size_t len,
+ 	 * the peak rate available.  Some chips support commands with
+ 	 * fewer "don't care" bytes.  Both buffers stay unchanged.
+ 	 */
+-	command[0] = OP_READ_CONTINUOUS;
+-	command[1] = (uint8_t)(addr >> 16);
+-	command[2] = (uint8_t)(addr >> 8);
+-	command[3] = (uint8_t)(addr >> 0);
++	spi_flash_command_init(&cmd, OP_READ_CONTINUOUS, SPI_FLASH_3B_ADDR_LEN,
++			       SPI_FCMD_READ);
++	cmd.addr = addr;
++	cmd.num_wait_states = 4 * 8; /* 4 "don't care" bytes */
++	cmd.data_len = len;
++	cmd.rx_data = buf;
+ 
+ 	/* plus 4 "don't care" bytes, command len: 4 + 4 "don't care" bytes */
+-	status = spi_flash_cmd_read(spi, command, 8, buf, len);
++	status = spi_flash_cmd_read(spi_flash, &cmd);
+ 
+ 	spi_release_bus(spi);
+ 
+@@ -264,10 +261,10 @@ static int spi_dataflash_read(struct udevice *dev, u32 offset, size_t len,
+ int spi_dataflash_write(struct udevice *dev, u32 offset, size_t len,
+ 			const void *buf)
+ {
++	struct spi_flash_command	cmd;
+ 	struct dataflash	*dataflash;
+ 	struct spi_flash	*spi_flash;
+ 	struct spi_slave	*spi;
+-	uint8_t			*command;
+ 	unsigned int		pageaddr, addr, to, writelen;
+ 	size_t			remaining = len;
+ 	u_char			*writebuf = (u_char *)buf;
+@@ -277,9 +274,6 @@ int spi_dataflash_write(struct udevice *dev, u32 offset, size_t len,
+ 	spi_flash = dev_get_uclass_priv(dev);
+ 	spi = spi_flash->spi;
+ 
+-	memset(dataflash->command, 0 , sizeof(dataflash->command));
+-	command = dataflash->command;
+-
+ 	debug("%s: write 0x%x..0x%x\n", dev->name, offset, (offset + len));
+ 
+ 	pageaddr = ((unsigned)offset / spi_flash->page_size);
+@@ -295,6 +289,8 @@ int spi_dataflash_write(struct udevice *dev, u32 offset, size_t len,
+ 		return status;
+ 	}
+ 
++	spi_flash_command_init(&cmd, OP_TRANSFER_BUF1, SPI_FLASH_3B_ADDR_LEN,
++			       SPI_FCMD_WRITE);
+ 	while (remaining > 0) {
+ 		debug("write @ %d:%d len=%d\n", pageaddr, to, writelen);
+ 
+@@ -319,22 +315,25 @@ int spi_dataflash_write(struct udevice *dev, u32 offset, size_t len,
+ 
+ 		/* (1) Maybe transfer partial page to Buffer1 */
+ 		if (writelen != spi_flash->page_size) {
+-			command[0] = OP_TRANSFER_BUF1;
+-			command[1] = (addr & 0x00FF0000) >> 16;
+-			command[2] = (addr & 0x0000FF00) >> 8;
+-			command[3] = 0;
++			cmd.inst = OP_TRANSFER_BUF1;
++			cmd.addr = (addr & 0x00FFFF00);
++			cmd.data_len = 0;
++			cmd.tx_data = NULL;
+ 
+ 			debug("TRANSFER: (%x) %x %x %x\n",
+-			      command[0], command[1], command[2], command[3]);
++			      cmd.inst,
++			      (cmd.addr >> 16) & 0xff,
++			      (cmd.addr >>  8) & 0xff,
++			      (cmd.addr >>  0) & 0xff);
+ 
+-			status = spi_flash_cmd_write(spi, command, 4, NULL, 0);
++			status = spi_flash_cmd_write(spi_flash, &cmd);
+ 			if (status < 0) {
+ 				debug("%s: write(<pagesize) command error!\n",
+ 				      dev->name);
+ 				return -EIO;
+ 			}
+ 
+-			status = dataflash_waitready(spi);
++			status = dataflash_waitready(spi_flash);
+ 			if (status < 0) {
+ 				debug("%s: write(<pagesize) waitready error!\n",
+ 				      dev->name);
+@@ -344,22 +343,24 @@ int spi_dataflash_write(struct udevice *dev, u32 offset, size_t len,
+ 
+ 		/* (2) Program full page via Buffer1 */
+ 		addr += to;
+-		command[0] = OP_PROGRAM_VIA_BUF1;
+-		command[1] = (addr & 0x00FF0000) >> 16;
+-		command[2] = (addr & 0x0000FF00) >> 8;
+-		command[3] = (addr & 0x000000FF);
++		cmd.inst = OP_PROGRAM_VIA_BUF1;
++		cmd.addr = addr;
++		cmd.data_len = writelen;
++		cmd.tx_data = writebuf;
+ 
+ 		debug("PROGRAM: (%x) %x %x %x\n",
+-		      command[0], command[1], command[2], command[3]);
++		      cmd.inst,
++		      (cmd.addr >> 16) & 0xff,
++		      (cmd.addr >>  8) & 0xff,
++		      (cmd.addr >>  0) & 0xff);
+ 
+-		status = spi_flash_cmd_write(spi, command,
+-					     4, writebuf, writelen);
++		status = spi_flash_cmd_write(spi_flash, &cmd);
+ 		if (status < 0) {
+ 			debug("%s: write send command error!\n", dev->name);
+ 			return -EIO;
+ 		}
+ 
+-		status = dataflash_waitready(spi);
++		status = dataflash_waitready(spi_flash);
+ 		if (status < 0) {
+ 			debug("%s: write waitready error!\n", dev->name);
+ 			return status;
+@@ -368,16 +369,18 @@ int spi_dataflash_write(struct udevice *dev, u32 offset, size_t len,
+ #ifdef CONFIG_SPI_DATAFLASH_WRITE_VERIFY
+ 		/* (3) Compare to Buffer1 */
+ 		addr = pageaddr << dataflash->page_offset;
+-		command[0] = OP_COMPARE_BUF1;
+-		command[1] = (addr & 0x00FF0000) >> 16;
+-		command[2] = (addr & 0x0000FF00) >> 8;
+-		command[3] = 0;
++		cmd.inst = OP_COMPARE_BUF1;
++		cmd.addr = addr & 0x00FFFF00;
++		cmd.data_len = writelen;
++		cmd.tx_data = writebuf;
+ 
+ 		debug("COMPARE: (%x) %x %x %x\n",
+-		      command[0], command[1], command[2], command[3]);
++		      cmd.inst,
++		      (cmd.addr >> 16) & 0xff,
++		      (cmd.addr >>  8) & 0xff,
++		      (cmd.addr >>  0) & 0xff);
+ 
+-		status = spi_flash_cmd_write(spi, command,
+-					     4, writebuf, writelen);
++		status = spi_flash_cmd_write(spi, &cmd);
+ 		if (status < 0) {
+ 			debug("%s: write(compare) send command error!\n",
+ 			      dev->name);
+@@ -502,7 +505,7 @@ static struct flash_info dataflash_data[] = {
+ 	{ "at45db642d",  0x1f2800, 8192, 1024, 10, SUP_POW2PS | IS_POW2PS},
+ };
+ 
+-static struct flash_info *jedec_probe(struct spi_slave *spi)
++static struct flash_info *jedec_probe(struct spi_flash *spi_flash)
+ {
+ 	int			tmp;
+ 	uint8_t			id[5];
+@@ -519,7 +522,7 @@ static struct flash_info *jedec_probe(struct spi_slave *spi)
+ 	 * That's not an error; only rev C and newer chips handle it, and
+ 	 * only Atmel sells these chips.
+ 	 */
+-	tmp = spi_flash_cmd(spi, CMD_READ_ID, id, sizeof(id));
++	tmp = spi_flash_cmd(spi_flash, CMD_READ_ID, id, sizeof(id));
+ 	if (tmp < 0) {
+ 		printf("dataflash: error %d reading JEDEC ID\n", tmp);
+ 		return ERR_PTR(tmp);
+@@ -538,7 +541,7 @@ static struct flash_info *jedec_probe(struct spi_slave *spi)
+ 			tmp++, info++) {
+ 		if (info->jedec_id == jedec) {
+ 			if (info->flags & SUP_POW2PS) {
+-				status = dataflash_status(spi);
++				status = dataflash_status(spi_flash);
+ 				if (status < 0) {
+ 					debug("dataflash: status error %d\n",
+ 					      status);
+@@ -602,7 +605,7 @@ static int spi_dataflash_probe(struct udevice *dev)
+ 	 * Both support the security register, though with different
+ 	 * write procedures.
+ 	 */
+-	info = jedec_probe(spi);
++	info = jedec_probe(spi_flash);
+ 	if (IS_ERR(info))
+ 		goto err_jedec_probe;
+ 	if (info != NULL) {
+@@ -617,7 +620,7 @@ static int spi_dataflash_probe(struct udevice *dev)
+ 	* Older chips support only legacy commands, identifing
+ 	* capacity using bits in the status byte.
+ 	*/
+-	status = dataflash_status(spi);
++	status = dataflash_status(spi_flash);
+ 	if (status <= 0 || status == 0xff) {
+ 		printf("dataflash: read status error %d\n", status);
+ 		if (status == 0 || status == 0xff)
+diff --git a/drivers/mtd/spi/sf_internal.h b/drivers/mtd/spi/sf_internal.h
+index 839cdbe1b0..5c551089d6 100644
+--- a/drivers/mtd/spi/sf_internal.h
++++ b/drivers/mtd/spi/sf_internal.h
+@@ -27,7 +27,7 @@ enum spi_nor_option_flags {
+ };
+ 
+ #define SPI_FLASH_3B_ADDR_LEN		3
+-#define SPI_FLASH_CMD_LEN		(1 + SPI_FLASH_3B_ADDR_LEN)
++#define SPI_FLASH_CMD_LEN		(1 + SPI_FLASH_3B_ADDR_LEN + 16)
+ #define SPI_FLASH_16MB_BOUN		0x1000000
+ 
+ /* CFI Manufacture ID's */
+@@ -137,21 +137,21 @@ struct spi_flash_info {
+ extern const struct spi_flash_info spi_flash_ids[];
+ 
+ /* Send a single-byte command to the device and read the response */
+-int spi_flash_cmd(struct spi_slave *spi, u8 cmd, void *response, size_t len);
++int spi_flash_cmd(struct spi_flash *flash, u8 instr, void *response, size_t len);
+ 
+ /*
+  * Send a multi-byte command to the device and read the response. Used
+  * for flash array reads, etc.
+  */
+-int spi_flash_cmd_read(struct spi_slave *spi, const u8 *cmd,
+-		size_t cmd_len, void *data, size_t data_len);
++int spi_flash_cmd_read(struct spi_flash *flash,
++		       const struct spi_flash_command *cmd);
+ 
+ /*
+  * Send a multi-byte command to the device followed by (optional)
+  * data. Used for programming the flash array, etc.
+  */
+-int spi_flash_cmd_write(struct spi_slave *spi, const u8 *cmd, size_t cmd_len,
+-		const void *data, size_t data_len);
++int spi_flash_cmd_write(struct spi_flash *flash,
++			const struct spi_flash_command *cmd);
+ 
+ 
+ /* Flash erase(sectors) operation, support all possible erase commands */
+@@ -169,13 +169,13 @@ int stm_is_locked(struct spi_flash *flash, u32 ofs, size_t len);
+ /* Enable writing on the SPI flash */
+ static inline int spi_flash_cmd_write_enable(struct spi_flash *flash)
+ {
+-	return spi_flash_cmd(flash->spi, CMD_WRITE_ENABLE, NULL, 0);
++	return spi_flash_cmd(flash, CMD_WRITE_ENABLE, NULL, 0);
+ }
+ 
+ /* Disable writing on the SPI flash */
+ static inline int spi_flash_cmd_write_disable(struct spi_flash *flash)
+ {
+-	return spi_flash_cmd(flash->spi, CMD_WRITE_DISABLE, NULL, 0);
++	return spi_flash_cmd(flash, CMD_WRITE_DISABLE, NULL, 0);
+ }
+ 
+ /*
+@@ -186,8 +186,8 @@ static inline int spi_flash_cmd_write_disable(struct spi_flash *flash)
+  * - spi_flash_wait_till_ready
+  * - SPI release
+  */
+-int spi_flash_write_common(struct spi_flash *flash, const u8 *cmd,
+-		size_t cmd_len, const void *buf, size_t buf_len);
++int spi_flash_write_common(struct spi_flash *flash,
++			   const struct spi_flash_command *cmd);
+ 
+ /*
+  * Flash write operation, support all possible write commands.
+@@ -201,8 +201,8 @@ int spi_flash_cmd_write_ops(struct spi_flash *flash, u32 offset,
+  * Same as spi_flash_cmd_read() except it also claims/releases the SPI
+  * bus. Used as common part of the ->read() operation.
+  */
+-int spi_flash_read_common(struct spi_flash *flash, const u8 *cmd,
+-		size_t cmd_len, void *data, size_t data_len);
++int spi_flash_read_common(struct spi_flash *flash,
++			  const struct spi_flash_command *cmd);
+ 
+ /* Flash read operation, support all possible read commands */
+ int spi_flash_cmd_read_ops(struct spi_flash *flash, u32 offset,
+diff --git a/drivers/mtd/spi/spi_flash.c b/drivers/mtd/spi/spi_flash.c
+index 294d9f9d79..e6e75959a8 100644
+--- a/drivers/mtd/spi/spi_flash.c
++++ b/drivers/mtd/spi/spi_flash.c
+@@ -22,21 +22,15 @@
+ 
+ DECLARE_GLOBAL_DATA_PTR;
+ 
+-static void spi_flash_addr(u32 addr, u8 *cmd)
+-{
+-	/* cmd[0] is actual command */
+-	cmd[1] = addr >> 16;
+-	cmd[2] = addr >> 8;
+-	cmd[3] = addr >> 0;
+-}
+-
+ static int read_sr(struct spi_flash *flash, u8 *rs)
+ {
++	struct spi_flash_command cmd;
+ 	int ret;
+-	u8 cmd;
+ 
+-	cmd = CMD_READ_STATUS;
+-	ret = spi_flash_read_common(flash, &cmd, 1, rs, 1);
++	spi_flash_command_init(&cmd, CMD_READ_STATUS, 0, SPI_FCMD_READ_REG);
++	cmd.data_len = 1;
++	cmd.rx_data = rs;
++	ret = spi_flash_read_common(flash, &cmd);
+ 	if (ret < 0) {
+ 		debug("SF: fail to read status register\n");
+ 		return ret;
+@@ -47,10 +41,13 @@ static int read_sr(struct spi_flash *flash, u8 *rs)
+ 
+ static int read_fsr(struct spi_flash *flash, u8 *fsr)
+ {
++	struct spi_flash_command cmd;
+ 	int ret;
+-	const u8 cmd = CMD_FLAG_STATUS;
+ 
+-	ret = spi_flash_read_common(flash, &cmd, 1, fsr, 1);
++	spi_flash_command_init(&cmd, CMD_FLAG_STATUS, 0, SPI_FCMD_READ_REG);
++	cmd.data_len = 1;
++	cmd.rx_data = fsr;
++	ret = spi_flash_read_common(flash, &cmd);
+ 	if (ret < 0) {
+ 		debug("SF: fail to read flag status register\n");
+ 		return ret;
+@@ -61,11 +58,13 @@ static int read_fsr(struct spi_flash *flash, u8 *fsr)
+ 
+ static int write_sr(struct spi_flash *flash, u8 ws)
+ {
+-	u8 cmd;
++	struct spi_flash_command cmd;
+ 	int ret;
+ 
+-	cmd = CMD_WRITE_STATUS;
+-	ret = spi_flash_write_common(flash, &cmd, 1, &ws, 1);
++	spi_flash_command_init(&cmd, CMD_WRITE_STATUS, 0, SPI_FCMD_WRITE_REG);
++	cmd.data_len = 1;
++	cmd.tx_data = &ws;
++	ret = spi_flash_write_common(flash, &cmd);
+ 	if (ret < 0) {
+ 		debug("SF: fail to write status register\n");
+ 		return ret;
+@@ -77,11 +76,13 @@ static int write_sr(struct spi_flash *flash, u8 ws)
+ #if defined(CONFIG_SPI_FLASH_SPANSION) || defined(CONFIG_SPI_FLASH_WINBOND)
+ static int read_cr(struct spi_flash *flash, u8 *rc)
+ {
++	struct spi_flash_command cmd;
+ 	int ret;
+-	u8 cmd;
+ 
+-	cmd = CMD_READ_CONFIG;
+-	ret = spi_flash_read_common(flash, &cmd, 1, rc, 1);
++	spi_flash_command_init(&cmd, CMD_READ_CONFIG, 0, SPI_FCMD_READ_REG);
++	cmd.data_len = 1;
++	cmd.rx_data = rc;
++	ret = spi_flash_read_common(flash, &cmd);
+ 	if (ret < 0) {
+ 		debug("SF: fail to read config register\n");
+ 		return ret;
+@@ -92,17 +93,19 @@ static int read_cr(struct spi_flash *flash, u8 *rc)
+ 
+ static int write_cr(struct spi_flash *flash, u8 wc)
+ {
++	struct spi_flash_command cmd;
+ 	u8 data[2];
+-	u8 cmd;
+ 	int ret;
+ 
+ 	ret = read_sr(flash, &data[0]);
+ 	if (ret < 0)
+ 		return ret;
+ 
+-	cmd = CMD_WRITE_STATUS;
++	spi_flash_command_init(&cmd, CMD_WRITE_STATUS, 0, SPI_FCMD_WRITE_REG);
++	cmd.data_len = 2;
++	cmd.tx_data = data;
+ 	data[1] = wc;
+-	ret = spi_flash_write_common(flash, &cmd, 1, &data, 2);
++	ret = spi_flash_write_common(flash, &cmd);
+ 	if (ret) {
+ 		debug("SF: fail to write config register\n");
+ 		return ret;
+@@ -136,15 +139,19 @@ static int clean_bar(struct spi_flash *flash)
+ 
+ static int write_bar(struct spi_flash *flash, u32 offset)
+ {
+-	u8 cmd, bank_sel;
++	struct spi_flash_command cmd;
++	u8 bank_sel;
+ 	int ret;
+ 
+ 	bank_sel = offset / (SPI_FLASH_16MB_BOUN << flash->shift);
+ 	if (bank_sel == flash->bank_curr)
+ 		goto bar_end;
+ 
+-	cmd = flash->bank_write_cmd;
+-	ret = spi_flash_write_common(flash, &cmd, 1, &bank_sel, 1);
++	spi_flash_command_init(&cmd, flash->bank_write_cmd, 0,
++			       SPI_FCMD_WRITE_REG);
++	cmd.data_len = 1;
++	cmd.tx_data = &bank_sel;
++	ret = spi_flash_write_common(flash, &cmd);
+ 	if (ret < 0) {
+ 		debug("SF: fail to write bank register\n");
+ 		return ret;
+@@ -157,6 +164,7 @@ bar_end:
+ 
+ static int read_bar(struct spi_flash *flash, const struct spi_flash_info *info)
+ {
++	struct spi_flash_command cmd;
+ 	u8 curr_bank = 0;
+ 	int ret;
+ 
+@@ -173,8 +181,11 @@ static int read_bar(struct spi_flash *flash, const struct spi_flash_info *info)
+ 		flash->bank_write_cmd = CMD_EXTNADDR_WREAR;
+ 	}
+ 
+-	ret = spi_flash_read_common(flash, &flash->bank_read_cmd, 1,
+-				    &curr_bank, 1);
++	spi_flash_command_init(&cmd, flash->bank_read_cmd, 0,
++			       SPI_FCMD_READ_REG);
++	cmd.data_len = 1;
++	cmd.rx_data = &curr_bank;
++	ret = spi_flash_read_common(flash, &cmd);
+ 	if (ret) {
+ 		debug("SF: fail to read bank addr register\n");
+ 		return ret;
+@@ -271,14 +282,14 @@ static int spi_flash_wait_till_ready(struct spi_flash *flash,
+ 	return -ETIMEDOUT;
+ }
+ 
+-int spi_flash_write_common(struct spi_flash *flash, const u8 *cmd,
+-		size_t cmd_len, const void *buf, size_t buf_len)
++int spi_flash_write_common(struct spi_flash *flash,
++			   const struct spi_flash_command *cmd)
+ {
+ 	struct spi_slave *spi = flash->spi;
+ 	unsigned long timeout = SPI_FLASH_PROG_TIMEOUT;
+ 	int ret;
+ 
+-	if (buf == NULL)
++	if (cmd->tx_data == NULL)
+ 		timeout = SPI_FLASH_PAGE_ERASE_TIMEOUT;
+ 
+ 	ret = spi_claim_bus(spi);
+@@ -293,7 +304,7 @@ int spi_flash_write_common(struct spi_flash *flash, const u8 *cmd,
+ 		return ret;
+ 	}
+ 
+-	ret = spi_flash_cmd_write(spi, cmd, cmd_len, buf, buf_len);
++	ret = spi_flash_cmd_write(flash, cmd);
+ 	if (ret < 0) {
+ 		debug("SF: write cmd failed\n");
+ 		return ret;
+@@ -314,8 +325,8 @@ int spi_flash_write_common(struct spi_flash *flash, const u8 *cmd,
+ 
+ int spi_flash_cmd_erase_ops(struct spi_flash *flash, u32 offset, size_t len)
+ {
++	struct spi_flash_command cmd;
+ 	u32 erase_size, erase_addr;
+-	u8 cmd[SPI_FLASH_CMD_LEN];
+ 	int ret = -1;
+ 
+ 	erase_size = flash->erase_size;
+@@ -332,7 +343,8 @@ int spi_flash_cmd_erase_ops(struct spi_flash *flash, u32 offset, size_t len)
+ 		}
+ 	}
+ 
+-	cmd[0] = flash->erase_cmd;
++	spi_flash_command_init(&cmd, flash->erase_cmd, SPI_FLASH_3B_ADDR_LEN,
++			       SPI_FCMD_ERASE);
+ 	while (len) {
+ 		erase_addr = offset;
+ 
+@@ -345,12 +357,15 @@ int spi_flash_cmd_erase_ops(struct spi_flash *flash, u32 offset, size_t len)
+ 		if (ret < 0)
+ 			return ret;
+ #endif
+-		spi_flash_addr(erase_addr, cmd);
++		cmd.addr = erase_addr;
+ 
+-		debug("SF: erase %2x %2x %2x %2x (%x)\n", cmd[0], cmd[1],
+-		      cmd[2], cmd[3], erase_addr);
++		debug("SF: erase %2x %2x %2x %2x (%x)\n", cmd.inst,
++		      (cmd.addr >> 16) & 0xff,
++		      (cmd.addr >>  8) & 0xff,
++		      (cmd.addr >>  0) & 0xff,
++		      erase_addr);
+ 
+-		ret = spi_flash_write_common(flash, cmd, sizeof(cmd), NULL, 0);
++		ret = spi_flash_write_common(flash, &cmd);
+ 		if (ret < 0) {
+ 			debug("SF: erase failed\n");
+ 			break;
+@@ -371,10 +386,10 @@ int spi_flash_cmd_write_ops(struct spi_flash *flash, u32 offset,
+ 		size_t len, const void *buf)
+ {
+ 	struct spi_slave *spi = flash->spi;
++	struct spi_flash_command cmd;
+ 	unsigned long byte_addr, page_size;
+ 	u32 write_addr;
+ 	size_t chunk_len, actual;
+-	u8 cmd[SPI_FLASH_CMD_LEN];
+ 	int ret = -1;
+ 
+ 	page_size = flash->page_size;
+@@ -387,7 +402,8 @@ int spi_flash_cmd_write_ops(struct spi_flash *flash, u32 offset,
+ 		}
+ 	}
+ 
+-	cmd[0] = flash->write_cmd;
++	spi_flash_command_init(&cmd, flash->write_cmd, SPI_FLASH_3B_ADDR_LEN,
++			       SPI_FCMD_WRITE);
+ 	for (actual = 0; actual < len; actual += chunk_len) {
+ 		write_addr = offset;
+ 
+@@ -407,13 +423,18 @@ int spi_flash_cmd_write_ops(struct spi_flash *flash, u32 offset,
+ 			chunk_len = min(chunk_len,
+ 					spi->max_write_size - sizeof(cmd));
+ 
+-		spi_flash_addr(write_addr, cmd);
++		cmd.addr = write_addr;
++		cmd.data_len = chunk_len;
++		cmd.tx_data = buf + actual;
+ 
+ 		debug("SF: 0x%p => cmd = { 0x%02x 0x%02x%02x%02x } chunk_len = %zu\n",
+-		      buf + actual, cmd[0], cmd[1], cmd[2], cmd[3], chunk_len);
++		      buf + actual, cmd.inst,
++		      (cmd.addr >> 16) & 0xff,
++		      (cmd.addr >>  8) & 0xff,
++		      (cmd.addr >>  0) & 0xff,
++		      chunk_len);
+ 
+-		ret = spi_flash_write_common(flash, cmd, sizeof(cmd),
+-					buf + actual, chunk_len);
++		ret = spi_flash_write_common(flash, &cmd);
+ 		if (ret < 0) {
+ 			debug("SF: write failed\n");
+ 			break;
+@@ -429,8 +450,8 @@ int spi_flash_cmd_write_ops(struct spi_flash *flash, u32 offset,
+ 	return ret;
+ }
+ 
+-int spi_flash_read_common(struct spi_flash *flash, const u8 *cmd,
+-		size_t cmd_len, void *data, size_t data_len)
++int spi_flash_read_common(struct spi_flash *flash,
++			  const struct spi_flash_command *cmd)
+ {
+ 	struct spi_slave *spi = flash->spi;
+ 	int ret;
+@@ -441,7 +462,7 @@ int spi_flash_read_common(struct spi_flash *flash, const u8 *cmd,
+ 		return ret;
+ 	}
+ 
+-	ret = spi_flash_cmd_read(spi, cmd, cmd_len, data, data_len);
++	ret = spi_flash_cmd_read(flash, cmd);
+ 	if (ret < 0) {
+ 		debug("SF: read cmd failed\n");
+ 		return ret;
+@@ -469,7 +490,7 @@ int spi_flash_cmd_read_ops(struct spi_flash *flash, u32 offset,
+ 		size_t len, void *data)
+ {
+ 	struct spi_slave *spi = flash->spi;
+-	u8 *cmd, cmdsz;
++	struct spi_flash_command cmd;
+ 	u32 remain_len, read_len, read_addr;
+ 	int bank_sel = 0;
+ 	int ret = -1;
+@@ -488,14 +509,9 @@ int spi_flash_cmd_read_ops(struct spi_flash *flash, u32 offset,
+ 		return 0;
+ 	}
+ 
+-	cmdsz = SPI_FLASH_CMD_LEN + flash->dummy_byte;
+-	cmd = calloc(1, cmdsz);
+-	if (!cmd) {
+-		debug("SF: Failed to allocate cmd\n");
+-		return -ENOMEM;
+-	}
+-
+-	cmd[0] = flash->read_cmd;
++	spi_flash_command_init(&cmd, flash->read_cmd, SPI_FLASH_3B_ADDR_LEN,
++			       SPI_FCMD_READ);
++	cmd.num_wait_states = flash->dummy_byte * 8;
+ 	while (len) {
+ 		read_addr = offset;
+ 
+@@ -519,9 +535,10 @@ int spi_flash_cmd_read_ops(struct spi_flash *flash, u32 offset,
+ 		if (spi->max_read_size)
+ 			read_len = min(read_len, spi->max_read_size);
+ 
+-		spi_flash_addr(read_addr, cmd);
+-
+-		ret = spi_flash_read_common(flash, cmd, cmdsz, data, read_len);
++		cmd.addr = read_addr;
++		cmd.data_len = read_len;
++		cmd.rx_data = data;
++		ret = spi_flash_read_common(flash, &cmd);
+ 		if (ret < 0) {
+ 			debug("SF: read failed\n");
+ 			break;
+@@ -536,30 +553,33 @@ int spi_flash_cmd_read_ops(struct spi_flash *flash, u32 offset,
+ 	ret = clean_bar(flash);
+ #endif
+ 
+-	free(cmd);
+ 	return ret;
+ }
+ 
+ #ifdef CONFIG_SPI_FLASH_SST
+ static int sst_byte_write(struct spi_flash *flash, u32 offset, const void *buf)
+ {
+-	struct spi_slave *spi = flash->spi;
++	struct spi_flash_command cmd;
+ 	int ret;
+-	u8 cmd[4] = {
+-		CMD_SST_BP,
+-		offset >> 16,
+-		offset >> 8,
+-		offset,
+-	};
++	u8 sr = 0xFFu;
++
++	spi_flash_command_init(&cmd, CMD_SST_BP, SPI_FLASH_3B_ADDR_LEN,
++			       SPI_FCMD_WRITE);
++	cmd.addr = offset;
++	cmd.data_len = 1;
++	cmd.tx_data = buf;
+ 
++#ifdef DEBUG
++	read_sr(flash, &sr);
++#endif
+ 	debug("BP[%02x]: 0x%p => cmd = { 0x%02x 0x%06x }\n",
+-	      spi_w8r8(spi, CMD_READ_STATUS), buf, cmd[0], offset);
++	      sr, buf, cmd.inst, offset);
+ 
+ 	ret = spi_flash_cmd_write_enable(flash);
+ 	if (ret)
+ 		return ret;
+ 
+-	ret = spi_flash_cmd_write(spi, cmd, sizeof(cmd), buf, 1);
++	ret = spi_flash_cmd_write(flash, &cmd);
+ 	if (ret)
+ 		return ret;
+ 
+@@ -570,9 +590,10 @@ int sst_write_wp(struct spi_flash *flash, u32 offset, size_t len,
+ 		const void *buf)
+ {
+ 	struct spi_slave *spi = flash->spi;
+-	size_t actual, cmd_len;
++	struct spi_flash_command cmd;
++	size_t actual;
+ 	int ret;
+-	u8 cmd[4];
++	u8 sr = 0xFFu;
+ 
+ 	ret = spi_claim_bus(spi);
+ 	if (ret) {
+@@ -593,19 +614,20 @@ int sst_write_wp(struct spi_flash *flash, u32 offset, size_t len,
+ 	if (ret)
+ 		goto done;
+ 
+-	cmd_len = 4;
+-	cmd[0] = CMD_SST_AAI_WP;
+-	cmd[1] = offset >> 16;
+-	cmd[2] = offset >> 8;
+-	cmd[3] = offset;
++	spi_flash_command_init(&cmd, CMD_SST_AAI_WP, SPI_FLASH_3B_ADDR_LEN,
++			       SPI_FCMD_WRITE);
++	cmd.addr = offset;
++	cmd.data_len = 2;
+ 
+ 	for (; actual < len - 1; actual += 2) {
++#ifdef DEBUG
++		read_sr(flash, &sr);
++#endif
+ 		debug("WP[%02x]: 0x%p => cmd = { 0x%02x 0x%06x }\n",
+-		      spi_w8r8(spi, CMD_READ_STATUS), buf + actual,
+-		      cmd[0], offset);
++		      sr, buf + actual, cmd.inst, offset);
+ 
+-		ret = spi_flash_cmd_write(spi, cmd, cmd_len,
+-					buf + actual, 2);
++		cmd.tx_data = buf + actual;
++		ret = spi_flash_cmd_write(flash, &cmd);
+ 		if (ret) {
+ 			debug("SF: sst word program failed\n");
+ 			break;
+@@ -615,7 +637,7 @@ int sst_write_wp(struct spi_flash *flash, u32 offset, size_t len,
+ 		if (ret)
+ 			break;
+ 
+-		cmd_len = 1;
++		cmd.addr_len = 0;
+ 		offset += 2;
+ 	}
+ 
+@@ -905,7 +927,7 @@ static const struct spi_flash_info *spi_flash_read_id(struct spi_flash *flash)
+ 	u8				id[SPI_FLASH_MAX_ID_LEN];
+ 	const struct spi_flash_info	*info;
+ 
+-	tmp = spi_flash_cmd(flash->spi, CMD_READ_ID, id, SPI_FLASH_MAX_ID_LEN);
++	tmp = spi_flash_cmd(flash, CMD_READ_ID, id, SPI_FLASH_MAX_ID_LEN);
+ 	if (tmp < 0) {
+ 		printf("SF: error %d reading JEDEC ID\n", tmp);
+ 		return ERR_PTR(tmp);
+-- 
+2.22.0
+

@@ -1,0 +1,31 @@
+From 8c41895013e689e6bc6f36df1480a49395594faf Mon Sep 17 00:00:00 2001
+From: Ken Ma <make@marvell.com>
+Date: Thu, 8 Mar 2018 09:20:02 +0800
+Subject: [PATCH 0605/1200] arm64: a37xx: dts: add gpio head file including
+
+Change-Id: I3757d61baf270e63a933082e9c6cff5297b9f1aa
+Cc: Simon Glass <sjg@chromium.org>
+Cc: Stefan Roese <sr@denx.de>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/52520
+Tested-by: Hua Jing <jinghua@marvell.com>
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+---
+ arch/arm/dts/armada-37xx.dtsi | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/dts/armada-37xx.dtsi b/arch/arm/dts/armada-37xx.dtsi
+index 690234234b..75a22deb4a 100644
+--- a/arch/arm/dts/armada-37xx.dtsi
++++ b/arch/arm/dts/armada-37xx.dtsi
+@@ -46,6 +46,7 @@
+ 
+ #include <dt-bindings/interrupt-controller/arm-gic.h>
+ #include <dt-bindings/comphy/comphy_data.h>
++#include <dt-bindings/gpio/gpio.h>
+ 
+ / {
+ 	model = "Marvell Armada 37xx SoC";
+-- 
+2.22.0
+

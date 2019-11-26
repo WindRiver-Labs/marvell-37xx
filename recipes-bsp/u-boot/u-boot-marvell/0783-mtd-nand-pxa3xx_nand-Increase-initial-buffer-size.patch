@@ -1,0 +1,71 @@
+From 93a926786fa4e4a98b6b7977eef540b64e3d24e9 Mon Sep 17 00:00:00 2001
+From: Ofer Heifetz <oferh@marvell.com>
+Date: Thu, 23 Nov 2017 16:12:22 +0200
+Subject: [PATCH 0783/1200] mtd: nand: pxa3xx_nand: Increase initial buffer
+ size
+
+The initial buffer is used for the initial commands used to detect
+a flash device (STATUS, READID and PARAM).
+
+ONFI param page is 256 bytes, and there are three redundant copies
+to be read. JEDEC param page is 512 bytes, and there are also three
+redundant copies to be read. Hence this buffer should be at least
+512 x 3. This commits rounds the buffer size to 2048.
+
+This commit is taken from Linux:
+'commit c16340973fcb64614' ("nand: pxa3xx: Increase initial buffer size")
+
+
+Change-Id: I1fab8c3a15f01e4a9194925e6b7789bcbcd0af84
+Signed-off-by: Chris Packham <judge.packham@gmail.com>
+Signed-off-by: Ofer Heifetz <oferh@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/47027
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55769
+---
+ drivers/mtd/nand/pxa3xx_nand.c | 15 +++++++++------
+ 1 file changed, 9 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/mtd/nand/pxa3xx_nand.c b/drivers/mtd/nand/pxa3xx_nand.c
+index 86f76ac44a..e3fe0c13b2 100644
+--- a/drivers/mtd/nand/pxa3xx_nand.c
++++ b/drivers/mtd/nand/pxa3xx_nand.c
+@@ -29,10 +29,13 @@ DECLARE_GLOBAL_DATA_PTR;
+ 
+ /*
+  * Define a buffer size for the initial command that detects the flash device:
+- * STATUS, READID and PARAM. The largest of these is the PARAM command,
+- * needing 256 bytes.
++ * STATUS, READID and PARAM.
++ * ONFI param page is 256 bytes, and there are three redundant copies
++ * to be read. JEDEC param page is 512 bytes, and there are also three
++ * redundant copies to be read.
++ * Hence this buffer should be at least 512 x 3. Let's pick 2048.
+  */
+-#define INIT_BUFFER_SIZE	256
++#define INIT_BUFFER_SIZE	2048
+ 
+ /* registers and bit definitions */
+ #define NDCR		(0x00) /* Control register */
+@@ -846,14 +849,14 @@ static int prepare_set_command(struct pxa3xx_nand_info *info, int command,
+ 		break;
+ 
+ 	case NAND_CMD_PARAM:
+-		info->buf_count = 256;
++		info->buf_count = INIT_BUFFER_SIZE;
+ 		info->ndcb0 |= NDCB0_CMD_TYPE(0)
+ 				| NDCB0_ADDR_CYC(1)
+ 				| NDCB0_LEN_OVRD
+ 				| command;
+ 		info->ndcb1 = (column & 0xFF);
+-		info->ndcb3 = 256;
+-		info->data_size = 256;
++		info->ndcb3 = INIT_BUFFER_SIZE;
++		info->data_size = INIT_BUFFER_SIZE;
+ 		break;
+ 
+ 	case NAND_CMD_READID:
+-- 
+2.22.0
+

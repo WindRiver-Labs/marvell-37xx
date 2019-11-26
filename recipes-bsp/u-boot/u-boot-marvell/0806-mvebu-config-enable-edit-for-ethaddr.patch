@@ -1,0 +1,42 @@
+From 49a8d1690a067dd365327830cd5580e601b61156 Mon Sep 17 00:00:00 2001
+From: Ofir Fedida <ofedida@marvell.com>
+Date: Tue, 10 Jul 2018 16:17:00 +0300
+Subject: [PATCH 0806/1200] mvebu: config: enable edit for ethaddr
+
+Currently, environment variable 'ethaddr' cannot be overwritten at all.
+
+This patch fixes this issue by setting CONFIG_ENV_OVERWRITE, this
+allows 'ethaddr' modification in the environment variables.
+
+Change-Id: I8c2b0caab83f3c86088057d1349e84ff3d71db4a
+Signed-off-by: Ofir Fedida <ofedida@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/57812
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ include/configs/mvebu_armada-common.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/mvebu_armada-common.h b/include/configs/mvebu_armada-common.h
+index b5194cd1f7..5f7d0a2e3d 100644
+--- a/include/configs/mvebu_armada-common.h
++++ b/include/configs/mvebu_armada-common.h
+@@ -33,6 +33,7 @@
+ #define CONFIG_HAS_ETH2
+ #define CONFIG_ETHPRIME			"eth0"
+ #define CONFIG_ROOTPATH                 "/srv/nfs/" /* Default Dir for NFS */
++#define CONFIG_ENV_OVERWRITE		/* ethaddr can be reprogrammed */
+ #define CONFIG_EXTRA_ENV_SETTINGS	"kernel_addr_r=0x7000000\0"	\
+ 					"initrd_addr=0xa00000\0"	\
+ 					"initrd_size=0x2000000\0"	\
+@@ -68,7 +69,6 @@
+ 						"$serverip:$rootpath " \
+ 						"$extra_params " \
+ 						"$cpuidle"
+-
+ /*
+  * For booting Linux, the board info and command line data
+  * have to be in the first 8 MB of memory, since this is
+-- 
+2.22.0
+

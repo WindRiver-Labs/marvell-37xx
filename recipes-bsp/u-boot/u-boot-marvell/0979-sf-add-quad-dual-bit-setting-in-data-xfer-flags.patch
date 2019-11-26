@@ -1,0 +1,73 @@
+From 50c3ea6fcac4e57e3aefea190fa1299c2fa420fa Mon Sep 17 00:00:00 2001
+From: Ken Ma <make@marvell.com>
+Date: Wed, 5 Jul 2017 10:58:02 +0800
+Subject: [PATCH 0979/1200] sf: add quad/dual bit setting in data xfer flags
+
+Currently sf does not pass quad/dual bit in xfer flags to controller,
+so spi controller does not know the transfer mode(quad, dual or single)
+and handles the transfer in single mode by default.
+The quad/dual bit needs to be passed to spi controller in quad/dual
+data transfer just after quad/dual command part(including command byte,
+address bytes and dummy bytes) transfer; and since in current codes spi
+flash scan only supports quad/dual commands of
+CMD_READ_QUAD_OUTPUT_FAST(0x6b), CMD_READ_DUAL_OUTPUT_FAST(0x3b) and
+CMD_QUAD_PAGE_PROGRAM(0x32), quad/dual bit is set in data xfer flags
+only for these 3 commands transfer and not for other commands like
+CMD_READ_ID, CMD_READ_STATUS...
+This patch sets quad/dual bit in data xfer flags according to the sf
+command type.
+
+Change-Id: I4efd687aeea61cd407b7b59778c03d3394a2ac6b
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/61670
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/2036
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ drivers/mtd/spi/sf.c | 10 +++++++++-
+ include/spi.h        |  2 ++
+ 2 files changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mtd/spi/sf.c b/drivers/mtd/spi/sf.c
+index 6178b0aa98..08f01e0b73 100644
+--- a/drivers/mtd/spi/sf.c
++++ b/drivers/mtd/spi/sf.c
+@@ -61,9 +61,17 @@ static int spi_flash_exec(struct spi_flash *flash,
+ 		debug("SF: Failed to send command (%zu bytes): %d\n",
+ 		      cmd_len, ret);
+ 	} else if (cmd->data_len != 0) {
++		flags = SPI_XFER_END;
++
++		if (cmd->inst == CMD_READ_QUAD_OUTPUT_FAST ||
++		    cmd->inst == CMD_QUAD_PAGE_PROGRAM)
++			flags |= SPI_XFER_QUAD;
++		else if (cmd->inst == CMD_READ_DUAL_OUTPUT_FAST)
++			flags |= SPI_XFER_DUAL;
++
+ 		ret = spi_xfer(spi, cmd->data_len * 8,
+ 			       cmd->tx_data, cmd->rx_data,
+-			       SPI_XFER_END);
++			       flags);
+ 		if (ret)
+ 			debug("SF: Failed to transfer %zu bytes of data: %d\n",
+ 			      cmd->data_len, ret);
+diff --git a/include/spi.h b/include/spi.h
+index d20c49c81b..b87336fe90 100644
+--- a/include/spi.h
++++ b/include/spi.h
+@@ -226,6 +226,8 @@ struct spi_slave {
+ #define SPI_XFER_ONCE		(SPI_XFER_BEGIN | SPI_XFER_END)
+ #define SPI_XFER_MMAP		BIT(2)	/* Memory Mapped start */
+ #define SPI_XFER_MMAP_END	BIT(3)	/* Memory Mapped End */
++#define SPI_XFER_DUAL		BIT(30)
++#define SPI_XFER_QUAD		BIT(31)
+ };
+ 
+ /**
+-- 
+2.22.0
+

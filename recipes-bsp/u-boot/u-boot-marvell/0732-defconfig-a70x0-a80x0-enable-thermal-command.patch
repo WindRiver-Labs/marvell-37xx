@@ -1,0 +1,46 @@
+From 843f79587c6e7b0aa8b7b975bb56f341daba3d0c Mon Sep 17 00:00:00 2001
+From: David Sniatkiwicz <davidsn@marvell.com>
+Date: Mon, 19 Jun 2017 17:01:45 +0300
+Subject: [PATCH 0732/1200] defconfig: a70x0: a80x0: enable thermal command
+
+Change-Id: I73ee2fbb8b3e6196a5c62798b3a80f8ebd675f4a
+Signed-off-by: zachary zhang <zhangzg@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55602
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ configs/mvebu_db_armada8k_defconfig   | 3 +++
+ configs/mvebu_mcbin-88f8040_defconfig | 3 +++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/configs/mvebu_db_armada8k_defconfig b/configs/mvebu_db_armada8k_defconfig
+index 8f2972ad4b..e418bd8e31 100644
+--- a/configs/mvebu_db_armada8k_defconfig
++++ b/configs/mvebu_db_armada8k_defconfig
+@@ -71,6 +71,9 @@ CONFIG_DEBUG_UART_SHIFT=2
+ CONFIG_DEBUG_UART_ANNOUNCE=y
+ CONFIG_SYS_NS16550=y
+ CONFIG_KIRKWOOD_SPI=y
++CONFIG_DM_THERMAL=y
++CONFIG_MVEBU_THERMAL_SENSOR_28NM=y
++CONFIG_MVEBU_THERMAL_EXT_SENSOR_28NM=y
+ CONFIG_USB=y
+ CONFIG_DM_USB=y
+ CONFIG_USB_XHCI_HCD=y
+diff --git a/configs/mvebu_mcbin-88f8040_defconfig b/configs/mvebu_mcbin-88f8040_defconfig
+index 51fa8777cf..b5895abc73 100644
+--- a/configs/mvebu_mcbin-88f8040_defconfig
++++ b/configs/mvebu_mcbin-88f8040_defconfig
+@@ -68,6 +68,9 @@ CONFIG_DEBUG_UART_SHIFT=2
+ CONFIG_DEBUG_UART_ANNOUNCE=y
+ CONFIG_SYS_NS16550=y
+ CONFIG_KIRKWOOD_SPI=y
++CONFIG_DM_THERMAL=y
++CONFIG_MVEBU_THERMAL_SENSOR_28NM=y
++CONFIG_MVEBU_THERMAL_EXT_SENSOR_28NM=y
+ CONFIG_USB=y
+ CONFIG_DM_USB=y
+ CONFIG_USB_XHCI_HCD=y
+-- 
+2.22.0
+

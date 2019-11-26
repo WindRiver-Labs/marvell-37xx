@@ -1,0 +1,87 @@
+From e788d1462a3f4c0b619594a424582098cec4e3e9 Mon Sep 17 00:00:00 2001
+From: Suneel Garapati <sgarapati@caviumnetworks.com>
+Date: Mon, 14 Jan 2019 17:02:05 -0800
+Subject: [PATCH 0987/1200] Revert "ahci: Fix 64-bit support"
+
+This reverts commit 744d0cc761e3041e47f9added4d24a70a4cecb53.
+
+Change-Id: Ied2bb3f50535fcf5e5bcd08c26f7f10b454dc5bc
+Reviewed-on: https://sj1git1.cavium.com/2174
+Tested-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ drivers/ata/ahci.c | 23 ++++++++---------------
+ 1 file changed, 8 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/ata/ahci.c b/drivers/ata/ahci.c
+index 5a4f36b827..dc924b956f 100644
+--- a/drivers/ata/ahci.c
++++ b/drivers/ata/ahci.c
+@@ -32,16 +32,13 @@
+ #include <asm/arch/octeontx.h>
+ #endif
+ 
+-#define LOWER32(val)	(u32)((u64)(val) & 0xffffffff)
+-#define UPPER32(val)	(u32)(((u64)(val) & 0xffffffff00000000) >> 32)
+-
+ static int ata_io_flush(struct ahci_uc_priv *uc_priv, u8 port);
+ 
+ #ifndef CONFIG_DM_SCSI
+ struct ahci_uc_priv *probe_ent = NULL;
+ #endif
+ 
+-#define writel_with_flush(a,b)	do { writel(a,b); mb(); readl(b); } while (0)
++#define writel_with_flush(a,b)	do { writel(a,b); readl(b); } while (0)
+ 
+ /*
+  * Some controllers limit number of blocks they can read/write at once.
+@@ -523,9 +520,8 @@ static int ahci_fill_sg(struct ahci_uc_priv *uc_priv, u8 port,
+ 
+ 	for (i = 0; i < sg_count; i++) {
+ 		ahci_sg->addr =
+-			cpu_to_le32(LOWER32(buf + i * MAX_DATA_BYTE_COUNT));
+-		ahci_sg->addr_hi =
+-			cpu_to_le32(UPPER32(buf + i * MAX_DATA_BYTE_COUNT));
++		    cpu_to_le32((unsigned long) buf + i * MAX_DATA_BYTE_COUNT);
++		ahci_sg->addr_hi = 0;
+ 		ahci_sg->flags_size = cpu_to_le32(0x3fffff &
+ 					  (buf_len < MAX_DATA_BYTE_COUNT
+ 					   ? (buf_len - 1)
+@@ -542,8 +538,11 @@ static void ahci_fill_cmd_slot(struct ahci_ioports *pp, u32 opts)
+ {
+ 	pp->cmd_slot->opts = cpu_to_le32(opts);
+ 	pp->cmd_slot->status = 0;
+-	pp->cmd_slot->tbl_addr = cpu_to_le32(LOWER32(pp->cmd_tbl));
+-	pp->cmd_slot->tbl_addr_hi = cpu_to_le32(UPPER32(pp->cmd_tbl));
++	pp->cmd_slot->tbl_addr = cpu_to_le32((u32)pp->cmd_tbl & 0xffffffff);
++#ifdef CONFIG_PHYS_64BIT
++	pp->cmd_slot->tbl_addr_hi =
++	    cpu_to_le32((u32)(((pp->cmd_tbl) >> 16) >> 16));
++#endif
+ }
+ 
+ static int wait_spinup(void __iomem *port_mmio)
+@@ -691,20 +690,14 @@ static int ahci_device_data_io(struct ahci_uc_priv *uc_priv, u8 port, u8 *fis,
+ 	ahci_dcache_flush_sata_cmd(pp);
+ 	ahci_dcache_flush_range((unsigned long)buf, (unsigned long)buf_len);
+ 
+-	mb();
+-
+ 	writel_with_flush(1, port_mmio + PORT_CMD_ISSUE);
+ 
+-	mb();
+-
+ 	if (waiting_for_cmd_completed(port_mmio + PORT_CMD_ISSUE,
+ 				WAIT_MS_DATAIO, 0x1)) {
+ 		printf("timeout exit!\n");
+ 		return -1;
+ 	}
+ 
+-	mb();
+-
+ 	ahci_dcache_invalidate_range((unsigned long)buf,
+ 				     (unsigned long)buf_len);
+ 	debug("%s: %d byte transferred.\n", __func__, pp->cmd_slot->status);
+-- 
+2.22.0
+

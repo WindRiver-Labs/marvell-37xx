@@ -1,0 +1,45 @@
+From bc94bafd05bc1ceaf89eef92bf4843f43092dd0f Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Mon, 7 Jan 2019 17:23:57 +0200
+Subject: [PATCH 0977/1200] scripts: ci: add cn9130 to the build system
+
+Change-Id: I00a1b4b16769bc652ad696ebdf81259e0ef30aa1
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/62465
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Lior Levin <levin@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/1881
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ scripts/ci/compile.sh           | 1 +
+ scripts/ci/supported_builds.txt | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index 1b0107102a..590e9e8b83 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -119,6 +119,7 @@ case $build_name in
+ 
+ 	uboot_2018_cn9030_A ) device_tree="cn9030-vd-A"; ;;
+ 	uboot_2018_cn9030_B ) device_tree="cn9030-vd-B"; ;;
++	uboot_2018_cn9130_A ) device_tree="cn9130-db-A"; ;;
+ 
+ 	uboot_2018*_a37xx_ddr3_v2_A_* )
+ 		device_tree="armada-3720-db"; ;;
+diff --git a/scripts/ci/supported_builds.txt b/scripts/ci/supported_builds.txt
+index 9dec00cb0c..2a4d1c65c6 100644
+--- a/scripts/ci/supported_builds.txt
++++ b/scripts/ci/supported_builds.txt
+@@ -32,6 +32,7 @@ uboot_2018_a80x0_ucpe
+ 
+ uboot_2018_cn9030_A
+ uboot_2018_cn9030_B
++uboot_2018_cn9130_A
+ 
+ uboot_2018_a37xx_ddr3_v2_A_1000_800
+ uboot_2018_a37xx_ddr3_v2_B_1000_800
+-- 
+2.22.0
+

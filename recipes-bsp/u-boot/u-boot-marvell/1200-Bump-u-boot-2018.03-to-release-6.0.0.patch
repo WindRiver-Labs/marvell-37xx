@@ -1,0 +1,23 @@
+From 5ab3e18ffca9f57c772fe8601dfdc901e7372106 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Sun, 28 Jul 2019 09:58:00 +0300
+Subject: [PATCH 1200/1200] Bump u-boot-2018.03 to release 6.0.0
+
+Change-Id: I2e5f481fdc60aa9a999644578c12113bc81508e6
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/13163
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+---
+ localversion | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/localversion b/localversion
+index 5c96c49b29..4257ecf852 100644
+--- a/localversion
++++ b/localversion
+@@ -1 +1 @@
+--5.0.0
++-6.0.0
+-- 
+2.22.0
+

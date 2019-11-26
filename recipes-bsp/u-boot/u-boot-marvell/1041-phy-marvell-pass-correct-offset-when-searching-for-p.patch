@@ -1,0 +1,35 @@
+From 5eb6a193dcddc7ee1439a376b570ea3446a70971 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Tue, 5 Mar 2019 16:56:35 +0100
+Subject: [PATCH 1041/1200] phy: marvell: pass correct offset when searching
+ for parent node
+
+Fix the parent search by replacing the node instance with parent one in
+a call to fdt_node_offset_by_compatible().
+
+Change-Id: I8016f999a6462825be0468e7201d5758d14eaafe
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/5217
+Reviewed-by: Nadav Haklai <Nadav.Haklai@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Tested-by: sa_ip-sw-jenkins
+---
+ drivers/phy/marvell/comphy_cp110.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/phy/marvell/comphy_cp110.c b/drivers/phy/marvell/comphy_cp110.c
+index a371bc2ab4..fc389b307e 100644
+--- a/drivers/phy/marvell/comphy_cp110.c
++++ b/drivers/phy/marvell/comphy_cp110.c
+@@ -472,7 +472,7 @@ void comphy_dedicated_phys_init(void)
+ 		if (!fdtdec_get_is_enabled(gd->fdt_blob, node))
+ 			continue;
+ 
+-		parent = fdt_node_offset_by_compatible(gd->fdt_blob, node,
++		parent = fdt_node_offset_by_compatible(gd->fdt_blob, parent,
+ 						       "marvell,mvebu-utmi");
+ 		if (parent <= 0)
+ 			break;
+-- 
+2.22.0
+

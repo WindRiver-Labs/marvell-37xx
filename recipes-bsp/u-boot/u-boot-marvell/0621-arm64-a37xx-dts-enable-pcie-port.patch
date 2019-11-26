@@ -1,0 +1,82 @@
+From 6e910b06d61b14b6a168dbf106b59bb57a18e405 Mon Sep 17 00:00:00 2001
+From: Wilson Ding <dingwei@marvell.com>
+Date: Wed, 13 Dec 2017 19:21:43 +0800
+Subject: [PATCH 0621/1200] arm64: a37xx: dts: enable pcie port
+
+This patch enabled PCIe port on both devel-board
+and espressobin board.
+
+Change-Id: I26a75bf45121736b4f48b2553c671298a7e5bcde
+Cc: Simon Glass <sjg@chromium.org>
+Cc: Stefan Roese <sr@denx.de>
+Signed-off-by: Wilson Ding <dingwei@marvell.com>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/52536
+Tested-by: Hua Jing <jinghua@marvell.com>
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+---
+ arch/arm/dts/armada-3720-db.dts          |  8 ++++++++
+ arch/arm/dts/armada-3720-espressobin.dts |  7 +++++++
+ arch/arm/dts/armada-37xx.dtsi            | 16 ++++++++++++++++
+ 3 files changed, 31 insertions(+)
+
+diff --git a/arch/arm/dts/armada-3720-db.dts b/arch/arm/dts/armada-3720-db.dts
+index 52fc134bad..770c08aa7d 100644
+--- a/arch/arm/dts/armada-3720-db.dts
++++ b/arch/arm/dts/armada-3720-db.dts
+@@ -154,3 +154,11 @@
+ &usb3 {
+ 	status = "okay";
+ };
++
++/* CON17 */
++&pcie0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pcie_pins>;
++	reset-gpio = <&gpiosb 3 GPIO_ACTIVE_HIGH>;
++	status = "okay";
++};
+diff --git a/arch/arm/dts/armada-3720-espressobin.dts b/arch/arm/dts/armada-3720-espressobin.dts
+index 4e70d885bc..7bfccb0435 100644
+--- a/arch/arm/dts/armada-3720-espressobin.dts
++++ b/arch/arm/dts/armada-3720-espressobin.dts
+@@ -141,3 +141,10 @@
+ &usb3 {
+ 	status = "okay";
+ };
++
++&pcie0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pcie_pins>;
++	reset-gpio = <&gpiosb 3 GPIO_ACTIVE_HIGH>;
++	status = "okay";
++};
+diff --git a/arch/arm/dts/armada-37xx.dtsi b/arch/arm/dts/armada-37xx.dtsi
+index 9fc87c9272..54007428ed 100644
+--- a/arch/arm/dts/armada-37xx.dtsi
++++ b/arch/arm/dts/armada-37xx.dtsi
+@@ -294,5 +294,21 @@
+ 				max-lanes = <2>;
+ 			};
+ 		};
++
++		pcie0: pcie@d0070000 {
++			compatible = "marvell,armada-37xx-pcie";
++			reg = <0 0xd0070000 0 0x20000>;
++			#address-cells = <3>;
++			#size-cells = <2>;
++			device_type = "pci";
++			num-lanes = <1>;
++			status = "disabled";
++
++			bus-range = <0 0xff>;
++			ranges = <0x82000000 0 0xe8000000
++				 0 0xe8000000 0 0x1000000 /* Port 0 MEM */
++				 0x81000000 0 0xe9000000
++				 0 0xe9000000 0 0x10000>; /* Port 0 IO*/
++		};
+ 	};
+ };
+-- 
+2.22.0
+

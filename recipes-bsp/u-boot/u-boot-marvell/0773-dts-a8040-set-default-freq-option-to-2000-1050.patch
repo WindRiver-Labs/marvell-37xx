@@ -1,0 +1,30 @@
+From f4d5bcd543af7982db6d1600bf355d1cc4f07140 Mon Sep 17 00:00:00 2001
+From: Igal Liberman <igall@marvell.com>
+Date: Tue, 3 Jul 2018 15:55:23 +0300
+Subject: [PATCH 0773/1200] dts: a8040: set default freq option to 2000/1050
+
+Change-Id: I98ab6175fac8c9289d92eca23ce0fd45d77cbf1e
+Signed-off-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/57620
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Christine Gharzuzi <chrisg@marvell.com>
+---
+ arch/arm/dts/armada-8040-dev-info.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/armada-8040-dev-info.dtsi b/arch/arm/dts/armada-8040-dev-info.dtsi
+index ff7d9cce47..4ce015c142 100644
+--- a/arch/arm/dts/armada-8040-dev-info.dtsi
++++ b/arch/arm/dts/armada-8040-dev-info.dtsi
+@@ -40,7 +40,7 @@
+ 					  "0x3", "CPU/DDR = 0x3: 1800/1050 Mhz, PIDI = 0: 1Ghz",
+ 					  "0x4", "CPU/DDR = 0x4: 1600/1050 Mhz, PIDI = 0: 1Ghz",
+ 					  "0xe", "CPU/DDR = 0x6: 1300/800 Mhz,  PIDI = 1: 500Mhz";
+-				default = <0xe>;
++				default = <0x1>;
+ 				status = "okay";
+ 			};
+ 			boot_mode {
+-- 
+2.22.0
+

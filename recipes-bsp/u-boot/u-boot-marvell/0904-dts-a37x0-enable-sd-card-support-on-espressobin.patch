@@ -1,0 +1,58 @@
+From ef0e8919f7c8905131ff6d56dd311baaa2351da6 Mon Sep 17 00:00:00 2001
+From: Wilson Ding <dingwei@marvell.com>
+Date: Tue, 2 May 2017 17:49:28 +0800
+Subject: [PATCH 0904/1200] dts: a37x0: enable sd card support on espressobin
+
+Enabled SDIO slot 0 (south bridge) for SD card on
+Espressobin board.
+
+Change-Id: I51a2debf9fba276b9c4a2bc6da91328d47f443e3
+Signed-off-by: Wilson Ding <dingwei@marvell.com>
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/60945
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/armada-3720-espressobin.dts | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/arch/arm/dts/armada-3720-espressobin.dts b/arch/arm/dts/armada-3720-espressobin.dts
+index d8bd75211b..24da9df069 100644
+--- a/arch/arm/dts/armada-3720-espressobin.dts
++++ b/arch/arm/dts/armada-3720-espressobin.dts
+@@ -68,6 +68,17 @@
+ 		reg = <0x00000000 0x00000000 0x00000000 0x20000000>;
+ 	};
+ 
++	vcc_sd_reg0: regulator@0 {
++		compatible = "regulator-gpio";
++		regulator-name = "vcc_sd0";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-type = "voltage";
++		states = <1800000 0x1
++			  3300000 0x0>;
++		gpios = <&gpionb 4 GPIO_ACTIVE_HIGH>;
++	};
++
+ 	mdio@32004 {
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+@@ -126,6 +137,14 @@
+ 	status = "okay";
+ };
+ 
++&sdhci0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&sdio_pins>;
++	bus-width = <4>;
++	vqmmc-supply = <&vcc_sd_reg0>;
++	status = "okay";
++};
++
+ &spi0 {
+ 	status = "okay";
+ 	pinctrl-names = "default";
+-- 
+2.22.0
+

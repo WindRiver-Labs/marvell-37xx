@@ -1,0 +1,97 @@
+From f0507bf15d34db0b249fc4a19152c6ccc4105027 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Fri, 22 Feb 2019 22:30:30 +0100
+Subject: [PATCH 1034/1200] arm64: dts: cn9132: update serdes topology for
+ setup A
+
+Serdes configuration was update therefore currently supported devices
+connected to phy on CP2 are:
+- PCIex2 port0
+- SATA port0
+- USB3.0 port1
+- 10G ETH port0
+- PCIex1 port2
+
+The SW1 found in the extension board "SLM-1521-V2" connected to CP2
+should be set to:
+SW1.1 = ON
+SW1.2 = OFF
+SW1.3 = ON
+SW1.4 = OFF
+SW1.5 = ON
+
+It is required in order to connect appropriate serdes lane to relevant
+devices supported in updated setup.
+
+Change-Id: Iae62a33d2ef3d9b5c32d2437a2ffb1e1f2396cd8
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/4697
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Nadav Haklai <Nadav.Haklai@cavium.com>
+---
+ arch/arm/dts/cn9132-db-A.dts | 21 ++++++++++++++++-----
+ 1 file changed, 16 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm/dts/cn9132-db-A.dts b/arch/arm/dts/cn9132-db-A.dts
+index bc2a784db1..467bcf6e12 100644
+--- a/arch/arm/dts/cn9132-db-A.dts
++++ b/arch/arm/dts/cn9132-db-A.dts
+@@ -24,11 +24,11 @@
+ 	};
+ 
+ 	phy2 {
+-		phy-type = <COMPHY_TYPE_PEX0>;
++		phy-type = <COMPHY_TYPE_SATA0>;
+ 	};
+ 
+ 	phy3 {
+-		phy-type = <COMPHY_TYPE_PEX0>;
++		phy-type = <COMPHY_TYPE_USB3_HOST1>;
+ 	};
+ 
+ 	phy4 {
+@@ -37,7 +37,7 @@
+ 	};
+ 
+ 	phy5 {
+-		phy-type = <COMPHY_TYPE_SATA1>;
++		phy-type = <COMPHY_TYPE_PEX2>;
+ 	};
+ };
+ 
+@@ -53,7 +53,13 @@
+ 
+ /* SLM-1521-V2, CON6 */
+ &cp2_pcie0 {
+-	num-lanes = <4>;
++	num-lanes = <2>;
++	status = "okay";
++};
++
++/* SLM-1521-V2, CON8 */
++&cp2_pcie0 {
++	num-lanes = <1>;
+ 	status = "okay";
+ };
+ 
+@@ -81,7 +87,7 @@
+ 		     0xe  0xe  0xe >;
+ };
+ 
+-/* SLM-1521-V2, CON2 */
++/* SLM-1521-V2, CON4 */
+ &cp2_sata0 {
+ 	status = "okay";
+ };
+@@ -93,3 +99,8 @@
+ 	bus-width = <4>;
+ 	status = "okay";
+ };
++
++/* SLM-1521-V2, CON11 */
++&cp2_usb3_1 {
++	status = "okay";
++};
+-- 
+2.22.0
+

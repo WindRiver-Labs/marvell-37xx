@@ -1,0 +1,52 @@
+From d1329e3171f446f248445946d973f0defd2140b5 Mon Sep 17 00:00:00 2001
+From: Evan Wang <xswang@marvell.com>
+Date: Sat, 1 Apr 2017 10:47:20 +0800
+Subject: [PATCH 0712/1200] dts: a3700: add node of SDIO signal voltage
+ supplier
+
+- The A3700 SDIO signal voltage needs setting via GPIO,
+  or the SDIO does not work.
+- The patch adds the regulator node as supplier for
+  SDIO signal voltage, and connects it to SDIO port.
+
+Change-Id: Ic7d50bc866dd7e441e0c32886190764ae5efaea4
+Signed-off-by: Evan Wang <xswang@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/53591
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+Tested-by: Hua Jing <jinghua@marvell.com>
+---
+ arch/arm/dts/armada-3720-db.dts | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/arch/arm/dts/armada-3720-db.dts b/arch/arm/dts/armada-3720-db.dts
+index caf2a687b4..3b7764ea64 100644
+--- a/arch/arm/dts/armada-3720-db.dts
++++ b/arch/arm/dts/armada-3720-db.dts
+@@ -85,6 +85,16 @@
+ 		gpio = <&expander0 0 GPIO_ACTIVE_HIGH>;
+ 	};
+ 
++	vcc_sd_reg0: regulator@0 {
++		compatible = "regulator-gpio";
++		regulator-name = "vcc_sd0";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-type = "voltage";
++		states = <1800000 0x1
++				  3300000 0x0>;
++		gpios = <&gpiosb 23 GPIO_ACTIVE_HIGH>;
++	};
+ };
+ 
+ 
+@@ -130,6 +140,7 @@
+ 
+ &sdhci0 {
+ 	bus-width = <4>;
++	vqmmc-supply = <&vcc_sd_reg0>;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&sdio_pins>;
+ 	status = "okay";
+-- 
+2.22.0
+

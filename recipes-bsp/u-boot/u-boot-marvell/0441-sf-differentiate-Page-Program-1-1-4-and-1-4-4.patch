@@ -1,0 +1,47 @@
+From 294c3f0b3df5c52a6aa73c0675a16394c85f8327 Mon Sep 17 00:00:00 2001
+From: Cyrille Pitchen <cyrille.pitchen@atmel.com>
+Date: Tue, 25 Jul 2017 15:00:58 +0800
+Subject: [PATCH 0441/1200] sf: differentiate Page Program 1-1-4 and 1-4-4
+
+This patch simply renames the ambiguous CMD_QUAD_PAGE_PROGRAM macro
+into the more explicit CMD_PAGE_PROGRAM_1_1_4.
+Also it defines the CMD_PAGE_PROGRAM_1_4_4 macro to the standard 38h op
+code.
+
+Signed-off-by: Cyrille Pitchen <cyrille.pitchen@atmel.com>
+Signed-off-by: Wenyou Yang <wenyou.yang@microchip.com>
+---
+ drivers/mtd/spi/sf_internal.h | 3 ++-
+ drivers/mtd/spi/spi_flash.c   | 2 +-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mtd/spi/sf_internal.h b/drivers/mtd/spi/sf_internal.h
+index 5c551089d6..8b8c951bcc 100644
+--- a/drivers/mtd/spi/sf_internal.h
++++ b/drivers/mtd/spi/sf_internal.h
+@@ -48,7 +48,8 @@ enum spi_nor_option_flags {
+ #define CMD_PAGE_PROGRAM		0x02
+ #define CMD_WRITE_DISABLE		0x04
+ #define CMD_WRITE_ENABLE		0x06
+-#define CMD_QUAD_PAGE_PROGRAM		0x32
++#define CMD_PAGE_PROGRAM_1_1_4		0x32
++#define CMD_PAGE_PROGRAM_1_4_4		0x38
+ 
+ /* Read commands */
+ #define CMD_READ_ARRAY_SLOW		0x03
+diff --git a/drivers/mtd/spi/spi_flash.c b/drivers/mtd/spi/spi_flash.c
+index 2c4752ce90..d51d336228 100644
+--- a/drivers/mtd/spi/spi_flash.c
++++ b/drivers/mtd/spi/spi_flash.c
+@@ -1109,7 +1109,7 @@ int spi_flash_scan(struct spi_flash *flash)
+ 
+ 	/* Look for write commands */
+ 	if (info->flags & WR_QPP && spi->mode & SPI_TX_QUAD) {
+-		flash->write_cmd = CMD_QUAD_PAGE_PROGRAM;
++		flash->write_cmd = CMD_PAGE_PROGRAM_1_1_4;
+ 		flash->write_proto = SPI_FPROTO_1_1_4;
+ 	} else {
+ 		/* Go for default supported write cmd */
+-- 
+2.22.0
+

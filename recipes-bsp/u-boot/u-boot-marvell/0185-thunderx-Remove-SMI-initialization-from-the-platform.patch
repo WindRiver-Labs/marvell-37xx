@@ -1,0 +1,31 @@
+From 258c78519ae179ede3c6d9217f1cca03e0526ffb Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Tue, 17 May 2016 16:20:56 -0400
+Subject: [PATCH 0185/1200] thunderx: Remove SMI initialization from the
+ platform code
+
+Remove SMI initialization as SMIs are enumerated with ECAM
+
+Signed-off-by: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+---
+ board/cavium/thunderx/thunderx.c | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/board/cavium/thunderx/thunderx.c b/board/cavium/thunderx/thunderx.c
+index e0b9c25a20..13417e911c 100644
+--- a/board/cavium/thunderx/thunderx.c
++++ b/board/cavium/thunderx/thunderx.c
+@@ -140,10 +140,6 @@ int board_eth_init(bd_t *bis)
+ 	}
+ #endif
+ #endif
+-#if defined(CONFIG_THUNDERX_SMI)
+-	thunderx_smi_initialize(bis, 0);
+-	thunderx_smi_initialize(bis, 1);
+-#endif
+ 
+ #if defined(CONFIG_THUNDERX_VNIC)
+ #define VNIC_PER_NODE 8
+-- 
+2.22.0
+

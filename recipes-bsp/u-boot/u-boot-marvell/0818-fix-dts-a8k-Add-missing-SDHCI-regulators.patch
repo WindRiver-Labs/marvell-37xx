@@ -1,0 +1,86 @@
+From 4c90de2cb9c473bba6b3ee8d95efb2f24d72540f Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Wed, 25 Jul 2018 17:25:35 +0300
+Subject: [PATCH 0818/1200] fix: dts: a8k: Add missing SDHCI regulators
+
+Add SDHCI regulators to A7K and A8K DTSI fuiles.
+Connect these regulators to CP-side SDHCI for switching between
+3.3V and 1.8V supplies for high speed controller modes.
+
+Change-Id: Iad25b5c9a4d1ada69aefe1e586f6d86dfa6480fa
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/58412
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/armada-70x0-db.dtsi | 14 ++++++++++++++
+ arch/arm/dts/armada-80x0-db.dtsi | 14 ++++++++++++++
+ 2 files changed, 28 insertions(+)
+
+diff --git a/arch/arm/dts/armada-70x0-db.dtsi b/arch/arm/dts/armada-70x0-db.dtsi
+index 3b75aebed7..c1b9cca8a3 100644
+--- a/arch/arm/dts/armada-70x0-db.dtsi
++++ b/arch/arm/dts/armada-70x0-db.dtsi
+@@ -21,6 +21,10 @@
+ 				};
+ 			};
+ 
++			sdhci@780000 {
++				vqmmc-supply = <&cp0_reg_sd_vccq>;
++			};
++
+ 			cp0_reg_usb3_vbus0:cp0_usb3_vbus@0 {
+ 				compatible = "regulator-fixed";
+ 				regulator-min-microvolt = <5000000>;
+@@ -66,6 +70,16 @@
+ 				current-limiter = <&cp0_reg_usb3_current_limiter1>;
+ 				vbus-disable-delay = <500>;
+ 			};
++
++			cp0_reg_sd_vccq: cp0_sd_vccq@0 {
++				compatible = "regulator-gpio";
++				regulator-name = "cp0_sd_vcc";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <3300000>;
++				gpios = <&expander0 15 GPIO_ACTIVE_HIGH>;
++				states = <1800000 0x1
++					  3300000 0x0>;
++			};
+ 		};
+ 	};
+ };
+diff --git a/arch/arm/dts/armada-80x0-db.dtsi b/arch/arm/dts/armada-80x0-db.dtsi
+index 2411bea8ab..b2160e5a93 100644
+--- a/arch/arm/dts/armada-80x0-db.dtsi
++++ b/arch/arm/dts/armada-80x0-db.dtsi
+@@ -27,6 +27,10 @@
+ 				};
+ 			};
+ 
++			sdhci@780000 {
++				vqmmc-supply = <&cp0_reg_sd_vccq>;
++			};
++
+ 			cp0_reg_usb3_vbus0:cp0_usb3_vbus@0 {
+ 				compatible = "regulator-fixed";
+ 				regulator-min-microvolt = <5000000>;
+@@ -92,6 +96,16 @@
+ 				current-limiter = <&cp0_reg_usb3_current_limiter1>;
+ 				vbus-disable-delay = <500>;
+ 			};
++
++			cp0_reg_sd_vccq: cp0_sd_vccq@0 {
++				compatible = "regulator-gpio";
++				regulator-name = "cp0_sd_vcc";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <3300000>;
++				gpios = <&expander0 15 GPIO_ACTIVE_HIGH>;
++				states = <1800000 0x1
++					  3300000 0x0>;
++			};
+ 		};
+ 	};
+ 
+-- 
+2.22.0
+

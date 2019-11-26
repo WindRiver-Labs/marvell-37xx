@@ -1,0 +1,52 @@
+From 5161163c3f764325700e7cfe9949641615836644 Mon Sep 17 00:00:00 2001
+From: Bin Meng <bmeng.cn@gmail.com>
+Date: Fri, 3 Aug 2018 01:14:36 -0700
+Subject: [PATCH 1137/1200] dm: pci: Extract vendor/device id in
+ child_post_bind()
+
+Currently only devfn is extracted in child_post_bind(). Now that
+we have the live-tree version API to look up PCI vendor and device
+id from the compatible string, let's extract and save them too.
+
+Change-Id: Id266d7bf1e248359062f67f8ba763c7cd1bb92b2
+Signed-off-by: Bin Meng <bmeng.cn@gmail.com>
+Reviewed-by: Simon Glass <sjg@chromium.org>
+Reviewed-on: https://sj1git1.cavium.com/9924
+Tested-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ drivers/pci/pci-uclass.c | 11 +++++------
+ 1 file changed, 5 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/pci/pci-uclass.c b/drivers/pci/pci-uclass.c
+index 181f174e8d..faba7c0a8e 100644
+--- a/drivers/pci/pci-uclass.c
++++ b/drivers/pci/pci-uclass.c
+@@ -1109,19 +1109,18 @@ static int pci_uclass_child_post_bind(struct udevice *dev)
+ 	if (!dev_of_valid(dev))
+ 		return 0;
+ 
+-	/*
+-	 * We could read vendor, device, class if available. But for now we
+-	 * just check the address.
+-	 */
+ 	pplat = dev_get_parent_platdata(dev);
++
++	/* Extract vendor id and device id if available */
++	ofnode_read_pci_vendev(dev_ofnode(dev), &pplat->vendor, &pplat->device);
++
++	/* Extract the devfn from fdt_pci_addr */
+ 	ret = ofnode_read_pci_addr(dev_ofnode(dev), FDT_PCI_SPACE_CONFIG, "reg",
+ 				   &addr);
+-
+ 	if (ret) {
+ 		if (ret != -ENOENT)
+ 			return -EINVAL;
+ 	} else {
+-		/* extract the devfn from fdt_pci_addr */
+ 		pplat->devfn = addr.phys_hi & 0xff00;
+ 	}
+ 
+-- 
+2.22.0
+

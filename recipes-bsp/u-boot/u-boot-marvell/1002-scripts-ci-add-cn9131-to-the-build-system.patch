@@ -1,0 +1,42 @@
+From 252257e5651af68bee3ea8957590f0e78c12a0dc Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Tue, 29 Jan 2019 17:51:30 +0100
+Subject: [PATCH 1002/1200] scripts: ci: add cn9131 to the build system
+
+Change-Id: Ia96a71ce6ae215e190a3e6c4732ae1b1502eaebd
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/2961
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ scripts/ci/compile.sh           | 1 +
+ scripts/ci/supported_builds.txt | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index 590e9e8b83..a5c86db7b8 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -120,6 +120,7 @@ case $build_name in
+ 	uboot_2018_cn9030_A ) device_tree="cn9030-vd-A"; ;;
+ 	uboot_2018_cn9030_B ) device_tree="cn9030-vd-B"; ;;
+ 	uboot_2018_cn9130_A ) device_tree="cn9130-db-A"; ;;
++	uboot_2018_cn9131_A ) device_tree="cn9131-db-A"; ;;
+ 
+ 	uboot_2018*_a37xx_ddr3_v2_A_* )
+ 		device_tree="armada-3720-db"; ;;
+diff --git a/scripts/ci/supported_builds.txt b/scripts/ci/supported_builds.txt
+index 2a4d1c65c6..b517ba2ae1 100644
+--- a/scripts/ci/supported_builds.txt
++++ b/scripts/ci/supported_builds.txt
+@@ -33,6 +33,7 @@ uboot_2018_a80x0_ucpe
+ uboot_2018_cn9030_A
+ uboot_2018_cn9030_B
+ uboot_2018_cn9130_A
++uboot_2018_cn9131_A
+ 
+ uboot_2018_a37xx_ddr3_v2_A_1000_800
+ uboot_2018_a37xx_ddr3_v2_B_1000_800
+-- 
+2.22.0
+

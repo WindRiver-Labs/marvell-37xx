@@ -1,0 +1,49 @@
+From 62b31da5f41a5ffbbd510fc0337773e86c91a340 Mon Sep 17 00:00:00 2001
+From: Ken Ma <make@marvell.com>
+Date: Mon, 5 Mar 2018 17:33:05 +0800
+Subject: [PATCH 0616/1200] Revert "arm64: a37xx: dts: Add pin control nodes to
+ DT"
+
+The commit "arm64: mvebu: Add pinctrl nodes for Armada 3700" has
+added new pinctrl nodes.
+This reverts commit f7cab0f95b05ec6a66fe4796b9ad44406d0cc864.
+
+Change-Id: I0870095ac8f807d1447c554451419c1e244e71d1
+Cc: Simon Glass <sjg@chromium.org>
+Cc: Stefan Roese <sr@denx.de>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/52531
+Tested-by: Hua Jing <jinghua@marvell.com>
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+---
+ arch/arm/dts/armada-37xx.dtsi | 14 --------------
+ 1 file changed, 14 deletions(-)
+
+diff --git a/arch/arm/dts/armada-37xx.dtsi b/arch/arm/dts/armada-37xx.dtsi
+index 301f9eecc4..9fc87c9272 100644
+--- a/arch/arm/dts/armada-37xx.dtsi
++++ b/arch/arm/dts/armada-37xx.dtsi
+@@ -286,20 +286,6 @@
+ 				status = "disabled";
+ 			};
+ 
+-			pinctl0: pinctl@13830 { /* north bridge */
+-				compatible = "marvell,armada-3700-pinctl";
+-				bank-name = "armada-3700-nb";
+-				reg = <0x13830 0x4>;
+-				pin-count = <36>;
+-			};
+-
+-			pinctl1: pinctl@18830 { /* south bridge */
+-				compatible = "marvell,armada-3700-pinctl";
+-				bank-name = "armada-3700-sb";
+-				reg = <0x18830 0x4>;
+-				pin-count = <30>;
+-			};
+-
+ 			comphy: comphy@18300 {
+ 				compatible = "marvell,mvebu-comphy", "marvell,comphy-armada-3700";
+ 				reg = <0x18300 0x28>,
+-- 
+2.22.0
+

@@ -1,0 +1,31 @@
+From e92137702388edf0d9329fc7c5449532989bab63 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Tue, 15 Jan 2019 11:27:27 +0200
+Subject: [PATCH 0982/1200] arm64: mvebu: cn9130: remove redundant string from
+ model name
+
+Change-Id: I59141af6ea0b5c0196aa5710822ec0c3e27aa672
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/2129
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Ben Peled <Ben.Peled@cavium.com>
+---
+ arch/arm/dts/cn9130-db-A.dts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/cn9130-db-A.dts b/arch/arm/dts/cn9130-db-A.dts
+index aac7cd09aa..37702f5613 100644
+--- a/arch/arm/dts/cn9130-db-A.dts
++++ b/arch/arm/dts/cn9130-db-A.dts
+@@ -8,7 +8,7 @@
+ #include "cn9130-db.dtsi"
+ 
+ / {
+-	model = "Model: Marvell CN9130 development board (CP NOR) setup(A)";
++	model = "Marvell CN9130 development board (CP NOR) setup(A)";
+ 	compatible = "marvell,cn9130-db", "marvell,cn91xx", "marvell,cn9030-vd",
+ 		     "marvell,cn9030", "marvell,armada-ap806-quad",
+ 		     "marvell,armada-ap806";
+-- 
+2.22.0
+

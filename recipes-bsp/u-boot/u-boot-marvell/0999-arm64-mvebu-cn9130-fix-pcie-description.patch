@@ -1,0 +1,52 @@
+From 3e948ba337827234b8e5ad82d27d8e3b16bc3493 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Wed, 23 Jan 2019 11:44:50 +0100
+Subject: [PATCH 0999/1200] arm64: mvebu: cn9130: fix pcie description
+
+- the PCIe mem size should be reduced since last 1MB is reserved for
+configuration space. The CP110_PCIE_MEM_SIZE is used for defining the base
+address of config space.
+
+- remove downstream I/O since it is not used
+
+Change-Id: I47be9c787b21de0c7a287684e7de1ec48faf5386
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/2958
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/cn9130-db.dtsi | 5 +----
+ arch/arm/dts/cn9130.dtsi    | 2 +-
+ 2 files changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm/dts/cn9130-db.dtsi b/arch/arm/dts/cn9130-db.dtsi
+index ccf575ffa3..47f893934d 100644
+--- a/arch/arm/dts/cn9130-db.dtsi
++++ b/arch/arm/dts/cn9130-db.dtsi
+@@ -101,9 +101,6 @@
+ 
+ &cp0_pcie0 {
+ 	status = "okay";
+-	ranges =
+-		/* downstream I/O */
+-		<0x81000000 0 0xf8000000 0 0xf8000000 0 0x10000
+ 		/* non-prefetchable memory */
+-		0x82000000 0 0xc0000000 0 0xc0000000 0 0x2000000>;
++	ranges =<0x82000000 0 0xc0000000 0 0xc0000000 0 0x2000000>;
+ };
+diff --git a/arch/arm/dts/cn9130.dtsi b/arch/arm/dts/cn9130.dtsi
+index 05ed23943a..c7ac1d0e41 100644
+--- a/arch/arm/dts/cn9130.dtsi
++++ b/arch/arm/dts/cn9130.dtsi
+@@ -21,7 +21,7 @@
+ #define CP110_BASE			(CP110_BASE_OFFSET + \
+ 						(CP110_NUM * CP110_SPACE_SIZE))
+ 
+-#define CP110_PCIE_MEM_SIZE		(0x1000000)
++#define CP110_PCIE_MEM_SIZE		(0xf00000)
+ #define CP110_PCIE_BUS_MEM_CFG		(0x82000000)
+ 
+ /* CP110-0 Settings */
+-- 
+2.22.0
+

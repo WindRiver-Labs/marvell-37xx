@@ -1,0 +1,30 @@
+From 13b472b8f141f5b42380b1f9162362e31c5dad5f Mon Sep 17 00:00:00 2001
+From: Suneel Garapati <sgarapati@caviumnetworks.com>
+Date: Tue, 17 Apr 2018 13:04:16 -0700
+Subject: [PATCH 0529/1200] cmd: bootelf: invoke board_quiesce_devices for cgx
+ shutdown
+
+BME and apps use bootelf command, so add call to invoke
+cgx interface shutdown before control transfers.
+
+Signed-off-by: Suneel Garapati <sgarapati@caviumnetworks.com>
+---
+ cmd/elf.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/cmd/elf.c b/cmd/elf.c
+index 35135bff9d..ea86984826 100644
+--- a/cmd/elf.c
++++ b/cmd/elf.c
+@@ -279,6 +279,8 @@ int do_bootelf(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+ 	if (ep && !strcmp(ep, "no"))
+ 		return rcode;
+ 
++	board_quiesce_devices();
++
+ 	printf("## Starting application at 0x%08lx ...\n", addr);
+ 
+ 	/*
+-- 
+2.22.0
+

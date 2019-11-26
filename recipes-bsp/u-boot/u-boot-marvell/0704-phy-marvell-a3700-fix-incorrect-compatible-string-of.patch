@@ -1,0 +1,36 @@
+From 6a651ea43659880dd1f3a82cebf3fc1870a3ca16 Mon Sep 17 00:00:00 2001
+From: zachary <zhangzg@marvell.com>
+Date: Sat, 25 Feb 2017 00:49:08 +0800
+Subject: [PATCH 0704/1200] phy: marvell: a3700: fix incorrect compatible
+ string of usb2
+
+- USB2 phy could not be powered up due to wrong compatible string
+  in a3700 comphy driver.
+- This patch updates compatbile string for usb2 phy.
+
+Change-Id: I94ebbaf6750ee89f381e345f801deb2b10d52383
+Signed-off-by: zachary <zhangzg@marvell.com>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/53599
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ drivers/phy/marvell/comphy_a3700.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/phy/marvell/comphy_a3700.c b/drivers/phy/marvell/comphy_a3700.c
+index f1a4401bc2..c80e739c68 100644
+--- a/drivers/phy/marvell/comphy_a3700.c
++++ b/drivers/phy/marvell/comphy_a3700.c
+@@ -853,7 +853,7 @@ void comphy_dedicated_phys_init(void)
+ 		 */
+ 		if (usb32 == 0) {
+ 			node = fdt_node_offset_by_compatible(
+-				blob, -1, "marvell,armada-3700-ehci");
++				blob, -1, "marvell,armada3700-ehci");
+ 		} else {
+ 			node = fdt_node_offset_by_compatible(
+ 				blob, -1, "marvell,armada3700-xhci");
+-- 
+2.22.0
+

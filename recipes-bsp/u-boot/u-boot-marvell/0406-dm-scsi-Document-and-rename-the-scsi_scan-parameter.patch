@@ -1,0 +1,39 @@
+From af17b456a6fe4d36d0bf6c648d05a36bfded7804 Mon Sep 17 00:00:00 2001
+From: Simon Glass <sjg@chromium.org>
+Date: Wed, 14 Jun 2017 21:28:41 -0600
+Subject: [PATCH 0406/1200] dm: scsi: Document and rename the scsi_scan()
+ parameter
+
+The 'mode' parameter is actually a flag to determine whether to display
+a list of devices found during the scan. Rename it to reflect this, add a
+function comment and adjust callers to use a boolean.
+
+Signed-off-by: Simon Glass <sjg@chromium.org>
+Reviewed-by: Bin Meng <bmeng.cn@gmail.com>
+---
+ include/scsi.h | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/include/scsi.h b/include/scsi.h
+index 7767dd38bb..4108e3a8a9 100644
+--- a/include/scsi.h
++++ b/include/scsi.h
+@@ -235,10 +235,12 @@ void scsi_init(void);
+ int scsi_exec(struct udevice *dev, struct scsi_cmd *pccb);
+ int scsi_bus_reset(struct udevice *dev);
+ 
+-/***************************************************************************
+- * functions residing inside cmd_scsi.c
++/**
++ * scsi_scan() - Scan all SCSI controllers for available devices
++ *
++ * @vebose: true to show information about each device found
+  */
+-int scsi_scan(int mode);
++int scsi_scan(bool verbose);
+ 
+ #define SCSI_IDENTIFY					0xC0  /* not used */
+ 
+-- 
+2.22.0
+

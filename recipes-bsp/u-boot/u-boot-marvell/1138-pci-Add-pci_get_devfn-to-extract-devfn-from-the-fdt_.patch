@@ -1,0 +1,95 @@
+From 0592364a3728ee3fa19cc29a870e49f8c021b1dd Mon Sep 17 00:00:00 2001
+From: Stefan Roese <sr@denx.de>
+Date: Fri, 25 Jan 2019 11:52:42 +0100
+Subject: [PATCH 1138/1200] pci: Add pci_get_devfn() to extract devfn from the
+ fdt_pci_addr
+
+This function will be used by the Marvell Armada XP/38x PCIe driver,
+which is moved to DM right now. So let's extract the functionality
+from pci_uclass_child_post_bind() to make it available.
+
+Change-Id: I82d69d1bb038957c7892f0f90190da2167958138
+Signed-off-by: Stefan Roese <sr@denx.de>
+Reviewed-by: Simon Glass <sjg@chromium.org>
+Reviewed-by: Bin Meng <bmeng.cn@gmail.com>
+Reviewed-on: https://sj1git1.cavium.com/9925
+Tested-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ drivers/pci/pci-uclass.c | 28 +++++++++++++++++++---------
+ include/pci.h            | 10 ++++++++++
+ 2 files changed, 29 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/pci/pci-uclass.c b/drivers/pci/pci-uclass.c
+index faba7c0a8e..5678900b9b 100644
+--- a/drivers/pci/pci-uclass.c
++++ b/drivers/pci/pci-uclass.c
+@@ -1100,10 +1100,25 @@ static int pci_uclass_post_probe(struct udevice *bus)
+ 	return 0;
+ }
+ 
++int pci_get_devfn(struct udevice *dev)
++{
++	struct fdt_pci_addr addr;
++	int ret;
++
++	/* Extract the devfn from fdt_pci_addr */
++	ret = ofnode_read_pci_addr(dev_ofnode(dev), FDT_PCI_SPACE_CONFIG,
++				   "reg", &addr);
++	if (ret) {
++		if (ret != -ENOENT)
++			return -EINVAL;
++	}
++
++	return addr.phys_hi & 0xff00;
++}
++
+ static int pci_uclass_child_post_bind(struct udevice *dev)
+ {
+ 	struct pci_child_platdata *pplat;
+-	struct fdt_pci_addr addr;
+ 	int ret;
+ 
+ 	if (!dev_of_valid(dev))
+@@ -1115,14 +1130,9 @@ static int pci_uclass_child_post_bind(struct udevice *dev)
+ 	ofnode_read_pci_vendev(dev_ofnode(dev), &pplat->vendor, &pplat->device);
+ 
+ 	/* Extract the devfn from fdt_pci_addr */
+-	ret = ofnode_read_pci_addr(dev_ofnode(dev), FDT_PCI_SPACE_CONFIG, "reg",
+-				   &addr);
+-	if (ret) {
+-		if (ret != -ENOENT)
+-			return -EINVAL;
+-	} else {
+-		pplat->devfn = addr.phys_hi & 0xff00;
+-	}
++	pplat->devfn = pci_get_devfn(dev);
++	if (ret < 0)
++		return ret;
+ 
+ 	return 0;
+ }
+diff --git a/include/pci.h b/include/pci.h
+index b4c89f4284..64da9f32a4 100644
+--- a/include/pci.h
++++ b/include/pci.h
+@@ -1737,6 +1737,16 @@ struct dm_pci_emul_ops {
+ int sandbox_pci_get_emul(struct udevice *bus, pci_dev_t find_devfn,
+ 			 struct udevice **emulp);
+ 
++/**
++ * pci_get_devfn() - Extract the devfn from fdt_pci_addr of the device
++ *
++ * Get devfn from fdt_pci_addr of the specifified device
++ *
++ * @dev:	PCI device
++ * @return devfn in bits 15...8 if found, -ENODEV if not found
++ */
++int pci_get_devfn(struct udevice *dev);
++
+ #endif /* CONFIG_DM_PCI */
+ 
+ /**
+-- 
+2.22.0
+

@@ -1,0 +1,41 @@
+From 11a8f9ab2a21161cca4d317f7ce1701d9103b877 Mon Sep 17 00:00:00 2001
+From: Ofer Heifetz <oferh@marvell.com>
+Date: Thu, 23 Nov 2017 16:15:45 +0200
+Subject: [PATCH 0786/1200] mtd: nand: pxa3xx_nand: fix early spurious
+ interrupt
+
+When the nand is first probe, and upon the first command start, the
+status bits should be cleared before the interrupts are unmasked.
+
+This commit is taken from Linux:
+'commit 0b14392db2e'
+("mtd: nand: pxa3xx_nand: fix early spurious interrupt")
+
+Change-Id: I76f1f1f5253700b402122a9dc4ad4b13264db171
+Signed-off-by: Chris Packham <judge.packham@gmail.com>
+Signed-off-by: Ofer Heifetz <oferh@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/47030
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55772
+---
+ drivers/mtd/nand/pxa3xx_nand.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mtd/nand/pxa3xx_nand.c b/drivers/mtd/nand/pxa3xx_nand.c
+index 53370f6933..dd75c7b55d 100644
+--- a/drivers/mtd/nand/pxa3xx_nand.c
++++ b/drivers/mtd/nand/pxa3xx_nand.c
+@@ -482,8 +482,8 @@ static void pxa3xx_nand_start(struct pxa3xx_nand_info *info)
+ 	ndcr |= NDCR_ND_RUN;
+ 
+ 	/* clear status bits and run */
+-	nand_writel(info, NDCR, 0);
+ 	nand_writel(info, NDSR, NDSR_MASK);
++	nand_writel(info, NDCR, 0);
+ 	nand_writel(info, NDCR, ndcr);
+ }
+ 
+-- 
+2.22.0
+

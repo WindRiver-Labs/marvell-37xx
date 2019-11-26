@@ -1,0 +1,45 @@
+From 5a2704d91e6f085df200b40f7e04a9ed2a67b4e9 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Tue, 13 Nov 2018 17:50:25 +0200
+Subject: [PATCH 0898/1200] fix: cp110: Switch to 8-bit ECC NAND setting
+
+All A7K/A8K/A3900 boards are using NAND chip that supports
+8 bit ECC strength. Using lower ECC strength is not recommended
+by the flash manufacturer and may cause data corruption.
+
+After moving to the new ECC configuration it is required to execute
+the following steps:
+1. Burn the image with 8-bit ECC to the boot device or run it from UART
+2. Run "nand scrub.chip" to re-initialize the flash with new 8b ECC
+
+For boards booting from NAND:
+3. Initialize and save the u-boot environment to re-formatted nand flash
+4. Burn the boot image to re-formatted nand flash
+5. Change the boot device from 0xe (4KB page 4-bit ECC)
+   to 0xf (4KB page, 8-bit ECC).
+
+Change-Id: Iacad31f8a40be84b83635fa74eae9718f23577a3
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/60886
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/armada-cp110.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/armada-cp110.dtsi b/arch/arm/dts/armada-cp110.dtsi
+index 1381910431..af82c14411 100644
+--- a/arch/arm/dts/armada-cp110.dtsi
++++ b/arch/arm/dts/armada-cp110.dtsi
+@@ -214,7 +214,7 @@
+ 
+ 				nand-enable-arbiter;
+ 				num-cs = <1>;
+-				nand-ecc-strength = <4>;
++				nand-ecc-strength = <8>;
+ 				nand-ecc-step-size = <512>;
+ 				status = "disabled";
+ 			};
+-- 
+2.22.0
+

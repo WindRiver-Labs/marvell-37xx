@@ -1,0 +1,83 @@
+From c9417be5a5b7b0c6f69e781f5427ed0fdf59f369 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Fri, 24 May 2019 14:40:29 +0200
+Subject: [PATCH 1143/1200] pci: mvebu: fixup classid for for first device on
+ first bus
+
+Without this patch the mvebu pcie didn't work since the transaction to
+new PCI DM was done. With old DM model it worked since the whole pci
+enumeration was done via legacy pci_hose_scan_bus which allowed to
+pci_skip_dev. New PCI DM the generic enumeration process doesn't provide
+this kind of functionality but skipping BDF 0.0.0 in case of mvebu pci
+controller can be achived by faking it class to "bridge other" and
+setting CONFIG_PCIAUTO_SKIP_HOST_BRIDGE, which allows to skip
+autoconfiguration of this pci endpoint device.
+
+Thanks to that, the driver settings will not be overwritten as it happen
+with defaults configuration where the pcie under BDF 0.0.0 introduce
+itself as Memory controller with classid "0x0580" and in reality was
+allowing to overwrite some pcie controller registers during device
+autoconfiguration.
+
+Change-Id: I2289ba3d9368ce4375ad4fba76fa565fa20756db
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/9929
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Marcin Wojtas <marcin@marvell.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ drivers/pci/pci_mvebu.c     | 16 ++++++++++++++++
+ include/configs/mv-common.h |  5 +++++
+ 2 files changed, 21 insertions(+)
+
+diff --git a/drivers/pci/pci_mvebu.c b/drivers/pci/pci_mvebu.c
+index ff4ba641ba..15711e342f 100644
+--- a/drivers/pci/pci_mvebu.c
++++ b/drivers/pci/pci_mvebu.c
+@@ -273,6 +273,19 @@ static void mvebu_pcie_setup_wins(struct mvebu_pcie *pcie)
+ 	       pcie->base + PCIE_BAR_CTRL_OFF(1));
+ }
+ 
++static void mvebu_pci_fixup_classid(struct mvebu_pcie *pcie)
++{
++	/* Setting pci class id to "bridge other" together with defining flag
++	 * CONFIG_PCIAUTO_SKIP_HOST_BRIDGE allows to skip autoconfiguration
++	 * of BDF=0.0.0 during pci enumeration. Thanks to that the driver
++	 * settings will not be overwritten as it happen with defaults
++	 * configuration where the pcie under BDF 0.0.0 introduce itself as
++	 * Memory controller with classid "0x0580" and in reality is pointing to
++	 * RC itself.
++	 */
++	writew(PCI_CLASS_BRIDGE_OTHER, pcie->base + PCI_CLASS_DEVICE);
++}
++
+ static int mvebu_pcie_probe(struct udevice *dev)
+ {
+ 	struct mvebu_pcie *pcie = dev_get_platdata(dev);
+@@ -314,6 +327,9 @@ static int mvebu_pcie_probe(struct udevice *dev)
+ 	reg |= BIT(10);		/* disable interrupts */
+ 	writel(reg, pcie->base + PCIE_CMD_OFF);
+ 
++	/* Fixup classid */
++	mvebu_pci_fixup_classid(pcie);
++
+ 	/* Set BAR0 to internal registers */
+ 	writel(SOC_REGS_PHY_BASE, pcie->base + PCIE_BAR_LO_OFF(0));
+ 	writel(0, pcie->base + PCIE_BAR_HI_OFF(0));
+diff --git a/include/configs/mv-common.h b/include/configs/mv-common.h
+index 3035a113c3..09b5499fc9 100644
+--- a/include/configs/mv-common.h
++++ b/include/configs/mv-common.h
+@@ -117,4 +117,9 @@
+ #define CONFIG_MTD_PARTITIONS
+ #endif
+ 
++/*
++ * PCI
++ */
++#define CONFIG_PCIAUTO_SKIP_HOST_BRIDGE     1
++
+ #endif /* _MV_COMMON_H */
+-- 
+2.22.0
+

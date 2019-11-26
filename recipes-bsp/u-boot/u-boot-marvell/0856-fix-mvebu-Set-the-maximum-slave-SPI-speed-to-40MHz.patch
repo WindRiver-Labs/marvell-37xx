@@ -1,0 +1,36 @@
+From d75118527a56937650bd54302ddf269ab8f831f5 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Mon, 27 Aug 2018 09:58:58 +0300
+Subject: [PATCH 0856/1200] fix: mvebu: Set the maximum slave SPI speed to
+ 40MHz
+
+While the SPI controller speed is defined by DTS, the maximum
+slave speed (connected devices) is limited by the pre-defined
+configuration value CONFIG_SF_DEFAULT_SPEED to 1MHz
+This patch increases this maximum SPI slave device speed to 40MHz
+
+Change-Id: I0d1239bd8a2061c66725c2c227c1e1f49c92c29e
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/59516
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ include/configs/mvebu_armada-common.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/mvebu_armada-common.h b/include/configs/mvebu_armada-common.h
+index 399748593c..8608b21a01 100644
+--- a/include/configs/mvebu_armada-common.h
++++ b/include/configs/mvebu_armada-common.h
+@@ -115,7 +115,7 @@
+ #define CONFIG_ENV_SPI_CS		0
+ 
+ /* SPI NOR flash default params, used by sf commands */
+-#define CONFIG_SF_DEFAULT_SPEED		1000000
++#define CONFIG_SF_DEFAULT_SPEED		40000000
+ #define CONFIG_SF_DEFAULT_MODE		SPI_MODE_0
+ #define CONFIG_ENV_SPI_MODE		CONFIG_SF_DEFAULT_MODE
+ 
+-- 
+2.22.0
+

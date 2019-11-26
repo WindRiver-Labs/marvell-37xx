@@ -1,0 +1,59 @@
+From cab1e87b2548598f21595ee409d3c542588436d2 Mon Sep 17 00:00:00 2001
+From: Suneel Garapati <sgarapati@caviumnetworks.com>
+Date: Wed, 23 Aug 2017 11:46:53 -0700
+Subject: [PATCH 0451/1200] drivers: ahci: write 64bit address to clb and fis
+ base registers
+
+Commandlist base and fis base are 64-bit values, so use the
+high registers to program upper 32bit value.
+
+This is fortunately noticed in asim when ram size is increased
+to more than 4G(>32-bit). It works in hardware because sata_ipm_quirk
+in atf is already programming the upper 32bits. Had been the address
+less than 4G, it would have certainly failed on hardware too.
+
+Signed-off-by: Suneel Garapati <sgarapati@caviumnetworks.com>
+---
+ drivers/ata/ahci.c | 11 +++++++++--
+ include/ahci.h     |  1 +
+ 2 files changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/ata/ahci.c b/drivers/ata/ahci.c
+index 02847f87e8..57db8d58b4 100644
+--- a/drivers/ata/ahci.c
++++ b/drivers/ata/ahci.c
+@@ -608,10 +608,17 @@ static int ahci_port_start(struct ahci_uc_priv *uc_priv, u8 port)
+ 	pp->cmd_tbl_sg =
+ 			(struct ahci_sg *)(uintptr_t)virt_to_phys((void *)mem);
+ 
+-	writel_with_flush((unsigned long)pp->cmd_slot,
++	if (uc_priv->cap & HOST_CAP_64)
++		writel_with_flush(cpu_to_le32(UPPER32(pp->cmd_slot)),
++				  port_mmio + PORT_LST_ADDR_HI);
++	writel_with_flush(cpu_to_le32(LOWER32(pp->cmd_slot)),
+ 			  port_mmio + PORT_LST_ADDR);
+ 
+-	writel_with_flush(pp->rx_fis, port_mmio + PORT_FIS_ADDR);
++	if (uc_priv->cap & HOST_CAP_64)
++		writel_with_flush(cpu_to_le32(UPPER32(pp->rx_fis)),
++				  port_mmio + PORT_FIS_ADDR_HI);
++	writel_with_flush(cpu_to_le32(LOWER32(pp->rx_fis)),
++			  port_mmio + PORT_FIS_ADDR);
+ 
+ #ifdef CONFIG_SUNXI_AHCI
+ 	sunxi_dma_init(port_mmio);
+diff --git a/include/ahci.h b/include/ahci.h
+index e5d95d8632..203ed46fce 100644
+--- a/include/ahci.h
++++ b/include/ahci.h
+@@ -40,6 +40,7 @@
+ #define HOST_RESET		(1 << 0)  /* reset controller; self-clear */
+ #define HOST_IRQ_EN		(1 << 1)  /* global IRQ enable */
+ #define HOST_AHCI_EN		(1 << 31) /* AHCI enabled */
++#define HOST_CAP_64		(1 << 31) /* 64-bit addressing supported */
+ 
+ /* Registers for each SATA port */
+ #define PORT_LST_ADDR		0x00 /* command list DMA addr */
+-- 
+2.22.0
+

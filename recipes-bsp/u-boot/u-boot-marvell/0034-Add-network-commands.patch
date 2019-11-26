@@ -1,0 +1,31 @@
+From e06fcc814141ecd425162f7a802730b442a20a64 Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <sergey.temerkhanov@auriga.com>
+Date: Mon, 23 Mar 2015 18:22:40 +0300
+Subject: [PATCH 0034/1200] Add network commands
+
+---
+ include/configs/thunderx_88xx.h | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/include/configs/thunderx_88xx.h b/include/configs/thunderx_88xx.h
+index abd73c0ea8..92317fd5bf 100644
+--- a/include/configs/thunderx_88xx.h
++++ b/include/configs/thunderx_88xx.h
+@@ -92,6 +92,14 @@
+ 
+ #define CONFIG_CMD_I2C
+ 
++#define CONFIG_CMD_DHCP
++#define CONFIG_CMD_MII
++#define CONFIG_CMD_NET
++#define CONFIG_CMD_PING
++#define CONFIG_CMD_TFTP
++#define CONFIG_CMD_TFTPPUT
++#define CONFIG_CMD_NFS
++
+ #define CONFIG_CMD_FAT
+ #define CONFIG_CMD_EXT2
+ #define CONFIG_CMD_EXT4
+-- 
+2.22.0
+

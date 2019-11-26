@@ -1,0 +1,24 @@
+From 3048f2d31694c4063e105b3f9ab26178f591bb75 Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <sergey.temerkhanov@auriga.com>
+Date: Wed, 1 Apr 2015 15:37:49 +0300
+Subject: [PATCH 0040/1200] Add 10G modes
+
+---
+ include/phy.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/phy.h b/include/phy.h
+index 0543ec10c2..7beaca10de 100644
+--- a/include/phy.h
++++ b/include/phy.h
+@@ -66,6 +66,7 @@ typedef enum {
+ 	PHY_INTERFACE_MODE_XAUI,
+ 	PHY_INTERFACE_MODE_RXAUI,
+ 	PHY_INTERFACE_MODE_SFI,
++	PHY_INTERFACE_MODE_XLAUI,
+ 	PHY_INTERFACE_MODE_NONE,	/* Must be last */
+ 
+ 	PHY_INTERFACE_MODE_COUNT,
+-- 
+2.22.0
+

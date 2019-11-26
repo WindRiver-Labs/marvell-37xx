@@ -1,0 +1,71 @@
+From e541f502403aa11cc5109154ad5a6b5b77fbab94 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Sun, 23 Apr 2017 18:59:26 +0300
+Subject: [PATCH 0751/1200] dts: mvebu: a80x0: Enable SD/eMMC interfaces
+
+Enable SDHCI interface on AP and CP0 in A80x0 DTS files
+
+Change-Id: Iace47a4c99f1b3e38331bf3c346f0f7d4d81d1b0
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/53517
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/armada-8040-db.dts    | 14 ++++++++++++++
+ arch/arm/dts/armada-8040-mcbin.dts |  8 ++++++++
+ 2 files changed, 22 insertions(+)
+
+diff --git a/arch/arm/dts/armada-8040-db.dts b/arch/arm/dts/armada-8040-db.dts
+index 95c30071c2..52d080aaec 100644
+--- a/arch/arm/dts/armada-8040-db.dts
++++ b/arch/arm/dts/armada-8040-db.dts
+@@ -99,6 +99,13 @@
+ 		     1 3 0 0 0 0 0 0 0 3 >;
+ };
+ 
++&ap_sdhci0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&ap_emmc_pins>;
++	bus-width = <8>;
++	status = "okay";
++};
++
+ &cp0_pinctl {
+ 	/* MPP Bus:
+ 	 *	[0-31]	= 0xff: Keep default CP0_shared_pins
+@@ -208,6 +215,13 @@
+ 	status = "okay";
+ };
+ 
++&cp0_sdhci0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&cp0_sdhci_pins>;
++	bus-width = <4>;
++	status = "okay";
++};
++
+ &cp1_pinctl {
+ 	/* MPP Bus:
+ 	 *	[0-11]	RGMII0
+diff --git a/arch/arm/dts/armada-8040-mcbin.dts b/arch/arm/dts/armada-8040-mcbin.dts
+index 23b2b2619e..a36510c2b2 100644
+--- a/arch/arm/dts/armada-8040-mcbin.dts
++++ b/arch/arm/dts/armada-8040-mcbin.dts
+@@ -180,6 +180,14 @@
+ 	status = "okay";
+ };
+ 
++/* uSD slot */
++&cp0_sdhci0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&cp0_sdhci_pins>;
++	bus-width = <4>;
++	status = "okay";
++};
++
+ &cp0_comphy {
+ 	/*
+ 	 * CP0 Serdes Configuration:
+-- 
+2.22.0
+

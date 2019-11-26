@@ -1,0 +1,35 @@
+From af834a088d9356f676d2ef434c221eb5cc76efba Mon Sep 17 00:00:00 2001
+From: Marcin Wojtas <mw@semihalf.com>
+Date: Wed, 20 Feb 2019 16:13:34 +0100
+Subject: [PATCH 1032/1200] arm64: dts: cn913x: fix CP2 SD voltage switch pin
+ assignment
+
+The correct pin for the SD Data power supply is mpp49, which
+is gpio#17 of the second controller.
+
+Change-Id: Ic7c6a7378c525ae76c16c1c1822115ee7efcb6a2
+Signed-off-by: Marcin Wojtas <mw@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/4414
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Grzegorz Jaszczyk <Grzegorz.Jaszczyk@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/cn9132-db.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/cn9132-db.dtsi b/arch/arm/dts/cn9132-db.dtsi
+index 541bda73bb..73b3f22820 100644
+--- a/arch/arm/dts/cn9132-db.dtsi
++++ b/arch/arm/dts/cn9132-db.dtsi
+@@ -61,7 +61,7 @@
+ 				regulator-min-microvolt = <1800000>;
+ 				regulator-max-microvolt = <3300000>;
+ 				/* cp2_mpp49 */
+-				gpios = <&cp2_gpio1 16 GPIO_ACTIVE_HIGH>;
++				gpios = <&cp2_gpio1 17 GPIO_ACTIVE_HIGH>;
+ 				states = <1800000 0x1
+ 					  3300000 0x0>;
+ 			};
+-- 
+2.22.0
+

@@ -1,0 +1,82 @@
+From 40778418f001ebd4d32307ec634ac190e1d1ba7a Mon Sep 17 00:00:00 2001
+From: zachary <zhangzg@marvell.com>
+Date: Tue, 28 Feb 2017 00:06:17 +0800
+Subject: [PATCH 0715/1200] phy: marvell: a3700: mask/ack USB3 device VBUS IRQ
+
+- When COMPHY is configured as USB PHY in u-boot, kernel will crash
+  during booting in USB device mode while register USB Device controller
+  interrupt.
+- The root cause is that during COMPHY initializes, the USB3 device
+  controller VBUS interrupt is triggered without ACK, although it is
+  in USB3 device controller, but USB2 device controller shares
+  the same irq, so USB2 device driver gets this interrupt,
+  but could not ack it.
+- This patch fixes this issue by masking and acking the VBUS interrupt,
+  which will be enabled again in the kernel USB3 device driver.
+
+Change-Id: Ic67fc1c92d23b2b53f9b109ea83a045e085b54b6
+Signed-off-by: zachary <zhangzg@marvell.com>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/53603
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ drivers/phy/marvell/comphy_a3700.c | 19 +++++++++++++++++++
+ drivers/phy/marvell/comphy_a3700.h |  4 ++++
+ 2 files changed, 23 insertions(+)
+
+diff --git a/drivers/phy/marvell/comphy_a3700.c b/drivers/phy/marvell/comphy_a3700.c
+index 940e889b9d..d42b05ceb5 100644
+--- a/drivers/phy/marvell/comphy_a3700.c
++++ b/drivers/phy/marvell/comphy_a3700.c
+@@ -476,6 +476,13 @@ static int comphy_usb3_power_up(u32 type, u32 speed, u32 invert)
+ 			usb32_ctrl_int_mode);
+ 	}
+ 
++	/* Disbale VBus interrupt which will be enable again in kernel */
++	reg_set((void __iomem *)USB3_TOP_INT_ENABLE_REG, 0x0, vbus_int_enable);
++
++	/* Clear VBus interrupt to prepare a clean state for kernel */
++	reg_set((void __iomem *)USB3_TOP_INT_STATUS_REG,
++		vbus_int_state, vbus_int_state);
++
+ 	debug_exit();
+ 
+ 	return ret;
+@@ -565,6 +572,18 @@ static int comphy_usb2_power_up(u8 usb32)
+ 	if (ret == 0)
+ 		printf("Failed to lock USB2 PLL\n");
+ 
++	if (usb32) {
++		/*
++		 * Disbale VBus interrupt which will be
++		 * enable again in kernel
++		 */
++		reg_set((void __iomem *)USB3_TOP_INT_ENABLE_REG, 0x0,
++			vbus_int_enable);
++		/* Clear VBus interrupt to prepare a clean state for kernel */
++		reg_set((void __iomem *)USB3_TOP_INT_STATUS_REG,
++			vbus_int_state, vbus_int_state);
++	}
++
+ 	debug_exit();
+ 
+ 	return ret;
+diff --git a/drivers/phy/marvell/comphy_a3700.h b/drivers/phy/marvell/comphy_a3700.h
+index e74d91154e..8fb6795f09 100644
+--- a/drivers/phy/marvell/comphy_a3700.h
++++ b/drivers/phy/marvell/comphy_a3700.h
+@@ -179,6 +179,10 @@
+ #define PHY_REF_CLK_ADDR		(0x4814 + PCIE_BASE)
+ 
+ #define USB3_CTRPUL_VAL_REG		(0x20 + USB32_BASE)
++#define USB3_TOP_INT_STATUS_REG		(0xd8 + USB32_BASE)
++#define vbus_int_state			BIT(5)
++#define USB3_TOP_INT_ENABLE_REG		(0xdc + USB32_BASE)
++#define vbus_int_enable			BIT(5)
+ #define USB3H_CTRPUL_VAL_REG		(0x3454 + USB32H_BASE)
+ #define rb_usb3_ctr_100ns		0xff000000
+ 
+-- 
+2.22.0
+

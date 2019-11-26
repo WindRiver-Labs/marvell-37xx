@@ -1,0 +1,39 @@
+From 2b53bd08abb268fb550f7c487adc9b4c613a53c7 Mon Sep 17 00:00:00 2001
+From: Igal Liberman <igall@marvell.com>
+Date: Wed, 26 Apr 2017 17:20:47 +0300
+Subject: [PATCH 0638/1200] phy: marvell: add missing speed during info prints
+
+In get_speed_string() we have an array (speed_strings[])
+which includes all possible speed strings.
+This array size and content must be aligned to the speed
+defines in comphy_data.h.
+
+This patch adds missing 5.125G speed, aligns speed_strings[]
+and fixes incorrect printing when speed > 5.0G.
+
+Change-Id: I2cd766838226a7f2d446330b7f0c1173343e9367
+Signed-off-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/53608
+---
+ drivers/phy/marvell/comphy_core.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/phy/marvell/comphy_core.c b/drivers/phy/marvell/comphy_core.c
+index 6fb310f423..ce8e009fd8 100644
+--- a/drivers/phy/marvell/comphy_core.c
++++ b/drivers/phy/marvell/comphy_core.c
+@@ -21,8 +21,9 @@ DECLARE_GLOBAL_DATA_PTR;
+ static char *get_speed_string(u32 speed)
+ {
+ 	char *speed_strings[] = {"1.25 Gbps", "1.5 Gbps", "2.5 Gbps",
+-				 "3.0 Gbps", "3.125 Gbps", "5 Gbps", "6 Gbps",
+-				 "6.25 Gbps", "10.31 Gbps" };
++				 "3.0 Gbps", "3.125 Gbps", "5 Gbps",
++				 "5.125 Gpbs", "6 Gbps", "6.25 Gbps",
++				 "10.3125 Gbps" };
+ 
+ 	if (speed < 0 || speed > COMPHY_SPEED_MAX)
+ 		return "invalid";
+-- 
+2.22.0
+

@@ -1,0 +1,85 @@
+From 505071748663139ec8d19c0c61a4c4dcade51895 Mon Sep 17 00:00:00 2001
+From: Suneel Garapati <sgarapati@caviumnetworks.com>
+Date: Wed, 19 Apr 2017 12:45:46 -0700
+Subject: [PATCH 0364/1200] board: cavium: add unique id feature support
+
+uboot log prints unique id read from fuse bits 640-729,
+if programmed, used octeon code as reference.
+
+Signed-off-by: Suneel Garapati <sgarapati@caviumnetworks.com>
+---
+ board/cavium/thunderx/thunderx.c | 51 +++++++++++++++++++++++++++++++-
+ 1 file changed, 50 insertions(+), 1 deletion(-)
+
+diff --git a/board/cavium/thunderx/thunderx.c b/board/cavium/thunderx/thunderx.c
+index 981c1fd6de..ddab312181 100644
+--- a/board/cavium/thunderx/thunderx.c
++++ b/board/cavium/thunderx/thunderx.c
+@@ -135,6 +135,55 @@ bool alternate_pkg(void)
+ 	return altpkg;
+ }
+ 
++/**
++ * Print board unique id, if programmed
++ */
++void print_board_unique_id(void)
++{
++	u64 rcmd, fdat1=0, fdat2=0;
++	u64 temp;
++	u16 temp16;
++	u8 unique_id[10];
++
++	/* Pending bit and 640 bit address */
++	rcmd = (1 << 12) | 0x50;
++	writeq(rcmd, CAVM_MIO_FUS_RCMD);
++
++	/* Wait until pending bit is cleared */
++	while( readq(CAVM_MIO_FUS_RCMD) & 0x1000 );
++
++	printf("Board UniqueID: ");
++	/* Read fus_bnk_dat 0 & 1 for 128 bit fuse data */
++	fdat1 = readq(CAVM_MIO_FUS_BNK_DATX(0));
++	fdat2 = readq(CAVM_MIO_FUS_BNK_DATX(1));
++
++	debug("BNK DAT 1 -> %02llx\n", fdat1);
++	debug("BNK DAT 2 -> %02llx\n", fdat2);
++
++	/* If either of banks is programmed, assume valid */
++	if (fdat1 || (fdat2 & 0x3FFFFFF)) {
++		/* Extract 640-693 bits from bank1 */
++		temp = fdat1 & 0x003fffffffffffff;
++		/* Extract 714-723 bits from bank2, push to MSB */
++		temp |= (((fdat2 >> 10) & 0x3ff) << 54);
++		/* Extract 704-713,724-729 bits from bank2 */
++		temp16 = ((fdat2 >> 20) & 0x3f) | ((fdat2 & 0x3ff) << 6);
++
++		/* Copy fuse data bits to unique_id in order
++		   723-714,693-640,713-704,724-729 */
++		for (int i=0; i < 8; i++)
++			unique_id[i] = *((u8 *)&temp + (7 - i));
++		unique_id[8] = *((u8 *)&temp16 + 1);
++		unique_id[9] = *((u8 *)&temp16);
++		/* Print the unique_id */
++		for (int i=0; i < 10; i++)
++			printf("%02x", unique_id[i]);
++		printf("\n");
++	} else {
++		printf("Not set\n");
++	}
++}
++
+ /**
+  * Board late initialization routine.
+  */
+@@ -146,7 +195,7 @@ int board_late_init(void)
+ 	thunderx_parse_phy_info();
+ 	board = getenv("board");
+ 	printf("Board type: %s\n", getenv("board"));
+-
++	print_board_unique_id();
+ 	if (board != NULL && !getenv("prompt")) {
+ 		snprintf(thunderx_prompt, sizeof(thunderx_prompt), "%s> ",
+ 			 board);
+-- 
+2.22.0
+

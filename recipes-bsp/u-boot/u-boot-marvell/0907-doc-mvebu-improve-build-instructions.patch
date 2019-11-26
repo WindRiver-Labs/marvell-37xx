@@ -1,0 +1,38 @@
+From f677a4d5327dea45aece71a8bf42fbc6f123bee0 Mon Sep 17 00:00:00 2001
+From: Igal Liberman <igall@marvell.com>
+Date: Wed, 21 Nov 2018 16:28:47 +0200
+Subject: [PATCH 0907/1200] doc: mvebu: improve build instructions
+
+No need to set device tree for MCBin and EspressoBin.
+
+Change-Id: I367961c5c6fdb8a69a6eb59cf54fceb8167a0584
+Signed-off-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/61176
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+---
+ doc/mvebu/build.txt | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/doc/mvebu/build.txt b/doc/mvebu/build.txt
+index 350ccc2588..5f6c775d32 100644
+--- a/doc/mvebu/build.txt
++++ b/doc/mvebu/build.txt
+@@ -82,13 +82,11 @@ Manual build procedure
+ 	- For the Armada-70x0 DB use "make DEVICE_TREE=armada-7040-db[-X]"
+ 	- For the Armada-7020 AMC use "make DEVICE_TREE=armada-7020-amc"
+ 	- For the Armada-80x0 DB use "make DEVICE_TREE=armada-8040-db[-X]"
+-	- For the Armada-80x0 MacchiatoBin use
+-	  "make DEVICE_TREE=armada-8040-mcbin"
+ 	- For the Armada-37x0 DB use "make DEVICE_TREE=armada-3720-ddrX-db[-X]"
+-	- For the Armada-37x0 EsspressoBin use
+-	  "make DEVICE_TREE=armada-3720-espressobin"
+ 	  (X represents possible board configuration)
+ 
++	No need to set this for Armada-80x0 MacchiatoBin and Armada-37x0 EsspressoBin.
++
+ 	The U-Boot compilation generates u-boot.bin - the U-Boot image
+ 
+ 	.. Note::
+-- 
+2.22.0
+

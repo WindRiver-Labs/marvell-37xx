@@ -1,0 +1,36 @@
+From 824962634ed9dd291b8b069e99c6a348dc8b2062 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Tue, 18 Dec 2018 16:26:37 +0100
+Subject: [PATCH 0970/1200] arm: ap80x: extend emmc pin description
+
+The ap_mpp12 can be configured to eMMC/SDIO function, which meaning is
+SDIO_CARD_PW_OFF (out). Reflect it in device tree description.
+
+Change-Id: Ie0b43b56639759e705c4165e82b187f9d58037e8
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/62085
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/1874
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/armada-ap80x.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/armada-ap80x.dtsi b/arch/arm/dts/armada-ap80x.dtsi
+index f253617026..444261ecbd 100644
+--- a/arch/arm/dts/armada-ap80x.dtsi
++++ b/arch/arm/dts/armada-ap80x.dtsi
+@@ -50,7 +50,7 @@
+ 				};
+ 				ap_emmc_pins: emmc-pins-0 {
+ 					marvell,pins = < 0 1 2 3 4 5 6 7
+-							 8 9 10 >;
++							 8 9 10 12 >;
+ 					marvell,function = <1>;
+ 				};
+ 			};
+-- 
+2.22.0
+

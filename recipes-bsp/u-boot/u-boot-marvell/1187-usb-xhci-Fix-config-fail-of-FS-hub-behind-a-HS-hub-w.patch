@@ -1,0 +1,51 @@
+From d1401de591ec3cbff3156c1a4e81084e60a4af23 Mon Sep 17 00:00:00 2001
+From: Bin Meng <bmeng.cn@gmail.com>
+Date: Wed, 23 May 2018 23:40:49 -0700
+Subject: [PATCH 1187/1200] usb: xhci: Fix config fail of FS hub behind a HS
+ hub with MTT
+
+If a full speed hub connects to a high speed hub which supports MTT,
+the MTT field of its slot context will be set to 1 when xHCI driver
+setups an xHCI virtual device in xhci_setup_addressable_virt_dev().
+Once usb core fetch its hub descriptor, and need to update the xHC's
+internal data structures for the device, the HUB field of its slot
+context will be set to 1 too, meanwhile MTT is also set before, this
+will cause configure endpoint command fail. In the case, we should
+clear MTT to 0 for full speed hub according to section 6.2.2.
+
+This keeps in sync with Linux kernel commit:
+  096b110: usb: xhci: fix config fail of FS hub behind a HS hub with MTT
+
+Change-Id: Ia552a172c14677cbdb387edd857d80f2267f1b3c
+Signed-off-by: Bin Meng <bmeng.cn@gmail.com>
+Reviewed-on: https://sj1git1.cavium.com/12547
+Reviewed-by: Chandrakala Chavva <cchavva@marvell.com>
+Tested-by: Chandrakala Chavva <cchavva@marvell.com>
+---
+ drivers/usb/host/xhci.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/usb/host/xhci.c b/drivers/usb/host/xhci.c
+index 99b0432151..7ce28a82c4 100644
+--- a/drivers/usb/host/xhci.c
++++ b/drivers/usb/host/xhci.c
+@@ -1438,8 +1438,15 @@ static int xhci_update_hub_device(struct udevice *dev, struct usb_device *udev)
+ 
+ 	/* Update hub related fields */
+ 	slot_ctx->dev_info |= cpu_to_le32(DEV_HUB);
+-	if (hub->tt.multi && udev->speed == USB_SPEED_HIGH)
++	/*
++	 * refer to section 6.2.2: MTT should be 0 for full speed hub,
++	 * but it may be already set to 1 when setup an xHCI virtual
++	 * device, so clear it anyway.
++	 */
++	if (hub->tt.multi)
+ 		slot_ctx->dev_info |= cpu_to_le32(DEV_MTT);
++	else if (udev->speed == USB_SPEED_FULL)
++		slot_ctx->dev_info &= cpu_to_le32(~DEV_MTT);
+ 	slot_ctx->dev_info2 |= cpu_to_le32(XHCI_MAX_PORTS(udev->maxchild));
+ 	/*
+ 	 * Set TT think time - convert from ns to FS bit times.
+-- 
+2.22.0
+

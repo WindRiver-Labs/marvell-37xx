@@ -1,0 +1,56 @@
+From 2f44d5474973f18f16f5d92b316a34aec5c177bc Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Thu, 21 Mar 2019 18:36:48 +0100
+Subject: [PATCH 1081/1200] phy: marvell: utmi: use correct parent for each
+ utmi node
+
+Before this patch, the parent was wrongly determined based on compatible
+string so consecutive UTMI ports got utmi pll base from next CP (south
+bridge) even if they should get one from the same CP.
+E.g. in cn9132 case where bellow configuration is used:
+CP0: utmi0 and utmi1 enabled
+CP1: utmi1 enabled
+Cp2: utmi0 and utmi1 enabled
+
+the assignment of utmi pll base and utmi port was incorrect:
+1) utmi port 0xf258000cutmi, pll base 0xf2580000  (ok)
+2) utmi port 0xf258100cutmi, pll base 0xf4580000  (wrong)
+3) utmi port 0xf458100cutmi, pll base 0xf6580000  (wrong)
+The utmi ports from CP2 were not even assigned (the pll registers relevant
+for CP2 were configured mistakenly with utmi port 1 from CP1).
+
+After this change the parent is taken out directly from the child node
+which results with correct mapping:
+1) utmi port 0xf258000c, utmi pll base 0xf2580000
+2) utmi port 0xf258100c, utmi pll base 0xf2580000
+3) utmi port 0xf458100c, utmi pll base 0xf4580000
+4) utmi port 0xf658000c, utmi pll base 0xf6580000
+5) utmi port 0xf658100c, utmi pll base 0xf6580000
+
+Change-Id: I03abc58762764f90673b1ba0173f98bb0d063fff
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/6062
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ drivers/phy/marvell/comphy_cp110.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/drivers/phy/marvell/comphy_cp110.c b/drivers/phy/marvell/comphy_cp110.c
+index e30f84a346..e5dfb1a8cd 100644
+--- a/drivers/phy/marvell/comphy_cp110.c
++++ b/drivers/phy/marvell/comphy_cp110.c
+@@ -485,8 +485,7 @@ void comphy_dedicated_phys_init(void)
+ 		if (!fdtdec_get_is_enabled(gd->fdt_blob, node))
+ 			continue;
+ 
+-		parent = fdt_node_offset_by_compatible(gd->fdt_blob, parent,
+-						       "marvell,mvebu-utmi");
++		parent = fdt_parent_offset(gd->fdt_blob, node);
+ 		if (parent <= 0)
+ 			break;
+ 
+-- 
+2.22.0
+

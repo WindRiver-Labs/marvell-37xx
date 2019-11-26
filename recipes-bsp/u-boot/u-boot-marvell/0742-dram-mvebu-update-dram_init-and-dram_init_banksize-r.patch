@@ -1,0 +1,55 @@
+From c0dfdecc0b8a65dcf0093dd39b7ea056101563aa Mon Sep 17 00:00:00 2001
+From: zachary <zhangzg@marvell.com>
+Date: Thu, 20 Apr 2017 18:08:53 +0800
+Subject: [PATCH 0742/1200] dram: mvebu: update dram_init and
+ dram_init_banksize routine
+
+- Update dram_init and dram_init_banksize routines to call two weak
+  routines, which could be override by SoC like A3700.
+
+Change-Id: Ibd94847a1e25bd057a05af96eafb47b177aa9de1
+Signed-off-by: zachary <zhangzg@marvell.com>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/56243
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/mach-mvebu/arm64-common.c | 16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/mach-mvebu/arm64-common.c b/arch/arm/mach-mvebu/arm64-common.c
+index 29a7747d65..0ce31e7bdb 100644
+--- a/arch/arm/mach-mvebu/arm64-common.c
++++ b/arch/arm/mach-mvebu/arm64-common.c
+@@ -47,16 +47,24 @@ const struct mbus_dram_target_info *mvebu_mbus_dram_info(void)
+ 
+ /* DRAM init code ... */
+ 
+-int dram_init_banksize(void)
++__weak int mvebu_dram_init(void)
+ {
+-	fdtdec_setup_memory_banksize();
++	return fdtdec_setup_memory_size();
++}
+ 
+-	return 0;
++__weak int mvebu_dram_init_banksize(void)
++{
++	return fdtdec_setup_memory_banksize();
++}
++
++int dram_init_banksize(void)
++{
++	return mvebu_dram_init_banksize();
+ }
+ 
+ int dram_init(void)
+ {
+-	if (fdtdec_setup_memory_size() != 0)
++	if (mvebu_dram_init() != 0)
+ 		return -EINVAL;
+ 
+ 	return 0;
+-- 
+2.22.0
+

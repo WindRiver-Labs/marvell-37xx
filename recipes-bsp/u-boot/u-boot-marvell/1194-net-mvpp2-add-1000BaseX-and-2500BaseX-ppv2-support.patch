@@ -1,0 +1,218 @@
+From 852372629351c7c5fc90229bd10682a58a28c2ed Mon Sep 17 00:00:00 2001
+From: Stefan Chulski <stefanc@marvell.com>
+Date: Wed, 24 Jul 2019 17:00:56 +0300
+Subject: [PATCH 1194/1200] net: mvpp2: add 1000BaseX and 2500BaseX ppv2
+ support
+
+Change-Id: If638135240eb48c0251556fc5d8f224319243f61
+Signed-off-by: Stefan Chulski <stefanc@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/12993
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+---
+ drivers/net/mvpp2.c | 117 ++++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 112 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/net/mvpp2.c b/drivers/net/mvpp2.c
+index 4597f0a5f8..18890db318 100644
+--- a/drivers/net/mvpp2.c
++++ b/drivers/net/mvpp2.c
+@@ -2877,6 +2877,10 @@ static void mvpp2_port_mii_set(struct mvpp2_port *port)
+ 	case PHY_INTERFACE_MODE_SGMII:
+ 		val |= MVPP2_GMAC_INBAND_AN_MASK;
+ 		break;
++	case PHY_INTERFACE_MODE_1000BASEX:
++	case PHY_INTERFACE_MODE_2500BASEX:
++		val &= ~MVPP2_GMAC_INBAND_AN_MASK;
++		break;
+ 	case PHY_INTERFACE_MODE_RGMII:
+ 	case PHY_INTERFACE_MODE_RGMII_ID:
+ 		val |= MVPP2_GMAC_PORT_RGMII_MASK;
+@@ -2937,7 +2941,9 @@ static void mvpp2_port_loopback_set(struct mvpp2_port *port)
+ 	else
+ 		val &= ~MVPP2_GMAC_GMII_LB_EN_MASK;
+ 
+-	if (port->phy_interface == PHY_INTERFACE_MODE_SGMII)
++	if (port->phy_interface == PHY_INTERFACE_MODE_SGMII ||
++	    port->phy_interface == PHY_INTERFACE_MODE_1000BASEX ||
++	    port->phy_interface == PHY_INTERFACE_MODE_2500BASEX)
+ 		val |= MVPP2_GMAC_PCS_LB_EN_MASK;
+ 	else
+ 		val &= ~MVPP2_GMAC_PCS_LB_EN_MASK;
+@@ -3048,10 +3054,10 @@ static void gop_gmac_sgmii2_5_cfg(struct mvpp2_port *port)
+ 
+ 	val = readl(port->base + MVPP2_GMAC_CTRL_0_REG);
+ 	/*
+-	 * Configure GIG MAC to 1000Base-X mode connected to a fiber
++	 * Configure GIG MAC to SGMII mode connected to a fiber
+ 	 * transceiver
+ 	 */
+-	val |= MVPP2_GMAC_PORT_TYPE_MASK;
++	val &= ~MVPP2_GMAC_PORT_TYPE_MASK;
+ 	writel(val, port->base + MVPP2_GMAC_CTRL_0_REG);
+ 
+ 	/* configure AN 0x9268 */
+@@ -3103,6 +3109,89 @@ static void gop_gmac_sgmii_cfg(struct mvpp2_port *port)
+ 	writel(val, port->base + MVPP2_GMAC_AUTONEG_CONFIG);
+ }
+ 
++static void gop_gmac_2500basex_cfg(struct mvpp2_port *port)
++{
++	u32 val, thresh;
++
++	/*
++	 * Configure minimal level of the Tx FIFO before the lower part
++	 * starts to read a packet
++	 */
++	thresh = MVPP2_SGMII2_5_TX_FIFO_MIN_TH;
++	val = readl(port->base + MVPP2_GMAC_PORT_FIFO_CFG_1_REG);
++	val &= ~MVPP2_GMAC_TX_FIFO_MIN_TH_ALL_MASK;
++	val |= MVPP2_GMAC_TX_FIFO_MIN_TH_MASK(thresh);
++	writel(val, port->base + MVPP2_GMAC_PORT_FIFO_CFG_1_REG);
++
++	/* Disable bypass of sync module */
++	val = readl(port->base + MVPP2_GMAC_CTRL_4_REG);
++	val |= MVPP2_GMAC_CTRL4_SYNC_BYPASS_MASK;
++	/* configure DP clock select according to mode */
++	val |= MVPP2_GMAC_CTRL4_DP_CLK_SEL_MASK;
++	/* configure QSGMII bypass according to mode */
++	val |= MVPP2_GMAC_CTRL4_QSGMII_BYPASS_ACTIVE_MASK;
++	writel(val, port->base + MVPP2_GMAC_CTRL_4_REG);
++
++	val = readl(port->base + MVPP2_GMAC_CTRL_0_REG);
++	/*
++	 * Configure GIG MAC to 2500Base-X mode connected to a fiber
++	 * transceiver
++	 */
++	val |= MVPP2_GMAC_PORT_TYPE_MASK;
++	writel(val, port->base + MVPP2_GMAC_CTRL_0_REG);
++
++	/* In 2500BaseX mode, we can't negotiate speed
++	 * and we do not want InBand autoneg
++	 * bypass enabled (link interrupt storm risk
++	 * otherwise).
++	 */
++	val = MVPP2_GMAC_EN_PCS_AN |
++		MVPP2_GMAC_CONFIG_GMII_SPEED  |
++		MVPP2_GMAC_CONFIG_FULL_DUPLEX |
++		MVPP2_GMAC_CHOOSE_SAMPLE_TX_CONFIG;
++	writel(val, port->base + MVPP2_GMAC_AUTONEG_CONFIG);
++}
++
++static void gop_gmac_1000basex_cfg(struct mvpp2_port *port)
++{
++	u32 val, thresh;
++
++	/*
++	 * Configure minimal level of the Tx FIFO before the lower part
++	 * starts to read a packet
++	 */
++	thresh = MVPP2_SGMII_TX_FIFO_MIN_TH;
++	val = readl(port->base + MVPP2_GMAC_PORT_FIFO_CFG_1_REG);
++	val &= ~MVPP2_GMAC_TX_FIFO_MIN_TH_ALL_MASK;
++	val |= MVPP2_GMAC_TX_FIFO_MIN_TH_MASK(thresh);
++	writel(val, port->base + MVPP2_GMAC_PORT_FIFO_CFG_1_REG);
++
++	/* Disable bypass of sync module */
++	val = readl(port->base + MVPP2_GMAC_CTRL_4_REG);
++	val |= MVPP2_GMAC_CTRL4_SYNC_BYPASS_MASK;
++	/* configure DP clock select according to mode */
++	val &= ~MVPP2_GMAC_CTRL4_DP_CLK_SEL_MASK;
++	/* configure QSGMII bypass according to mode */
++	val |= MVPP2_GMAC_CTRL4_QSGMII_BYPASS_ACTIVE_MASK;
++	writel(val, port->base + MVPP2_GMAC_CTRL_4_REG);
++
++	val = readl(port->base + MVPP2_GMAC_CTRL_0_REG);
++	/* configure GIG MAC to 1000BASEX mode */
++	val |= MVPP2_GMAC_PORT_TYPE_MASK;
++	writel(val, port->base + MVPP2_GMAC_CTRL_0_REG);
++
++	/* In 1000BaseX mode, we can't negotiate speed (it's
++	 * only 1000), and we do not want InBand autoneg
++	 * bypass enabled (link interrupt storm risk
++	 * otherwise).
++	 */
++	val = MVPP2_GMAC_EN_PCS_AN |
++		MVPP2_GMAC_CONFIG_GMII_SPEED  |
++		MVPP2_GMAC_CONFIG_FULL_DUPLEX |
++		MVPP2_GMAC_CHOOSE_SAMPLE_TX_CONFIG;
++	writel(val, port->base + MVPP2_GMAC_AUTONEG_CONFIG);
++}
++
+ static void gop_gmac_rgmii_cfg(struct mvpp2_port *port)
+ {
+ 	u32 val, thresh;
+@@ -3154,6 +3243,12 @@ static int gop_gmac_mode_cfg(struct mvpp2_port *port)
+ 			gop_gmac_sgmii_cfg(port);
+ 		break;
+ 
++	case PHY_INTERFACE_MODE_1000BASEX:
++		gop_gmac_1000basex_cfg(port);
++
++	case PHY_INTERFACE_MODE_2500BASEX:
++		gop_gmac_2500basex_cfg(port);
++
+ 	case PHY_INTERFACE_MODE_RGMII:
+ 	case PHY_INTERFACE_MODE_RGMII_ID:
+ 		gop_gmac_rgmii_cfg(port);
+@@ -3325,6 +3420,8 @@ static int gop_port_init(struct mvpp2_port *port)
+ 		break;
+ 
+ 	case PHY_INTERFACE_MODE_SGMII:
++	case PHY_INTERFACE_MODE_1000BASEX:
++	case PHY_INTERFACE_MODE_2500BASEX:
+ 		/* configure PCS */
+ 		gop_gpcs_mode_cfg(port, 1);
+ 
+@@ -3385,6 +3482,8 @@ static void gop_port_enable(struct mvpp2_port *port, int enable)
+ 	case PHY_INTERFACE_MODE_RGMII:
+ 	case PHY_INTERFACE_MODE_RGMII_ID:
+ 	case PHY_INTERFACE_MODE_SGMII:
++	case PHY_INTERFACE_MODE_1000BASEX:
++	case PHY_INTERFACE_MODE_2500BASEX:
+ 		if (enable)
+ 			mvpp2_port_enable(port);
+ 		else
+@@ -3420,7 +3519,9 @@ static u32 mvpp2_netc_cfg_create(int gop_id, phy_interface_t phy_type)
+ 	u32 val = 0;
+ 
+ 	if (gop_id == 2) {
+-		if (phy_type == PHY_INTERFACE_MODE_SGMII)
++		if (phy_type == PHY_INTERFACE_MODE_SGMII ||
++		    phy_type == PHY_INTERFACE_MODE_1000BASEX ||
++		    phy_type == PHY_INTERFACE_MODE_2500BASEX)
+ 			val |= MV_NETC_GE_MAC2_SGMII;
+ 		else if (phy_type == PHY_INTERFACE_MODE_RGMII ||
+ 			 phy_type == PHY_INTERFACE_MODE_RGMII_ID)
+@@ -3428,7 +3529,9 @@ static u32 mvpp2_netc_cfg_create(int gop_id, phy_interface_t phy_type)
+ 	}
+ 
+ 	if (gop_id == 3) {
+-		if (phy_type == PHY_INTERFACE_MODE_SGMII)
++		if (phy_type == PHY_INTERFACE_MODE_SGMII ||
++		    phy_type == PHY_INTERFACE_MODE_1000BASEX ||
++		    phy_type == PHY_INTERFACE_MODE_2500BASEX)
+ 			val |= MV_NETC_GE_MAC3_SGMII;
+ 		else if (phy_type == PHY_INTERFACE_MODE_RGMII ||
+ 			 phy_type == PHY_INTERFACE_MODE_RGMII_ID)
+@@ -4421,6 +4524,8 @@ static void mvpp2_start_dev(struct mvpp2_port *port)
+ 	case PHY_INTERFACE_MODE_RGMII:
+ 	case PHY_INTERFACE_MODE_RGMII_ID:
+ 	case PHY_INTERFACE_MODE_SGMII:
++	case PHY_INTERFACE_MODE_1000BASEX:
++	case PHY_INTERFACE_MODE_2500BASEX:
+ 		mvpp2_gmac_max_rx_size_set(port);
+ 	default:
+ 		break;
+@@ -5159,6 +5264,8 @@ static int mvpp2_start(struct udevice *dev)
+ 	case PHY_INTERFACE_MODE_RGMII:
+ 	case PHY_INTERFACE_MODE_RGMII_ID:
+ 	case PHY_INTERFACE_MODE_SGMII:
++	case PHY_INTERFACE_MODE_1000BASEX:
++	case PHY_INTERFACE_MODE_2500BASEX:
+ 		mvpp2_port_power_up(port);
+ 	default:
+ 		break;
+-- 
+2.22.0
+

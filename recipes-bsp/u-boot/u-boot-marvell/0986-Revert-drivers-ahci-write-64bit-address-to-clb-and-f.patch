@@ -1,0 +1,56 @@
+From bc76cd41a60744d139d013930440625068a6e99a Mon Sep 17 00:00:00 2001
+From: Suneel Garapati <sgarapati@caviumnetworks.com>
+Date: Mon, 14 Jan 2019 17:01:54 -0800
+Subject: [PATCH 0986/1200] Revert "drivers: ahci: write 64bit address to clb
+ and fis base registers"
+
+This reverts commit cab1e87b2548598f21595ee409d3c542588436d2.
+
+Change-Id: If8a04d949b8ff1847daa1f2f9d2cf7065c4dd23c
+Reviewed-on: https://sj1git1.cavium.com/2173
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ drivers/ata/ahci.c | 11 ++---------
+ include/ahci.h     |  1 -
+ 2 files changed, 2 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/ata/ahci.c b/drivers/ata/ahci.c
+index 9b9ebd236c..5a4f36b827 100644
+--- a/drivers/ata/ahci.c
++++ b/drivers/ata/ahci.c
+@@ -613,17 +613,10 @@ static int ahci_port_start(struct ahci_uc_priv *uc_priv, u8 port)
+ 	pp->cmd_tbl_sg =
+ 			(struct ahci_sg *)(uintptr_t)virt_to_phys((void *)mem);
+ 
+-	if (uc_priv->cap & HOST_CAP_64)
+-		writel_with_flush(cpu_to_le32(UPPER32(pp->cmd_slot)),
+-				  port_mmio + PORT_LST_ADDR_HI);
+-	writel_with_flush(cpu_to_le32(LOWER32(pp->cmd_slot)),
++	writel_with_flush((unsigned long)pp->cmd_slot,
+ 			  port_mmio + PORT_LST_ADDR);
+ 
+-	if (uc_priv->cap & HOST_CAP_64)
+-		writel_with_flush(cpu_to_le32(UPPER32(pp->rx_fis)),
+-				  port_mmio + PORT_FIS_ADDR_HI);
+-	writel_with_flush(cpu_to_le32(LOWER32(pp->rx_fis)),
+-			  port_mmio + PORT_FIS_ADDR);
++	writel_with_flush(pp->rx_fis, port_mmio + PORT_FIS_ADDR);
+ 
+ #ifdef CONFIG_SUNXI_AHCI
+ 	sunxi_dma_init(port_mmio);
+diff --git a/include/ahci.h b/include/ahci.h
+index fe3a138b78..4c947f0408 100644
+--- a/include/ahci.h
++++ b/include/ahci.h
+@@ -40,7 +40,6 @@
+ #define HOST_RESET		(1 << 0)  /* reset controller; self-clear */
+ #define HOST_IRQ_EN		(1 << 1)  /* global IRQ enable */
+ #define HOST_AHCI_EN		(1 << 31) /* AHCI enabled */
+-#define HOST_CAP_64		(1 << 31) /* 64-bit addressing supported */
+ 
+ /* Registers for each SATA port */
+ #define PORT_LST_ADDR		0x00 /* command list DMA addr */
+-- 
+2.22.0
+

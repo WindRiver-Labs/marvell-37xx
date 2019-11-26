@@ -1,0 +1,72 @@
+From b9150efa9dedda838e7e44aa0ee72a689372636e Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Fri, 29 Jan 2016 11:08:49 -0800
+Subject: [PATCH 0099/1200] PCI: Fix merge residue
+
+---
+ drivers/pci/pci_auto_old.c | 49 --------------------------------------
+ 1 file changed, 49 deletions(-)
+
+diff --git a/drivers/pci/pci_auto_old.c b/drivers/pci/pci_auto_old.c
+index caf19dc1f9..b5198b081e 100644
+--- a/drivers/pci/pci_auto_old.c
++++ b/drivers/pci/pci_auto_old.c
+@@ -22,55 +22,6 @@
+ #define CONFIG_SYS_PCI_CACHE_LINE_SIZE	8
+ #endif
+ 
+-/*
+- *
+- */
+-
+-void pciauto_region_init(struct pci_region *res)
+-{
+-	/*
+-	 * Avoid allocating PCI resources from address 0 -- this is illegal
+-	 * according to PCI 2.1 and moreover, this is known to cause Linux IDE
+-	 * drivers to fail. Use a reasonable starting value of 0x1000 instead.
+-	 */
+-	res->bus_lower = res->bus_start ? res->bus_start : 0x1000;
+-}
+-
+-void pciauto_region_align(struct pci_region *res, pci_size_t size)
+-{
+-	res->bus_lower = ((res->bus_lower - 1) | (size - 1)) + 1;
+-}
+-
+-int pciauto_region_allocate(struct pci_region *res, pci_size_t size,
+-	pci_addr_t *bar)
+-{
+-	pci_addr_t addr;
+-
+-	if (!res) {
+-		debug("No resource");
+-		goto error;
+-	}
+-
+-	addr = ((res->bus_lower - 1) | (size - 1)) + 1;
+-
+-	if (addr - res->bus_start + size > res->size) {
+-		debug("No room in resource");
+-		goto error;
+-	}
+-
+-	res->bus_lower = addr + size;
+-
+-	debug("address=0x%llx bus_lower=0x%llx", (unsigned long long)addr,
+-	      (unsigned long long)res->bus_lower);
+-
+-	*bar = addr;
+-	return 0;
+-
+- error:
+-	*bar = (pci_addr_t)-1;
+-	return -1;
+-}
+-
+ /*
+  *
+  */
+-- 
+2.22.0
+

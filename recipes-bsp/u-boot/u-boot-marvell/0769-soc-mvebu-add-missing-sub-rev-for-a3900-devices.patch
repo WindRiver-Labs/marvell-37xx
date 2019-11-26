@@ -1,0 +1,37 @@
+From 84b4a2cce9ff7d7bbc64cf2e2355b674fc1da363 Mon Sep 17 00:00:00 2001
+From: Igal Liberman <igall@marvell.com>
+Date: Sun, 1 Jul 2018 18:09:34 +0300
+Subject: [PATCH 0769/1200] soc: mvebu: add missing sub-rev for a3900 devices
+
+Change-Id: I364c7bec665f49693eb9ac801d3c7d5124c7cb07
+Signed-off-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/57555
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Christine Gharzuzi <chrisg@marvell.com>
+---
+ arch/arm/mach-mvebu/armada8k/soc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-mvebu/armada8k/soc.c b/arch/arm/mach-mvebu/armada8k/soc.c
+index 07340d5b1b..4be300cfa4 100644
+--- a/arch/arm/mach-mvebu/armada8k/soc.c
++++ b/arch/arm/mach-mvebu/armada8k/soc.c
+@@ -44,13 +44,13 @@ struct soc_info {
+ };
+ 
+ static struct soc_info soc_info_table[] = {
+-	{ {0x7025, 0}, "Armada7640-A1", {0x807, 1}, {0x115, 0}, 1, 1},
++	{ {0x7025, 0}, "Armada7640-A1", {0x807, 1}, {0x115, 0}, 1, 1, 0},
+ 	{ {0x6025, 0}, "Armada3940-A1", {0x807, 1}, {0x115, 0}, 1, 1, 2},
+ 	{ {0x6025, 0}, "Armada3920-A1", {0x807, 1}, {0x115, 0}, 1, 1, 1},
+ 	{ {0x6025, 0}, "Armada3900-A1", {0x807, 1}, {0x115, 0}, 1, 1, 0},
+ 	{ {0x7045, 0}, "Armada3920-A0", {0x807, 0}, {0x115, 0}, 1, 1, 1},
+ 	{ {0x7045, 0}, "Armada3900-A0", {0x807, 0}, {0x115, 0}, 1, 1, 0},
+-	{ {0x7040, 2}, "Armada3900-Z2", {0x807, 0}, {0x110, 2}, 1, 1 },
++	{ {0x7040, 2}, "Armada3900-Z2", {0x807, 0}, {0x110, 2}, 1, 1, 0},
+ 	{ {0x7040, 1}, "Armada7040-A1", {0x806, 1}, {0x110, 1}, 1, 1 },
+ 	{ {0x7040, 2}, "Armada7040-A2", {0x806, 1}, {0x110, 2}, 1, 1 },
+ 	{ {0x7045, 0}, "Armada7040-B0", {0x806, 2}, {0x115, 0}, 1, 1 },
+-- 
+2.22.0
+

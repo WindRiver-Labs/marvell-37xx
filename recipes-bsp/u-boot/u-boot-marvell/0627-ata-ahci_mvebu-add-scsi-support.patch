@@ -1,0 +1,62 @@
+From e25610d80b5469cdf2e2af32a7ef8dbe84c913fc Mon Sep 17 00:00:00 2001
+From: Ken Ma <make@marvell.com>
+Date: Mon, 2 Apr 2018 15:12:22 +0800
+Subject: [PATCH 0627/1200] ata: ahci_mvebu: add scsi support
+
+Mvebu AHCI is AHCI driver which uses SCSI under the hood.
+This patch adjusts AHCI setup to support SCSI by creating
+a SCSI device as a child.
+
+Change-Id: I4862ff6d27afa5ca55042aa2c44d7e8ee1332d3a
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/53612
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ drivers/ata/ahci_mvebu.c | 17 ++++++++++++++++-
+ 1 file changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/ata/ahci_mvebu.c b/drivers/ata/ahci_mvebu.c
+index f4bfba0d98..7b97d9d33b 100644
+--- a/drivers/ata/ahci_mvebu.c
++++ b/drivers/ata/ahci_mvebu.c
+@@ -17,6 +17,20 @@ __weak int board_ahci_enable(void)
+ 	return 0;
+ }
+ 
++static int mvebu_ahci_bind(struct udevice *dev)
++{
++	struct udevice *scsi_dev;
++	int ret;
++
++	ret = ahci_bind_scsi(dev, &scsi_dev);
++	if (ret) {
++		debug("%s: Failed to bind (err=%d\n)", __func__, ret);
++		return ret;
++	}
++
++	return 0;
++}
++
+ static int mvebu_ahci_probe(struct udevice *dev)
+ {
+ 	/*
+@@ -25,7 +39,7 @@ static int mvebu_ahci_probe(struct udevice *dev)
+ 	 */
+ 	board_ahci_enable();
+ 
+-	ahci_init(devfdt_get_addr_ptr(dev));
++	ahci_probe_scsi(dev, (ulong)devfdt_get_addr_ptr(dev));
+ 
+ 	return 0;
+ }
+@@ -40,5 +54,6 @@ U_BOOT_DRIVER(ahci_mvebu_drv) = {
+ 	.name		= "ahci_mvebu",
+ 	.id		= UCLASS_AHCI,
+ 	.of_match	= mvebu_ahci_ids,
++	.bind		= mvebu_ahci_bind,
+ 	.probe		= mvebu_ahci_probe,
+ };
+-- 
+2.22.0
+

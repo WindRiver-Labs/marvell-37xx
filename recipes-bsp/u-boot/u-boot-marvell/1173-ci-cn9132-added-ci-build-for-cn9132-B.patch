@@ -1,0 +1,52 @@
+From b34404b6ed6e4636071c192b2e4c512dd077f6af Mon Sep 17 00:00:00 2001
+From: Stefan Chulski <stefanc@marvell.com>
+Date: Sun, 16 Jun 2019 19:03:20 +0300
+Subject: [PATCH 1173/1200] ci: cn9132: added ci build for cn9132-B
+
+Change-Id: Id5f698e33125a0fd857a8a61a75fd42148b89eda
+Signed-off-by: Stefan Chulski <stefanc@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/11007
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ scripts/ci/compile.sh           | 4 +++-
+ scripts/ci/supported_builds.txt | 1 +
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index 5c43fe2370..430a5b3302 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -134,6 +134,7 @@ case $build_name in
+ 	uboot_2018_cn9131_ddr32_A ) device_tree="cn9131-db-A"; ;;
+ 	uboot_2018_cn9131_emmc_A ) device_tree="cn9131-db-A"; ;;
+ 	uboot_2018_cn9132_A ) device_tree="cn9132-db-A"; ;;
++	uboot_2018_cn9132_B ) device_tree="cn9132-db-B"; ;;
+ 	uboot_2018_cn9132_ddr32_A ) device_tree="cn9132-db-A"; ;;
+ 	uboot_2018_cn9132_emmc_A ) device_tree="cn9132-db-A"; ;;
+ 
+@@ -173,7 +174,8 @@ config_cmd=""
+ if [[ $build_name == "uboot_2018_a70x0_D" ||
+ 	$build_name == "uboot_2018_a80x0_D" ||
+ 	$build_name == "uboot_2018_cn9130_B" ||
+-	$build_name == "uboot_2018_cn9131_B" ]]; then
++	$build_name == "uboot_2018_cn9131_B" ||
++	$build_name == "uboot_2018_cn9132_B" ]]; then
+ 	config_cmd="""
+ 	./scripts/config -d CONFIG_MVEBU_SPI_BOOT
+ 	./scripts/config -e CONFIG_MVEBU_NAND_BOOT
+diff --git a/scripts/ci/supported_builds.txt b/scripts/ci/supported_builds.txt
+index 8a19692de2..dcc7d300b0 100644
+--- a/scripts/ci/supported_builds.txt
++++ b/scripts/ci/supported_builds.txt
+@@ -45,6 +45,7 @@ uboot_2018_cn9131_B
+ uboot_2018_cn9131_ddr32_A
+ uboot_2018_cn9131_emmc_A
+ uboot_2018_cn9132_A
++uboot_2018_cn9132_B
+ uboot_2018_cn9132_ddr32_A
+ uboot_2018_cn9132_emmc_A
+ 
+-- 
+2.22.0
+

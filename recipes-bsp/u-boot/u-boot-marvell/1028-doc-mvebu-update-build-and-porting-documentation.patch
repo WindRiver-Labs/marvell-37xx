@@ -1,0 +1,153 @@
+From b90a43348cf741edc8a6040c40e406725db0dfb0 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Tue, 19 Feb 2019 10:58:57 +0200
+Subject: [PATCH 1028/1200] doc/mvebu: update build and porting documentation
+
+- Add missing SoCs - Armada 3900 and OcteonTX2 CN913x
+
+Change-Id: I13877b14d07988ec20230443570ee422749504dc
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/4315
+Reviewed-by: Nadav Haklai <Nadav.Haklai@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Tested-by: sa_ip-sw-jenkins
+---
+ doc/mvebu/build.txt         | 44 ++++++++++++++++++++-----------------
+ doc/mvebu/porting_guide.txt | 12 +++++-----
+ 2 files changed, 31 insertions(+), 25 deletions(-)
+
+diff --git a/doc/mvebu/build.txt b/doc/mvebu/build.txt
+index b0fe41005e..30b03888e4 100644
+--- a/doc/mvebu/build.txt
++++ b/doc/mvebu/build.txt
+@@ -57,12 +57,12 @@ Manual build procedure
+ 
+ 		> make <defconfig_file>
+ 
+-   - For the Armada-70x0/80x0 DB board and Armada-7020 AMC use
++   - For the ARMADA 70x0/80x0/3900 DB board and ARMADA 7020 AMC use
+      "make mvebu_db_armada8k_defconfig"
+-   - For the Armada-80x0 MacchiatoBin use "make mvebu_mcbin-88f8040_defconfig"
+-   - For the Armada-3700 DB board use "make mvebu_db-88f3720_defconfig"
+-   - For the Armada-3700 EsspressoBin use
+-     "make mvebu_espressobin-88f3720_defconfig"
++   - For the ARMADA 80x0 MacchiatoBin use "make mvebu_mcbin-88f8040_defconfig"
++   - For the ARMADA 3700 DB board use "make mvebu_db-88f3720_defconfig"
++   - For the ARMADA 3700 EsspressoBin use "make mvebu_espressobin-88f3720_defconfig"
++   - For the OcteonTX2 CN913x DB board use "make mvebu_db_cn91xx_defconfig"
+ 
+ 3. Configure the device-tree and build the U-Boot image:
+ 
+@@ -70,28 +70,31 @@ Manual build procedure
+ 	Information about the different configuration available for the
+ 	development board is located in:
+ 
+-	- For A37x0: ./doc/mvebu/a3700/armada-3700-db-setup.txt
+-	- For A70x0: ./doc/mvebu/a7k-a8k/armada70x0-db-setup.txt
+-	- For A80x0: ./doc/mvebu/a7k-a8k/armada80x0-db-setup.txt
++	- For ARMADA 37x0: ./doc/mvebu/a3700/armada-3700-db-setup.txt
++	- For ARMADA 70x0: ./doc/mvebu/a7k-a8k/armada70x0-db-setup.txt
++	- For ARMADA 80x0: ./doc/mvebu/a7k-a8k/armada80x0-db-setup.txt
++	- For ARMADA 3900: ./doc/mvebu/a7k-a8k/armada3900-db-setup.txt
+ 
+ 	In order to compile u-boot with a specific device-tree,
+ 	use the following::
+ 
+ 		> make DEVICE_TREE=<name>
+ 
+-	- For the Armada-70x0 DB use "make DEVICE_TREE=armada-7040-db[-X]"
+-	- For the Armada-7020 AMC use "make DEVICE_TREE=armada-7020-amc"
+-	- For the Armada-80x0 DB use "make DEVICE_TREE=armada-8040-db[-X]"
+-	- For the Armada-37x0 DB use "make DEVICE_TREE=armada-3720-ddrX-db[-X]"
++	- For the ARMADA 3900 DB use "make DEVICE_TREE=armada-3900-vd[-X]"
++	- For the ARMADA 70x0 DB use "make DEVICE_TREE=armada-7040-db[-X]"
++	- For the ARMADA 7020 AMC use "make DEVICE_TREE=armada-7020-amc"
++	- For the ARMADA 80x0 DB use "make DEVICE_TREE=armada-8040-db[-X]"
++	- For the ARMADA 37x0 DB use "make DEVICE_TREE=armada-3720-ddrX-db[-X]"
+ 	  (X represents possible board configuration)
+ 	- For the EspressoBin board without soldered eMMC device use
+ 	  "make DEVICE_TREE=armada-3720-espressobin"
+ 	- For the EspressoBin board with populated eMMC device use
+ 	  "make DEVICE_TREE=armada-3720-espressobin-emmc"
+-	- For the Armada-80x0 MacchiatoBin use
++	- For the ARMADA 80x0 MacchiatoBin use
+ 	  "make DEVICE_TREE=armada-8040-mcbin"
+-	- For the Armada-80x0 MacchiatoBin Single Shot use
++	- For the ARMADA 80x0 MacchiatoBin Single Shot use
+ 	  "make DEVICE_TREE=armada-8040-mcbin-single-shot"
++	- For the OcteonTX2 CN913x DB use "make DEVICE_TREE=cn913[X]-A"
+ 
+ 	The U-Boot compilation generates u-boot.bin - the U-Boot image
+ 
+@@ -114,7 +117,8 @@ The following options are available:
+ 
+ eMMC Boot Device
+ -----------------
+-The Armada-3700 and armada-8k support eMMC as the boot device on the target.
++The ARMADA 3700, ARMADA 7K/8K/3900 and OcteonTX2 CN913x support eMMC as the boot
++device on the target.
+ The default boot device on this platform is SPI NOR flash.
+ In order to change the boot device to eMMC, set the following parameter
+ the default configuration::
+@@ -181,16 +185,16 @@ The selected partition will be used by U-Boot "bubt" and "savenv" commands
+ for flashing the boot image and saving U-Boot configuration.
+ 
+ 
+-Boot Device Selection for Armada-8k/7k Build
+---------------------------------------------
+-The following options are available for A8K and A7K boot:
++Boot Device Selection for ARMADA 7K/8K/3900 and OcteonTX2 CN913x Build
++----------------------------------------------------------------------
++The following options are available for A8K, A7K, A3900 and OcteonTX2 CN913x boot:
+ 
+ 	- Boot from SPI NAND
+ 
+ SPI NAND Boot Device
+ --------------------
+-The Armada-7K and ARMADA-8K supports SPI NAND flash as the boot device on the
+-target.
++The ARMADA-7K/8K/3900 and OcteonTX2 CN913x support SPI NAND flash as the boot
++device on the target.
+ In order to burn the image and save environment variables to SPI NAND flash,
+ please enable SPI NAND driver at first by set the following parameter to <Y>::
+ 
+diff --git a/doc/mvebu/porting_guide.txt b/doc/mvebu/porting_guide.txt
+index 6370247185..90536ff825 100644
+--- a/doc/mvebu/porting_guide.txt
++++ b/doc/mvebu/porting_guide.txt
+@@ -5,9 +5,11 @@ This document provide instructions for porting the Marvell U-Boot package to a c
+ 
+ Relevant Devices
+ ----------------
+-- Armada-80x0
+-- Armada-70x0
+-- Armada-37x0
++- ARMADA 80x0
++- ARMADA 70x0
++- ARMADA 37x0
++- ARMADA 3900
++- Octeon-TX2 CN913x
+ 
+ Introduction
+ ------------
+@@ -105,7 +107,7 @@ Device-tree porting
+ 	- USB3 - xHCI - usb/marvell.xhci-usb.txt
+ 	- MMC/SDIO - mmc/xenon-mmc.txt
+ 
+-   2. Armada-8k SoC family:
++   2. ARMADA 7K/8K/3900 and OcteonTX2 CN913x SoC family:
+ 
+ 	- MPPs - pinctrl/marvell,mvebu-pinctrl.txt
+ 	- GPIO - gpio/mvebu-gpio.txt
+@@ -118,7 +120,7 @@ Device-tree porting
+ 	- PPv2 - net/marvell-pp2x.txt
+ 	- Efuse - fuse/fuse-a7k.txt
+ 
+-   3. Armada-3700 SoC family:
++   3. ARMADA 3700 SoC family:
+ 
+ 	- Serial - serial/mvebu-serial.txt
+ 	- MPPs & GPIO - pinctrl/marvell,armada-37xx-pinctrl.txt
+-- 
+2.22.0
+

@@ -1,0 +1,51 @@
+From 8c623c68147853e7f92f5d4eb3c3efa0385620a6 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Thu, 3 Jan 2019 17:06:53 +0200
+Subject: [PATCH 0974/1200] arm64: mvebu: extend the mmio region
+
+Some of the setups including cn9130 opens mmio window starting from
+0xc0000000, reflect it in the u-boot code.
+
+Change-Id: I95164644f10c6ca892fe61beb902e2628a481f9c
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Signed-off-by: Kostya Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/62414
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Nadav Haklai <nadavh@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/1878
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/mach-mvebu/armada8k/cpu.c         | 4 ++--
+ arch/arm/mach-mvebu/include/mach/fw_info.h | 2 ++
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-mvebu/armada8k/cpu.c b/arch/arm/mach-mvebu/armada8k/cpu.c
+index 9c74aad823..cb63986d07 100644
+--- a/arch/arm/mach-mvebu/armada8k/cpu.c
++++ b/arch/arm/mach-mvebu/armada8k/cpu.c
+@@ -46,8 +46,8 @@ static struct mm_region mvebu_mem_map[] = {
+ 	},
+ 	{
+ 		/* MMIO regions */
+-		.phys = SOC_REGS_PHY_BASE,
+-		.virt = SOC_REGS_PHY_BASE,
++		.phys = MMIO_REGS_PHY_BASE,
++		.virt = MMIO_REGS_PHY_BASE,
+ 		.size = SZ_1G,
+ 
+ 		.attrs = PTE_BLOCK_MEMTYPE(MT_DEVICE_NGNRNE) |
+diff --git a/arch/arm/mach-mvebu/include/mach/fw_info.h b/arch/arm/mach-mvebu/include/mach/fw_info.h
+index 28c7733952..cc51fda484 100644
+--- a/arch/arm/mach-mvebu/include/mach/fw_info.h
++++ b/arch/arm/mach-mvebu/include/mach/fw_info.h
+@@ -14,4 +14,6 @@
+ /* Firmware related definition used for SMC calls */
+ #define MV_SIP_DRAM_SIZE		0x82000010
+ 
++#define MMIO_REGS_PHY_BASE		0xc0000000
++
+ #endif /* _FW_INFO_H_ */
+-- 
+2.22.0
+

@@ -1,0 +1,38 @@
+From 8490bddb701c5dc0e01d0a215201c8d2acf069d5 Mon Sep 17 00:00:00 2001
+From: Suneel Garapati <sgarapati@caviumnetworks.com>
+Date: Fri, 18 Aug 2017 17:49:05 -0700
+Subject: [PATCH 0444/1200] drivers: mtd: fix spi_flash_cmd_read_ops to support
+ 4BAIS
+
+calculate bank length only if BAR is in use. Otherwise,
+consider the given len as read_len.
+
+Signed-off-by: Suneel Garapati <sgarapati@caviumnetworks.com>
+---
+ drivers/mtd/spi/spi_flash.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mtd/spi/spi_flash.c b/drivers/mtd/spi/spi_flash.c
+index 57d4d1d45c..9a50e12575 100644
+--- a/drivers/mtd/spi/spi_flash.c
++++ b/drivers/mtd/spi/spi_flash.c
+@@ -587,13 +587,15 @@ int spi_flash_cmd_read_ops(struct spi_flash *flash, u32 offset,
+ 		if (ret < 0)
+ 			return ret;
+ 		bank_sel = flash->bank_curr;
+-#endif
+ 		remain_len = ((SPI_FLASH_16MB_BOUN << flash->shift) *
+ 				(bank_sel + 1)) - offset;
+ 		if (len < remain_len)
+ 			read_len = len;
+ 		else
+ 			read_len = remain_len;
++#else
++		read_len = len;
++#endif
+ 
+ 		if (spi->max_read_size)
+ 			read_len = min(read_len, spi->max_read_size);
+-- 
+2.22.0
+

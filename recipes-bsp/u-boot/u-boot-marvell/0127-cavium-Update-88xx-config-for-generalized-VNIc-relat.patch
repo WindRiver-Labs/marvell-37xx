@@ -1,0 +1,30 @@
+From f55ceb6cea9f81da89f7557334971e18a3e5920b Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Thu, 5 May 2016 17:49:16 -0700
+Subject: [PATCH 0127/1200] cavium: Update 88xx config for generalized
+ VNIc-related code
+
+Define number of BGX in the config file rather than in the code
+
+Signed-off-by: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+---
+ include/configs/thunderx_88xx.h | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/include/configs/thunderx_88xx.h b/include/configs/thunderx_88xx.h
+index 208585bc1e..60e7190491 100644
+--- a/include/configs/thunderx_88xx.h
++++ b/include/configs/thunderx_88xx.h
+@@ -146,6 +146,9 @@
+ 
+ #define CONFIG_PHYLIB
+ 
++#define CONFIG_MAX_BGX_PER_NODE		2
++#define CONFIG_MAX_BGX			4 /* 2 nodes, 2 bgx per node */
++
+ /* Command line configuration */
+ #define CONFIG_MENU
+ 
+-- 
+2.22.0
+

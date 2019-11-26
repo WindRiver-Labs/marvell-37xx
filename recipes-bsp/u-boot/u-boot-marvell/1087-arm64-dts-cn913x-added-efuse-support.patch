@@ -1,0 +1,115 @@
+From 69dae3992c5f450aab29c279d40d3613450beabd Mon Sep 17 00:00:00 2001
+From: Alex Leibovich <alexl@marvell.com>
+Date: Sun, 7 Apr 2019 10:26:54 +0300
+Subject: [PATCH 1087/1200] arm64: dts: cn913x: added efuse support
+
+Added relevant configuration to enable efuse.
+
+Change-Id: I2bb2b65fe40e8812c6c3cc3ec98d636221e7eb81
+Signed-off-by: Alex Leibovich <alexl@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/7043
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/cn9130-db-A.dts | 15 +++++++++++++++
+ arch/arm/dts/cn9131-db-A.dts |  5 +++++
+ arch/arm/dts/cn9131-db.dtsi  |  1 +
+ arch/arm/dts/cn9132-db-A.dts |  4 ++++
+ arch/arm/dts/cn9132-db.dtsi  |  1 +
+ 5 files changed, 26 insertions(+)
+
+diff --git a/arch/arm/dts/cn9130-db-A.dts b/arch/arm/dts/cn9130-db-A.dts
+index a2855928a0..b4458f08b5 100644
+--- a/arch/arm/dts/cn9130-db-A.dts
++++ b/arch/arm/dts/cn9130-db-A.dts
+@@ -23,6 +23,9 @@
+ 		gpio0 = &ap_gpio0;
+ 		gpio1 = &cp0_gpio0;
+ 		gpio2 = &cp0_gpio1;
++		fuse0 = &ap_hd_efuse0;
++		fuse1 = &ap_ld_efuse1;
++		fuse2 = &cp0_ld_efuse1;
+ 	};
+ 
+ 	memory@00000000 {
+@@ -35,6 +38,14 @@
+ 	status = "okay";
+ };
+ 
++&ap_hd_efuse0 {
++	status = "okay";
++};
++
++&ap_ld_efuse1 {
++	status = "okay";
++};
++
+ /*
+  * AP related configuration
+  */
+@@ -106,6 +117,10 @@
+ 	status = "okay";
+ };
+ 
++&cp0_ld_efuse1 {
++	status = "okay";
++};
++
+ /* U54 */
+ &cp0_nand {
+ 	status = "disabled";
+diff --git a/arch/arm/dts/cn9131-db-A.dts b/arch/arm/dts/cn9131-db-A.dts
+index 57b051c696..132a56efe0 100644
+--- a/arch/arm/dts/cn9131-db-A.dts
++++ b/arch/arm/dts/cn9131-db-A.dts
+@@ -13,3 +13,8 @@
+ 	compatible = "marvell,cn9131-db", "marvell,armada-ap806-quad",
+ 		     "marvell,armada-ap806";
+ };
++
++&cp1_ld_efuse1 {
++	status = "okay";
++};
++
+diff --git a/arch/arm/dts/cn9131-db.dtsi b/arch/arm/dts/cn9131-db.dtsi
+index d7a9d05a20..f1f03d3b5f 100644
+--- a/arch/arm/dts/cn9131-db.dtsi
++++ b/arch/arm/dts/cn9131-db.dtsi
+@@ -29,6 +29,7 @@
+ 	aliases {
+ 		gpio3 = &cp1_gpio0;
+ 		gpio4 = &cp1_gpio1;
++		fuse3 = &cp1_ld_efuse1;
+ 	};
+ 
+ 	cp1 {
+diff --git a/arch/arm/dts/cn9132-db-A.dts b/arch/arm/dts/cn9132-db-A.dts
+index 31aa8ed6b6..24a74c2ba0 100644
+--- a/arch/arm/dts/cn9132-db-A.dts
++++ b/arch/arm/dts/cn9132-db-A.dts
+@@ -41,6 +41,10 @@
+ 	};
+ };
+ 
++&cp2_ld_efuse1 {
++	status = "okay";
++};
++
+ &cp2_ethernet {
+ 	status = "okay";
+ };
+diff --git a/arch/arm/dts/cn9132-db.dtsi b/arch/arm/dts/cn9132-db.dtsi
+index 76e9029a94..58312905c4 100644
+--- a/arch/arm/dts/cn9132-db.dtsi
++++ b/arch/arm/dts/cn9132-db.dtsi
+@@ -29,6 +29,7 @@
+ 	aliases {
+ 		gpio5 = &cp2_gpio0;
+ 		gpio6 = &cp2_gpio1;
++		fuse4 = &cp2_ld_efuse1;
+ 	};
+ 
+ 	cp2 {
+-- 
+2.22.0
+

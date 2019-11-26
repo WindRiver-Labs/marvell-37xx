@@ -1,0 +1,47 @@
+From e9af5cff5aee685873df68edc82b8271cf3b6d96 Mon Sep 17 00:00:00 2001
+From: allen yan <yanwei@marvell.com>
+Date: Wed, 12 Apr 2017 15:22:40 +0800
+Subject: [PATCH 0830/1200] boot_log: a3700: override print_cpuinfo
+
+- This patch overrides print_cpuinfo to print clock info
+  during boot.
+
+Change-Id: I2efcd287d4884c64e194e63de18fd423e16dbf8c
+Signed-off-by: allen yan <yanwei@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/38658
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/58803
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/mach-mvebu/armada3700/cpu.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/arch/arm/mach-mvebu/armada3700/cpu.c b/arch/arm/mach-mvebu/armada3700/cpu.c
+index 98168d044c..26037ff638 100644
+--- a/arch/arm/mach-mvebu/armada3700/cpu.c
++++ b/arch/arm/mach-mvebu/armada3700/cpu.c
+@@ -14,6 +14,7 @@
+ #include <asm/arch/soc.h>
+ #include <asm/armv8/mmu.h>
+ #include <mach/fw_info.h>
++#include <mach/clock.h>
+ 
+ DECLARE_GLOBAL_DATA_PTR;
+ 
+@@ -97,3 +98,12 @@ u32 get_ref_clk(void)
+ 	else
+ 		return 40;
+ }
++
++#if defined(CONFIG_DISPLAY_BOARDINFO)
++int print_cpuinfo(void)
++{
++	soc_print_clock_info();
++
++	return 0;
++}
++#endif
+-- 
+2.22.0
+

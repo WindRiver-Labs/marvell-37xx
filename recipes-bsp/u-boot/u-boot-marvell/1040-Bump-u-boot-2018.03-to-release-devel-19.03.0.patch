@@ -1,0 +1,22 @@
+From d08e3ccd8567c5d8c0e679556f691924835ecc38 Mon Sep 17 00:00:00 2001
+From: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+Date: Mon, 4 Mar 2019 10:30:13 -0800
+Subject: [PATCH 1040/1200] Bump u-boot-2018.03 to release devel-19.03.0
+
+Change-Id: Id38a2ee6ec8b2c2e30dda803ef1fc6f2207d7624
+Signed-off-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+Reviewed-on: https://sj1git1.cavium.com/5147
+---
+ localversion | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/localversion b/localversion
+index a7310d750d..8e3ec26c86 100644
+--- a/localversion
++++ b/localversion
+@@ -1 +1 @@
+--devel-19.02.1
++-devel-19.03.0
+-- 
+2.22.0
+

@@ -1,0 +1,140 @@
+From dae90ed6aec802f23d66c4d22cf78c7cb7312cd4 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Wed, 12 Sep 2018 15:40:11 +0200
+Subject: [PATCH 0865/1200] mvebu: a3700: use smc call for obtaining memory
+ size
+
+Desired runtime service in fw was implemented to allow obtaining the
+real ddr size. Take advantage of it and determine memory size by using
+appropriate smc call.
+
+In Armada 3700 firmware there are two different layouts used:
+- for ddr size less or equal to 2GB one memory decoding window is used.
+- for 4GB ddr four decoding windows are used and the layout looks like
+bellow:
+		0xE8000000 ---> |-----------------------|
+				|	 DDR window 3	| 128 MB
+		0xE0000000 ---> +-----------------------+
+				:			:
+				:			:
+		0xD0000000 ---> |-----------------------|
+				|	 DDR window 2	| 256 MB
+		0xC0000000 ---> |-----------------------|
+				|			|
+				|	 DDR window 1	| 1 GB
+				|			|
+		0x80000000 ---> |-----------------------|
+				|			|
+				|			|
+				|	 DDR window 0	| 2 GB
+				|			|
+				|			|
+		0x00000000 ---> +-----------------------+
+
+Reflect relevant ddr layout in dram bank init.
+
+Change-Id: I8337c14ca48e9039ec194888b3357d95666b88f1
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/59932
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/mach-mvebu/armada3700/cpu.c | 62 ++++++++++++++++++++++++----
+ include/configs/mvebu_armada-37xx.h  |  2 +-
+ 2 files changed, 55 insertions(+), 9 deletions(-)
+
+diff --git a/arch/arm/mach-mvebu/armada3700/cpu.c b/arch/arm/mach-mvebu/armada3700/cpu.c
+index 26037ff638..33d53a4e8a 100644
+--- a/arch/arm/mach-mvebu/armada3700/cpu.c
++++ b/arch/arm/mach-mvebu/armada3700/cpu.c
+@@ -5,16 +5,11 @@
+  */
+ 
+ #include <common.h>
+-#include <dm.h>
+-#include <fdtdec.h>
+-#include <linux/libfdt.h>
+-#include <asm/io.h>
+-#include <asm/system.h>
+-#include <asm/arch/cpu.h>
+-#include <asm/arch/soc.h>
+ #include <asm/armv8/mmu.h>
+-#include <mach/fw_info.h>
++#include <asm/io.h>
++#include <linux/sizes.h>
+ #include <mach/clock.h>
++#include <mach/fw_info.h>
+ 
+ DECLARE_GLOBAL_DATA_PTR;
+ 
+@@ -107,3 +102,54 @@ int print_cpuinfo(void)
+ 	return 0;
+ }
+ #endif
++
++static u64 mvebu_dram_scan_ap_sz(void)
++{
++	struct pt_regs pregs = {0};
++
++	pregs.regs[0] = MV_SIP_DRAM_SIZE;
++
++	smc_call(&pregs);
++
++	if (!pregs.regs[0])
++		pr_err("Failed to get ddr size\n");
++
++	return pregs.regs[0];
++}
++
++int mvebu_dram_init(void)
++{
++	gd->ram_size = mvebu_dram_scan_ap_sz();
++
++	if (gd->ram_size == 0) {
++		pr_err("DRAM size not initialized - check DRAM configuration\n");
++		printf("\n Using temporary DRAM size of 512MB.\n\n");
++		gd->ram_size = SZ_512M;
++	}
++
++	return 0;
++}
++
++int mvebu_dram_init_banksize(void)
++{
++	/* If ddr size is bellow 2GB there is only one ddr bank used */
++	gd->bd->bi_dram[0].start = CONFIG_SYS_SDRAM_BASE;
++	if (gd->ram_size <= SZ_2G) {
++		gd->bd->bi_dram[0].size = gd->ram_size;
++		return 0;
++	}
++
++	/*
++	 * If ddr size is above 2GB there is only one case 4GB but the firmware
++	 * uses 4 decoding windows for describing it in way reflected below.
++	 */
++	gd->bd->bi_dram[0].size = SZ_2G;
++	gd->bd->bi_dram[1].start = SZ_2G;
++	gd->bd->bi_dram[1].size = SZ_1G;
++	gd->bd->bi_dram[2].start = SZ_2G + SZ_1G;
++	gd->bd->bi_dram[2].size = SZ_256M;
++	gd->bd->bi_dram[3].start = 0xe0000000;
++	gd->bd->bi_dram[3].size = SZ_128M;
++
++	return 0;
++}
+diff --git a/include/configs/mvebu_armada-37xx.h b/include/configs/mvebu_armada-37xx.h
+index abaf2565d5..cf8a77a414 100644
+--- a/include/configs/mvebu_armada-37xx.h
++++ b/include/configs/mvebu_armada-37xx.h
+@@ -15,7 +15,7 @@
+ /*
+  * High Level Configuration Options (easy to change)
+  */
+-#define CONFIG_NR_DRAM_BANKS	1
++#define CONFIG_NR_DRAM_BANKS	4
+ 
+ /*
+  * I2C
+-- 
+2.22.0
+

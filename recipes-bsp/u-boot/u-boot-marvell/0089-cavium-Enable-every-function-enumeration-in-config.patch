@@ -1,0 +1,24 @@
+From 28589537b20839ac2d565a4cb5cd5f1a140475dd Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Mon, 9 Nov 2015 14:20:14 -0800
+Subject: [PATCH 0089/1200] cavium: Enable every function enumeration in config
+
+---
+ include/configs/thunderx_88xx.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/configs/thunderx_88xx.h b/include/configs/thunderx_88xx.h
+index 222d366024..2f6e1d42bb 100644
+--- a/include/configs/thunderx_88xx.h
++++ b/include/configs/thunderx_88xx.h
+@@ -198,6 +198,7 @@
+ #define CONFIG_PCI_SCAN_SHOW
+ #undef CONFIG_PCI_ENUM_ONLY
+ #define CONFIG_PCI_PNP
++#define CONFIG_SYS_PCI_ARI
+ #define CONFIG_THUNDERX_ECAMS 8
+ #define CONFIG_THUNDERX_RCS 12
+ 
+-- 
+2.22.0
+

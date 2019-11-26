@@ -1,0 +1,63 @@
+From 568a408364f40e1d265d2d6f6d562da0f37d88ab Mon Sep 17 00:00:00 2001
+From: Jagan Teki <jagan@amarulasolutions.com>
+Date: Thu, 15 Mar 2018 17:03:22 +0530
+Subject: [PATCH 0857/1200] spi: kirkwood: Get drvdata in .ofdata_to_platdata
+
+Get the is_errata_50mhz_ac in .ofdata_to_platdata, and
+reuse it in .set_mode this can eventually initialized
+dt code at once and adding room to add platdata.
+
+Change-Id: Iac7c0f4ec028b425a40543544abc0e0ff87bd4a5
+Signed-off-by: Jagan Teki <jagan@amarulasolutions.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/59611
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ drivers/spi/kirkwood_spi.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/spi/kirkwood_spi.c b/drivers/spi/kirkwood_spi.c
+index 6594c448de..0b5e78d763 100644
+--- a/drivers/spi/kirkwood_spi.c
++++ b/drivers/spi/kirkwood_spi.c
+@@ -293,6 +293,7 @@ struct mvebu_spi_dev {
+ struct mvebu_spi_platdata {
+ 	struct kwspi_registers		*spireg;
+ 	struct mvebu_spi_direct_acc	direct_access[CHIPSELECTS_NUM];
++	bool is_errata_50mhz_ac;
+ };
+ 
+ struct mvebu_spi_priv {
+@@ -405,7 +406,6 @@ static int mvebu_spi_set_mode(struct udevice *bus, uint mode)
+ {
+ 	struct mvebu_spi_platdata *plat = dev_get_platdata(bus);
+ 	struct kwspi_registers *reg = plat->spireg;
+-	const struct mvebu_spi_dev *drvdata;
+ 	u32 data = readl(&reg->cfg);
+ 
+ 	data &= ~(KWSPI_CPHA | KWSPI_CPOL | KWSPI_RXLSBF | KWSPI_TXLSBF);
+@@ -419,8 +419,7 @@ static int mvebu_spi_set_mode(struct udevice *bus, uint mode)
+ 
+ 	writel(data, &reg->cfg);
+ 
+-	drvdata = (struct mvebu_spi_dev *)dev_get_driver_data(bus);
+-	if (drvdata->is_errata_50mhz_ac)
++	if (plat->is_errata_50mhz_ac)
+ 		mvebu_spi_50mhz_ac_timing_erratum(bus, mode);
+ 
+ 	return 0;
+@@ -472,8 +471,11 @@ static int mvebu_spi_ofdata_to_platdata(struct udevice *bus)
+ {
+ 	struct mvebu_spi_platdata *plat = dev_get_platdata(bus);
+ 	struct udevice *child_dev;
++	const struct mvebu_spi_dev *drvdata =
++		(struct mvebu_spi_dev *)dev_get_driver_data(bus);
+ 
+ 	plat->spireg = (struct kwspi_registers *)devfdt_get_addr(bus);
++	plat->is_errata_50mhz_ac = drvdata->is_errata_50mhz_ac;
+ 
+ 	list_for_each_entry(child_dev, &bus->child_head, sibling_node) {
+ 		int cs;
+-- 
+2.22.0
+

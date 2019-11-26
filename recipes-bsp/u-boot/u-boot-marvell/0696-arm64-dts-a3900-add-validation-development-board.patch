@@ -1,0 +1,498 @@
+From 442834be96c34ee3c9a57707c4a5c782c854265c Mon Sep 17 00:00:00 2001
+From: Chih-Min Chao <cmchao@marvell.com>
+Date: Fri, 30 Jun 2017 12:25:55 +0800
+Subject: [PATCH 0696/1200] arm64: dts: a3900: add validation development board
+
+Armada3900 is an variant SoC of A7040 with different
+pin-out and some modification.
+
+This board is the first development board based this SoC. The basic
+skeleton is described in armada-3900-db.dtsi. The hierarchy is shown
+below and 'doc/mvebu/a7k-a8k/armada3900-db-setup.txt' describes the
+difference detailedly
+
+  |--- armada-70x0.dtsi, armada-70x0-dev-info.dtsi
+       |--- armada-3900-db.dtsi
+            |--- armada-3900-vd.dts  (enable CP SPI)
+            |--- armada-3900-vd-nand.dts (enable CP NAND)
+
+topology for 3900 board
+  SerDes:
+      - lane0: PEX0
+      - lane1: PEX0
+      - lane2: SGMII (1G)*
+      - lane3: SGMII (1G)
+      - lane4: USB
+      - lane5: PEX2
+  AP-MPPs:
+      - SPI, I2C, UART
+  CP-MPPs:
+      - PCIx4, PCIx1, USB0, USB1, I2C0, SPI1, ETH0, ETH1
+      - SPI1 or NAND
+
+Note:
+  - *: u-boot can't dynamically change the serders. It is configurerd
+       for 1G auto-neg here and let Linux handle 5G auto-neg
+
+Change-Id: I423d09bd249a57eccc2b78eae72a5b5c75b6c679
+Signed-off-by: Chih-Min Chao <cmchao@marvell.com>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55249
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/Makefile                     |   2 +
+ arch/arm/dts/armada-3900-db.dtsi          | 206 ++++++++++++++++++++++
+ arch/arm/dts/armada-3900-vd-nand.dts      |  53 ++++++
+ arch/arm/dts/armada-3900-vd.dts           |  56 ++++++
+ doc/mvebu/a7k-a8k/armada3900-db-setup.txt |  89 ++++++++++
+ 5 files changed, 406 insertions(+)
+ create mode 100644 arch/arm/dts/armada-3900-db.dtsi
+ create mode 100644 arch/arm/dts/armada-3900-vd-nand.dts
+ create mode 100644 arch/arm/dts/armada-3900-vd.dts
+ create mode 100644 doc/mvebu/a7k-a8k/armada3900-db-setup.txt
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index 125dec8114..ec35d06b01 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -93,6 +93,8 @@ dtb-$(CONFIG_ARCH_MVEBU) +=			\
+ 	armada-388-clearfog.dtb			\
+ 	armada-388-gp.dtb			\
+ 	armada-385-amc.dtb			\
++	armada-3900-vd.dtb			\
++	armada-3900-vd-nand.dtb			\
+ 	armada-7020-amc.dtb			\
+ 	armada-7040-pcac.dtb	                \
+ 	armada-7040-db.dtb			\
+diff --git a/arch/arm/dts/armada-3900-db.dtsi b/arch/arm/dts/armada-3900-db.dtsi
+new file mode 100644
+index 0000000000..3998bdf0d4
+--- /dev/null
++++ b/arch/arm/dts/armada-3900-db.dtsi
+@@ -0,0 +1,206 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2018 Marvell International Ltd.
++ */
++
++#include "armada-70x0.dtsi" /* include SoC device tree */
++
++/ {
++	model = "DB-ARMADA-3900";
++	compatible = "marvell,armada7040", "marvell,armada-ap806-quad",
++		     "marvell,armada-ap806";
++
++	chosen {
++		stdout-path = "serial0:115200n8";
++	};
++
++	aliases {
++		i2c0 = &cp0_i2c0;
++		spi0 = &ap_spi0;
++	};
++
++	memory@00000000 {
++		device_type = "memory";
++		reg = <0x0 0x0 0x0 0x80000000>;
++	};
++
++	cp0 {
++		config-space {
++			cp0_reg_usb3_vbus0: cp0_usb3_vbus@0 {
++				compatible = "regulator-fixed";
++				pinctrl-names = "default";
++				pinctrl-0 = <&cp0_xhci0_vbus_pins>;
++				regulator-name = "cp0-xhci0-vbus";
++				regulator-min-microvolt = <5000000>;
++				regulator-max-microvolt = <5000000>;
++				startup-delay-us = <100000>;
++				enable-active-high;
++				regulator-force-boot-off;
++				gpio = <&cp0_gpio1 12 GPIO_ACTIVE_HIGH>;
++			};
++
++			cp0_reg_usb3_vbus1: cp0_usb3_vbus@1 {
++				compatible = "regulator-fixed";
++				pinctrl-names = "default";
++				pinctrl-0 = <&cp0_xhci1_vbus_pins>;
++				regulator-name = "cp0-xhci1-vbus";
++				regulator-min-microvolt = <5000000>;
++				regulator-max-microvolt = <5000000>;
++				startup-delay-us = <100000>;
++				enable-active-high;
++				regulator-force-boot-off;
++				gpio = <&cp0_gpio1 13 GPIO_ACTIVE_HIGH>;
++			};
++		};
++	};
++};
++
++/*
++ * AP related configuration
++ */
++&ap_pinctl {
++		/* MPP Bus:
++		 * SPI   [0-3]
++		 * I2C   [4-5]
++		 * UART0 [11,19]
++		 */
++		/*   0 1 2 3 4 5 6 7 8 9 */
++	pin-func = < 3 3 3 3 3 3 0 0 0 0
++		     0 3 0 0 0 0 0 0 0 3 >;
++};
++
++&ap_spi0 {
++	status = "okay";
++};
++
++&uart0 {
++	status = "okay";
++};
++
++/*
++ * CP related configuration
++ */
++&cp0_pinctl {
++	cp0_xhci0_vbus_pins: cp0-xhci0-vbus-pins {
++		marvell,pins = <44>;
++		marvell,function = <0>;
++	};
++
++	cp0_xhci1_vbus_pins: cp0-xhci1-vbus-pins {
++		marvell,pins = <45>;
++		marvell,function = <0>;
++	};
++
++	cp0_mochi_reset_pins: cp0-mochi-reset-pins {
++		marvell,pins = <56>;
++		marvell,function = <0>;
++	};
++
++	cp0_mochi_enable_pins: cp0-mochi-enable-pins {
++		marvell,pins = <57>;
++		marvell,function = <0>;
++	};
++};
++
++&cp0_i2c0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&cp0_i2c0_pins>;
++	status = "okay";
++};
++
++&cp0_utmi0 {
++	status = "okay";
++};
++
++&cp0_utmi1 {
++	status = "okay";
++};
++
++&cp0_usb3_0 {
++	status = "okay";
++	vbus-supply = <&cp0_reg_usb3_vbus0>;
++	vbus-disable-delay = <500>;
++};
++
++&cp0_usb3_1 {
++	status = "okay";
++	vbus-supply = <&cp0_reg_usb3_vbus1>;
++	vbus-disable-delay = <500>;
++};
++
++&cp0_pcie0 {
++	status = "okay";
++	ranges =
++		/* downstream I/O */
++		<0x81000000 0 0xf7000000 0  0xf7000000 0 0x10000
++		/* non-prefetchable memory */
++		0x82000000 0 0xf6000000 0  0xf6000000 0 0xf00000>;
++};
++
++&cp0_pcie2 {
++	status = "okay";
++	ranges =
++		/* downstream I/O */
++		<0x81000000 0 0xf7020000 0  0xf7020000 0 0x10000
++		/* non-prefetchable memory */
++		0x82000000 0 0xf8000000 0  0xf8000000 0 0xf00000>;
++};
++
++&cp0_comphy {
++	phy0 {
++		phy-type = <COMPHY_TYPE_PEX0>;
++		phy-speed = <COMPHY_SPEED_5G>;
++	};
++
++	phy1 {
++		phy-type = <COMPHY_TYPE_PEX0>;
++		phy-speed = <COMPHY_SPEED_5G>;
++	};
++
++	phy2 {
++		phy-type = <COMPHY_TYPE_SGMII0>;
++		phy-speed = <COMPHY_SPEED_1_25G>;
++	};
++
++	phy3 {
++		phy-type = <COMPHY_TYPE_SGMII1>;
++		phy-speed = <COMPHY_SPEED_1_25G>;
++	};
++
++	phy4 {
++		phy-type = <COMPHY_TYPE_USB3_HOST1>;
++		phy-speed = <COMPHY_SPEED_5G>;
++	};
++
++	phy5 {
++		phy-type = <COMPHY_TYPE_PEX2>;
++		phy-speed = <COMPHY_SPEED_5G>;
++	};
++};
++
++&cp0_xmdio {
++	status = "okay";
++	phy0: ethernet-phy@0 {
++		reg = <0>;
++	};
++	phy1: ethernet-phy@1 {
++		reg = <1>;
++	};
++};
++
++&cp0_ethernet {
++	status = "okay";
++};
++
++&cp0_eth0 {
++	status = "okay";
++	phy-mode = "sgmii";
++	phy = <&phy0>;
++};
++
++&cp0_eth1 {
++	status = "okay";
++	phy-mode = "sgmii";
++	phy = <&phy1>;
++};
++
+diff --git a/arch/arm/dts/armada-3900-vd-nand.dts b/arch/arm/dts/armada-3900-vd-nand.dts
+new file mode 100644
+index 0000000000..c5793b2376
+--- /dev/null
++++ b/arch/arm/dts/armada-3900-vd-nand.dts
+@@ -0,0 +1,53 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2018 Marvell International Ltd.
++ */
++
++#include "armada-3900-db.dtsi"
++
++/ {
++	model = "Marvell Armada 3900 Validation Development board(CP NAND)";
++	compatible = "marvell,armada3900-vd", "marvell,armada7040",
++		     "marvell,armada-ap806-quad", "marvell,armada-ap806";
++
++	aliases {
++		i2c1 = &ap_i2c0;
++	};
++};
++
++/*
++ * AP related configuration
++ */
++&ap_i2c0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&ap_i2c0_pins>;
++	status = "okay";
++};
++
++/*
++ * CP related configuration
++ */
++&cp0_pinctl {
++		/* MPP Bus:
++		 *   NAND	[13,15-27]
++		 *   SMI	[32,34]
++		 *   XSMI	[35-36]
++		 *   I2C0	[37-38]
++		 *   USB	[44-45]
++		 *   UART1	[46-47,49,58]
++		 *   IHB	[56-57]
++		 *   UART0	[59-62]
++		 */
++		/*   0   1   2   3   4   5   6   7   8   9 */
++	pin-func = < 0   0   0   0   0   0   0   0   0   0
++		     0   0   0   2   0   1   1   1   1   1
++		     1   1   1   1   1   1   1   1   0   0
++		     0   0   7   0   7   7   7   2   2   0
++		     0   0   0   0   0   0   7   7   0   7
++		     0   0   0   0   0   0   0   0   7   7
++		     7   7   7>;
++};
++
++&cp0_nand {
++	status = "okay";
++};
+diff --git a/arch/arm/dts/armada-3900-vd.dts b/arch/arm/dts/armada-3900-vd.dts
+new file mode 100644
+index 0000000000..64569d65c6
+--- /dev/null
++++ b/arch/arm/dts/armada-3900-vd.dts
+@@ -0,0 +1,56 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2018 Marvell International Ltd.
++ */
++
++#include "armada-3900-db.dtsi"
++
++/ {
++	model = "Marvell Armada 3900 Validation Development board(CP NOR)";
++	compatible = "marvell,armada3900-vd", "marvell,armada7040",
++		     "marvell,armada-ap806-quad", "marvell,armada-ap806";
++
++	aliases {
++		i2c1 = &ap_i2c0;
++		spi1 = &cp0_spi1;
++	};
++};
++
++/*
++ * AP related configuration
++ */
++&ap_i2c0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&ap_i2c0_pins>;
++	status = "okay";
++};
++
++/*
++ * CP related configuration
++ */
++&cp0_pinctl {
++		/* MPP Bus:
++		 *   SPI1	[13-16]
++		 *   SMI	[32,34]
++		 *   XSMI	[35-36]
++		 *   I2C0	[37-38]
++		 *   USB	[44-45]
++		 *   UART1	[46-47,49,58]
++		 *   IHB	[56-57]
++		 *   UART0	[59-62]
++		 */
++		/*   0   1   2   3   4   5   6   7   8   9 */
++	pin-func = < 0   0   0   0   0   0   0   0   0   0
++		     0   0   0   3   3   3   3   0   0   0
++		     0   0   0   0   0   0   0   0   0   0
++		     0   0   7   0   7   7   7   2   2   0
++		     0   0   0   0   0   0   7   7   0   7
++		     0   0   0   0   0   0   0   0   7   7
++		     7   7   7>;
++};
++
++&cp0_spi1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&cp0_spi0_pins>;
++	status = "okay";
++};
+diff --git a/doc/mvebu/a7k-a8k/armada3900-db-setup.txt b/doc/mvebu/a7k-a8k/armada3900-db-setup.txt
+new file mode 100644
+index 0000000000..226dc6e677
+--- /dev/null
++++ b/doc/mvebu/a7k-a8k/armada3900-db-setup.txt
+@@ -0,0 +1,89 @@
++Armada-3900 Development Board Setup
++===================================
++
++The Armada 3900 Development Board are a series of configurable boards with different
++configuations for different purposes
++U-Boot supports a defined set of those configurations via different device tree files.
++
++This document describes the board modifications required to setup each configuration and the
++interfaces supported (or disabled in each one).
++
++To switch board configuration:
++1. Modify HW board settings according to the instructions in the "Board Setup" section below.
++2. Modify the Device tree file used by U-BOOT during compilation:
++   mvebu_db_armada8k_defconfig           - Choose Armada80x0/70x0 general defconfig
++   export DEVICE_TREE=<device_tree_name> - Choose specific device-tree
++
++Note:
++Booting Linux requires using the same Device Tree configuration as used in U-Boot.
++
++
++Board Target Usage and Setup Options
++-------------------
++
++|		| 1: VD				| 2: VD-NAND			|
++|---------------|-------------------------------|-------------------------------|
++|Device tree	| armada-3900-vd.dts		| armada-3900-vd-nand.dts	|
++|Purpose	| internal test	with NOR boot	| internal test with nand boot	|
++|PCB		| TB_A3900-BGA			| TB_A3900-BGA			|
++|pcie x 2 iface	| stardard x2 interface		| startard x 2 interface	|
++|pcie x 1 iface	| mini x2 interface		| mini x2 interface		|
++|mochi 		| external through mcix4	| external through mcix4	|
++
++The tables below summarize the interface configuration of each setup.
++
++SerDes Configuration
++---------------------
++ Lane	|  VD/VD-NAND/AXIS		|
++--------|-------------------------------|
++ 0	|  PCIe0 (x2)			|
++ 1	|  PCIe0 (x2)	        	|
++ 2	|  SGMII0 (auto-neg <= 1G) (*)	|
++ 3	|  SGMII1 (auto-neg <= 1G)	|
++ 4	|  USB3 HOST1	        	|
++ 5	|  PCIe2 (x1)	        	|
++-----------------------------------------
++
++Multi purpose pin configurations
++--------------------------------
++ AP806 pin	| 1: VD		| 2: VD-NAND	|
++----------------|---------------|---------------|
++	AP-SDIO | N/C		| N/C		|
++	AP-SPI0 | [0-3]		| [0-3]		|
++	AP-I2C	| [4-5]		| [4-5]		|
++	AP-UART0| [11,19]	| [11,19]	|
++
++ CP110 pin	| 1: VD		| 2: VD-NAND	|
++----------------|---------------|---------------|
++ CP-SPI1	| [13-16]	| N/C		|
++ CP-I2C0	| N/C		| N/C		|
++ CP-I2C1	| [37-38]	| [37-38]	|
++ NAND		| N/C		| [13,15-27]	|
++ CP-UART0	| [59-62]	| [59-62]	|
++ CP-UART1	| [46-47,49,58]	| [46-47,49,58] |
++ SMI		| [32,34]	| [32,34]	|
++ XSMI		| [35-36]	| [35-36]	|
++ USB0_VDD 	| [44]		| [44]		|
++ USB1_VDD 	| [45]		| [45]		|
++ IHB-ENABLE     | [56]          | [56]		|
++ IHB-RESET      | [57]		| [57]		|
++ IOT-RESET      | N/C		| N/C		|
++ ETH-PHY-RESET  | N/C		| N/C		|
++ PPS-RESET      | N/C		| N/C		|
++
++Network configuration
++---------------------
++1: VD/VD-NAND
++---------------------
++ Interface	| GMAC Port	| Board Interface			|
++ ---------------|---------------|---------------------------------------|
++ eth0		| 0		| SGMII (*)                         	|
++ eth1		| 2		| SGMII                         	|
++
++Notes:
++	- (*) eth0/serdes2 are expected to run with 5G speed but u-boot can't dynammically change the
++              serdes speed. It is configured with 1G and let Linux handle 5G task.
++	- Equivalent of this configuration can be viewed in arch/arm64/boot/dts/mvebu/armada-cpn110.dtsi
++	- eth0/1/2/3 may in fact be higher numbers, if prior eth_x interfaces already exist.
++
++
+-- 
+2.22.0
+

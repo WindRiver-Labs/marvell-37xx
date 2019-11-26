@@ -1,0 +1,56 @@
+From 0fa252678c1ad0126039ffb6a2ab28773d44d3ee Mon Sep 17 00:00:00 2001
+From: Boris Brezillon <boris.brezillon@free-electrons.com>
+Date: Mon, 18 Dec 2017 10:32:45 +0100
+Subject: [PATCH 0828/1200] mtd: nand: pxa3xx: Fix READOOB implementation
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+In the current driver, OOB bytes are accessed in raw mode, and when a
+page access is done with NDCR_SPARE_EN set and NDCR_ECC_EN cleared, the
+driver must read the whole spare area (64 bytes in case of a 2k page,
+16 bytes for a 512 page). The driver was only reading the free OOB
+bytes, which was leaving some unread data in the FIFO and was somehow
+leading to a timeout.
+
+We could patch the driver to read ->spare_size + ->ecc_size instead of
+just ->spare_size when READOOB is requested, but we'd better make
+in-band and OOB accesses consistent.
+Since the driver is always accessing in-band data in non-raw mode (with
+the ECC engine enabled), we should also access OOB data in this mode.
+That's particularly useful when using the BCH engine because in this
+mode the free OOB bytes are also ECC protected.
+
+Fixes: 43bcfd2bb24a ("mtd: nand: pxa3xx: Add driver-specific ECC BCH support")
+Change-Id: Ie64f52223a5d908e5d829bbc6b03625bc3e2ff4b
+Cc: stable@vger.kernel.org
+Reported-by: Sean Nyekjær <sean.nyekjaer@prevas.dk>
+Tested-by: Willy Tarreau <w@1wt.eu>
+Signed-off-by: Boris Brezillon <boris.brezillon@free-electrons.com>
+Acked-by: Ezequiel Garcia <ezequiel@vanguardiasur.com.ar>
+Tested-by: Sean Nyekjaer <sean.nyekjaer@prevas.dk>
+Acked-by: Robert Jarzmik <robert.jarzmik@free.fr>
+Signed-off-by: Richard Weinberger <richard@nod.at>
+Signed-off-by: Ofer Heifetz <oferh@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/58642
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ drivers/mtd/nand/pxa3xx_nand.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/mtd/nand/pxa3xx_nand.c b/drivers/mtd/nand/pxa3xx_nand.c
+index 3bdd57d538..5a42715391 100644
+--- a/drivers/mtd/nand/pxa3xx_nand.c
++++ b/drivers/mtd/nand/pxa3xx_nand.c
+@@ -754,6 +754,7 @@ static void prepare_start_command(struct pxa3xx_nand_info *info, int command)
+ 
+ 	switch (command) {
+ 	case NAND_CMD_READ0:
++	case NAND_CMD_READOOB:
+ 	case NAND_CMD_PAGEPROG:
+ 		info->use_ecc = 1;
+ 		break;
+-- 
+2.22.0
+

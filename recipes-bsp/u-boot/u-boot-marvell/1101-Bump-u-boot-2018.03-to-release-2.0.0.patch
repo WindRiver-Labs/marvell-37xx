@@ -1,0 +1,23 @@
+From d2d6a26dfefb575a1794e57fd38b66b58d6e2347 Mon Sep 17 00:00:00 2001
+From: "Chickles, Derek" <Derek.Chickles@cavium.com>
+Date: Tue, 30 Apr 2019 14:17:28 -0700
+Subject: [PATCH 1101/1200] Bump u-boot-2018.03 to release 2.0.0
+
+Change-Id: Ica92ea5c4c6e684e4fbbf851596f125ee4871449
+Reviewed-on: https://sj1git1.cavium.com/8334
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Chandrakala Chavva <cchavva@marvell.com>
+---
+ localversion | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/localversion b/localversion
+index 90e4cff822..d04b1df3b7 100644
+--- a/localversion
++++ b/localversion
+@@ -1 +1 @@
+--devel-1.0.0
++-2.0.0
+-- 
+2.22.0
+

@@ -1,0 +1,199 @@
+From 97987a804339f71c3d4b17a33a837313ccb47679 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Sun, 5 May 2019 17:41:19 +0300
+Subject: [PATCH 1120/1200] dts: cn913x: re-arrange efuse entries across
+ platform DTS files
+
+Move efuse aliases and enable entries to DTSI files to be shared
+across all platform boards.
+Make CP110 include file to be surrounded by defines and undefines
+in the same place to avoid possible conflicts.
+
+Change-Id: I8f3e4c436c099d8e4b0c89e61afe9c87d8091e77
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/8593
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+---
+ arch/arm/dts/cn9130-db-A.dts | 15 ---------------
+ arch/arm/dts/cn9130-db.dtsi  | 20 ++++++++++++++++++++
+ arch/arm/dts/cn9130.dtsi     | 15 +++++++++++++++
+ arch/arm/dts/cn9131-db.dtsi  | 21 +++++++++++++--------
+ arch/arm/dts/cn9132-db.dtsi  |  3 ++-
+ 5 files changed, 50 insertions(+), 24 deletions(-)
+
+diff --git a/arch/arm/dts/cn9130-db-A.dts b/arch/arm/dts/cn9130-db-A.dts
+index b4458f08b5..a2855928a0 100644
+--- a/arch/arm/dts/cn9130-db-A.dts
++++ b/arch/arm/dts/cn9130-db-A.dts
+@@ -23,9 +23,6 @@
+ 		gpio0 = &ap_gpio0;
+ 		gpio1 = &cp0_gpio0;
+ 		gpio2 = &cp0_gpio1;
+-		fuse0 = &ap_hd_efuse0;
+-		fuse1 = &ap_ld_efuse1;
+-		fuse2 = &cp0_ld_efuse1;
+ 	};
+ 
+ 	memory@00000000 {
+@@ -38,14 +35,6 @@
+ 	status = "okay";
+ };
+ 
+-&ap_hd_efuse0 {
+-	status = "okay";
+-};
+-
+-&ap_ld_efuse1 {
+-	status = "okay";
+-};
+-
+ /*
+  * AP related configuration
+  */
+@@ -117,10 +106,6 @@
+ 	status = "okay";
+ };
+ 
+-&cp0_ld_efuse1 {
+-	status = "okay";
+-};
+-
+ /* U54 */
+ &cp0_nand {
+ 	status = "disabled";
+diff --git a/arch/arm/dts/cn9130-db.dtsi b/arch/arm/dts/cn9130-db.dtsi
+index f933ed50b8..a5a51ce898 100644
+--- a/arch/arm/dts/cn9130-db.dtsi
++++ b/arch/arm/dts/cn9130-db.dtsi
+@@ -83,9 +83,29 @@
+ 	};
+ };
+ 
++&ap_hd_efuse0 {
++	status = "okay";
++};
++
++&ap_ld_efuse0 {
++	status = "okay";
++};
++
++&ap_ld_efuse1 {
++	status = "okay";
++};
++
+ /*
+  * CP0
+  */
++&cp0_ld_efuse0 {
++	status = "okay";
++};
++
++&cp0_ld_efuse1 {
++	status = "okay";
++};
++
+ &cp0_utmi0 {
+ 	status = "okay";
+ };
+diff --git a/arch/arm/dts/cn9130.dtsi b/arch/arm/dts/cn9130.dtsi
+index 02446ef5f0..3ff60085f9 100644
+--- a/arch/arm/dts/cn9130.dtsi
++++ b/arch/arm/dts/cn9130.dtsi
+@@ -35,10 +35,25 @@
+ 
+ #include "armada-cp110.dtsi"
+ 
++#undef CP110_NAME
++#undef CP110_NUM
++#undef CP110_PCIEx_CPU_IO_BASE
++#undef CP110_PCIEx_CPU_MEM_BASE
++#undef CP110_PCIEx_BUS_IO_BASE
++#undef CP110_PCIEx_BUS_MEM_BASE
++
+ / {
+ 	model = "Marvell CN 9030";
+ 	compatible = "marvell,armada70x0", "marvell,armada-ap806-quad",
+ 		     "marvell,armada-ap806";
++
++	aliases {
++		fuse0 = &ap_hd_efuse0;	/* banks 0-63 RW */
++		fuse1 = &ap_ld_efuse0;	/* bank 64 RO */
++		fuse2 = &ap_ld_efuse1;	/* bank 65 RW */
++		fuse3 = &cp0_ld_efuse0;	/* bank 66 RO */
++		fuse4 = &cp0_ld_efuse1;	/* bank 67 RW */
++	};
+ };
+ 
+ &cp0_rtc {
+diff --git a/arch/arm/dts/cn9131-db.dtsi b/arch/arm/dts/cn9131-db.dtsi
+index 7b3be011ad..e237130e1a 100644
+--- a/arch/arm/dts/cn9131-db.dtsi
++++ b/arch/arm/dts/cn9131-db.dtsi
+@@ -5,13 +5,6 @@
+  * https://spdx.org/licenses
+  */
+ 
+-#undef CP110_NAME
+-#undef CP110_NUM
+-#undef CP110_PCIEx_CPU_IO_BASE
+-#undef CP110_PCIEx_CPU_MEM_BASE
+-#undef CP110_PCIEx_BUS_IO_BASE
+-#undef CP110_PCIEx_BUS_MEM_BASE
+-
+ /* CP110-1 Settings */
+ #define CP110_NAME			cp1
+ #define CP110_NUM			1
+@@ -22,6 +15,13 @@
+ 
+ #include "armada-cp110.dtsi"
+ 
++#undef CP110_NAME
++#undef CP110_NUM
++#undef CP110_PCIEx_CPU_IO_BASE
++#undef CP110_PCIEx_CPU_MEM_BASE
++#undef CP110_PCIEx_BUS_IO_BASE
++#undef CP110_PCIEx_BUS_MEM_BASE
++
+ / {
+ 	model = "Marvell CN9131 development board";
+ 	compatible = "marvell,cn9131-db";
+@@ -29,7 +29,8 @@
+ 	aliases {
+ 		gpio3 = &cp1_gpio0;
+ 		gpio4 = &cp1_gpio1;
+-		fuse3 = &cp1_ld_efuse1;
++		fuse5 = &cp1_ld_efuse0;	/* bank 68 RO */
++		fuse6 = &cp1_ld_efuse1;	/* bank 69 RW */
+ 	};
+ 
+ 	cp1 {
+@@ -60,6 +61,10 @@
+ 	};
+ };
+ 
++&cp1_ld_efuse0 {
++	status = "okay";
++};
++
+ &cp1_ld_efuse1 {
+ 	status = "okay";
+ };
+diff --git a/arch/arm/dts/cn9132-db.dtsi b/arch/arm/dts/cn9132-db.dtsi
+index 58312905c4..b38c964c91 100644
+--- a/arch/arm/dts/cn9132-db.dtsi
++++ b/arch/arm/dts/cn9132-db.dtsi
+@@ -29,7 +29,8 @@
+ 	aliases {
+ 		gpio5 = &cp2_gpio0;
+ 		gpio6 = &cp2_gpio1;
+-		fuse4 = &cp2_ld_efuse1;
++		fuse7 = &cp2_ld_efuse0;	/* bank 70 RO */
++		fuse8 = &cp2_ld_efuse1;	/* bank 71 RW */
+ 	};
+ 
+ 	cp2 {
+-- 
+2.22.0
+

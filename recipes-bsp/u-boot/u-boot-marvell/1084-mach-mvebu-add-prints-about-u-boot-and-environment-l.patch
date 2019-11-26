@@ -1,0 +1,34 @@
+From 6d660d7614b5c25727907db44dc459a51e0b01f8 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Wed, 3 Apr 2019 16:26:49 +0300
+Subject: [PATCH 1084/1200] mach-mvebu: add prints about u-boot and environment
+ locations
+
+Add print with locations of relocated u-boot and environment.
+
+Change-Id: I910cdd18f66987153a4ea9e1caa46fbf89a34bb2
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/6912
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/mach-mvebu/arm64-common.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm/mach-mvebu/arm64-common.c b/arch/arm/mach-mvebu/arm64-common.c
+index ef733e980e..cbc980acbe 100644
+--- a/arch/arm/mach-mvebu/arm64-common.c
++++ b/arch/arm/mach-mvebu/arm64-common.c
+@@ -83,6 +83,8 @@ int arch_early_init_r(void)
+ 	int ret;
+ 	int i;
+ 
++	printf("Running in RAM - U-Boot at: 0x%08lx\n", gd->relocaddr);
++	printf("                 Env at:    0x%08lx\n", gd->env_addr);
+ 	/*
+ 	 * Loop over all MISC uclass drivers to call the comphy code
+ 	 * and init all CP110 devices enabled in the DT
+-- 
+2.22.0
+

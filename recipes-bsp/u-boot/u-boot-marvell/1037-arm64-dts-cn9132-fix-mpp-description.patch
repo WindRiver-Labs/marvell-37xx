@@ -1,0 +1,50 @@
+From 01ff075e20352363d0eaeb0f8249f78572342153 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Tue, 26 Feb 2019 16:26:14 +0100
+Subject: [PATCH 1037/1200] arm64: dts: cn9132: fix mpp description
+
+The mpp relevant for SD card detect and reset are under MPP54 and MPP55
+and not under MPP44 and MPP45 as previously described. Additionally some
+lower MPP should be configured to GPIO.
+
+Change-Id: I2bcfbb99901ac83268b192debc134c8a1b426616
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/4858
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/cn9132-db-A.dts | 11 +++++------
+ 1 file changed, 5 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm/dts/cn9132-db-A.dts b/arch/arm/dts/cn9132-db-A.dts
+index 467bcf6e12..31aa8ed6b6 100644
+--- a/arch/arm/dts/cn9132-db-A.dts
++++ b/arch/arm/dts/cn9132-db-A.dts
+@@ -71,10 +71,9 @@
+ 	 *	[29-31, 33]	GPIO (Default)
+ 	 *	[32,34]		SMI
+ 	 *	[37-38]		I2C0
+-	 *	[39-43]		GPIO
+-	 *	[44]		SD_CRD_RSTn (out)
+-	 *	[45]		SD_CRD_DT (in)
+-	 *	[46-53]		GPIO
++	 *	[39-53]		GPIO
++	 *	[54]		SD_CRD_RSTn (out)
++	 *	[55]		SD_CRD_DT (in)
+ 	 *	[56-62]		SDIO
+ 	 */
+ 		/*   0    1    2    3    4    5    6    7    8    9 */
+@@ -82,8 +81,8 @@
+ 		     0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x0
+ 		     0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x9  0x9  0x0
+ 		     0x0  0x0  0x8  0x0  0x8  0x0  0x0  0x2  0x2  0x0
+-		     0x0  0x0  0x0  0x0  0xA  0xB  0x0  0x0  0x0  0x0
+-		     0xe  0xe  0xe  0xe  0xe  0xe  0xe  0xe  0xe  0xe
++		     0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x0
++		     0x0  0x0  0x0  0x0  0xa  0xb  0xe  0xe  0xe  0xe
+ 		     0xe  0xe  0xe >;
+ };
+ 
+-- 
+2.22.0
+

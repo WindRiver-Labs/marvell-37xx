@@ -1,0 +1,131 @@
+From b534569f7c5003c9d3a8ef3a3a83d9d5a1dd5139 Mon Sep 17 00:00:00 2001
+From: Christine Gharzuzi <chrisg@marvell.com>
+Date: Mon, 18 Jun 2018 19:34:19 +0300
+Subject: [PATCH 0794/1200] dts: a3900: Enable NAND flash in a3900 A1 DT
+
+- replace CP0-SPI with CP0 NAND for 3900 Setup A and B
+
+Change-Id: I6778595f58695a634fdc158278ab50f837af401f
+Signed-off-by: Christine Gharzuzi <chrisg@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/56921
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/57635
+---
+ arch/arm/dts/armada-3900-vd-A.dts | 17 +++++++----------
+ arch/arm/dts/armada-3900-vd-B.dts | 17 +++++++----------
+ 2 files changed, 14 insertions(+), 20 deletions(-)
+
+diff --git a/arch/arm/dts/armada-3900-vd-A.dts b/arch/arm/dts/armada-3900-vd-A.dts
+index 2f3adc3ddd..953112533a 100644
+--- a/arch/arm/dts/armada-3900-vd-A.dts
++++ b/arch/arm/dts/armada-3900-vd-A.dts
+@@ -14,7 +14,6 @@
+ 
+ 	aliases {
+ 		i2c1 = &ap_i2c0;
+-		spi1 = &cp0_spi1;
+ 	};
+ };
+ 
+@@ -32,7 +31,7 @@
+  */
+ &cp0_pinctl {
+ 		/* MPP Bus:
+-		 *   SPI1	[13-16]
++		 *   NAND	[13,15-27]
+ 		 *   SMI	[32,34]
+ 		 *   XSMI	[35-36]
+ 		 *   I2C0	[37-38]
+@@ -43,14 +42,18 @@
+ 		 */
+ 		/*   0   1   2   3   4   5   6   7   8   9 */
+ 	pin-func = < 0   0   0   0   0   0   0   0   0   0
+-		     0   0   0   3   3   3   3   0   0   0
+-		     0   0   0   0   0   0   0   0   0   0
++		     0   0   0   2   0   1   1   1   1   1
++		     1   1   1   1   1   1   1   1   0   0
+ 		     0   0   7   0   7   7   7   2   2   0
+ 		     0   0   0   0   0   0   7   7   0   7
+ 		     0   0   0   0   0   0   0   0   7   7
+ 		     7   7   7>;
+ };
+ 
++&cp0_nand {
++	status = "okay";
++};
++
+ &cp0_comphy {
+ 
+ 	phy0 {
+@@ -78,12 +81,6 @@
+ 	};
+ };
+ 
+-&cp0_spi1 {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&cp0_spi0_pins>;
+-	status = "okay";
+-};
+-
+ &cp0_eth0 {
+ 	phy-mode = "sfi";
+ };
+diff --git a/arch/arm/dts/armada-3900-vd-B.dts b/arch/arm/dts/armada-3900-vd-B.dts
+index b8d896ba51..2e6bdfaa6a 100644
+--- a/arch/arm/dts/armada-3900-vd-B.dts
++++ b/arch/arm/dts/armada-3900-vd-B.dts
+@@ -14,7 +14,6 @@
+ 
+ 	aliases {
+ 		i2c1 = &ap_i2c0;
+-		spi1 = &cp0_spi1;
+ 	};
+ };
+ 
+@@ -32,7 +31,7 @@
+  */
+ &cp0_pinctl {
+ 		/* MPP Bus:
+-		 *   SPI1	[13-16]
++		 *   NAND	[13,15-27]
+ 		 *   SMI	[32,34]
+ 		 *   XSMI	[35-36]
+ 		 *   I2C0	[37-38]
+@@ -43,14 +42,18 @@
+ 		 */
+ 		/*   0   1   2   3   4   5   6   7   8   9 */
+ 	pin-func = < 0   0   0   0   0   0   0   0   0   0
+-		     0   0   0   3   3   3   3   0   0   0
+-		     0   0   0   0   0   0   0   0   0   0
++		     0   0   0   2   0   1   1   1   1   1
++		     1   1   1   1   1   1   1   1   0   0
+ 		     0   0   7   0   7   7   7   2   2   0
+ 		     0   0   0   0   0   0   7   7   0   7
+ 		     0   0   0   0   0   0   0   0   7   7
+ 		     7   7   7>;
+ };
+ 
++&cp0_nand {
++	status = "okay";
++};
++
+ &cp0_comphy {
+ 
+ 	phy0 {
+@@ -79,12 +82,6 @@
+ 	};
+ };
+ 
+-&cp0_spi1 {
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&cp0_spi0_pins>;
+-	status = "okay";
+-};
+-
+ &cp0_eth0 {
+ 	phy-mode = "sfi";
+ };
+-- 
+2.22.0
+

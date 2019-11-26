@@ -1,0 +1,36 @@
+From 487c793bd6b5461c6dc82f2fef26a84f8305b2f1 Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Mon, 16 May 2016 20:43:03 -0400
+Subject: [PATCH 0181/1200] armv8: Add 64-bit setbit()/clrbit()
+ functions/macros
+
+These are used for convenience for frequently occuring operations
+
+Signed-off-by: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+---
+ arch/arm/include/asm/io.h | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/arch/arm/include/asm/io.h b/arch/arm/include/asm/io.h
+index 5df74728de..c1a7e7f733 100644
+--- a/arch/arm/include/asm/io.h
++++ b/arch/arm/include/asm/io.h
+@@ -192,6 +192,15 @@ static inline void __raw_readsl(unsigned long addr, void *data, int longlen)
+ #define setbits_8(addr, set) setbits(8, addr, set)
+ #define clrsetbits_8(addr, clear, set) clrsetbits(8, addr, clear, set)
+ 
++#define clrbits_be64(addr, clear) clrbits(be64, addr, clear)
++#define setbits_be64(addr, set) setbits(be64, addr, set)
++#define clrsetbits_be64(addr, clear, set) clrsetbits(be64, addr, clear, set)
++
++#define clrbits_le64(addr, clear) clrbits(le64, addr, clear)
++#define setbits_le64(addr, set) setbits(le64, addr, set)
++#define clrsetbits_le64(addr, clear, set) clrsetbits(le64, addr, clear, set)
++
++
+ /*
+  * Now, pick up the machine-defined IO definitions
+  */
+-- 
+2.22.0
+

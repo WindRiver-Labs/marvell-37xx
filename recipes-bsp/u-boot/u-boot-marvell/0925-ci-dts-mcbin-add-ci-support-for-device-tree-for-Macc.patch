@@ -1,0 +1,50 @@
+From 5e4479e5f74c2a0c350e7e1d0ae762c75e74d39d Mon Sep 17 00:00:00 2001
+From: Ben Peled <bpeled@marvell.com>
+Date: Mon, 3 Dec 2018 14:17:05 +0200
+Subject: [PATCH 0925/1200] ci: dts: mcbin: add ci support for device tree for
+ MacchiatoBin single shot board
+
+- networking: MacchiatoBin single shot board doesn't have
+              two 3310 PHY's connected to port 0 on each CP
+
+Change-Id: I5f1f1f92d0afd33bd1ae7c39e6453df584cf161a
+Reviewed-on: http://vgitil04.il.marvell.com:8080/61467
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+---
+ scripts/ci/compile.sh           | 4 +++-
+ scripts/ci/supported_builds.txt | 3 +++
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index 64bf0634f1..f7ce995a92 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -112,7 +112,9 @@ case $build_name in
+ 	uboot_2018_a80x0_H ) device_tree="armada-8040-db-H"; ;;
+ 	uboot_2018_a80x0_kr ) device_tree="armada-8040-db"; ;;
+ 	uboot_2018_a80x0_pm ) device_tree="armada-8040-db"; ;;
+-	uboot_2018_a80x0_mcbin* ) device_tree=""; ;;
++	uboot_2018_a80x0_mcbin_single_shot* )
++		device_tree="armada-8040-mcbin-single-shot"; ;;
++	uboot_2018_a80x0_mcbin* ) device_tree="armada-8040-mcbin"; ;;
+ 	uboot_2018_a80x0_ucpe* ) device_tree=""; ;;
+ 
+ 	uboot_2018_a3900_A ) device_tree="armada-3900-vd-A"; ;;
+diff --git a/scripts/ci/supported_builds.txt b/scripts/ci/supported_builds.txt
+index 433f52850a..d72eb6ffff 100644
+--- a/scripts/ci/supported_builds.txt
++++ b/scripts/ci/supported_builds.txt
+@@ -25,6 +25,9 @@ uboot_2018_a80x0_pm
+ uboot_2018_a80x0_mcbin
+ uboot_2018_a80x0_mcbin_cve_2018_3639
+ uboot_2018_a80x0_mcbin_pm
++uboot_2018_a80x0_mcbin_single_shot
++uboot_2018_a80x0_mcbin_single_shot_cve_2018_3639
++uboot_2018_a80x0_mcbin_single_shot_pm
+ uboot_2018_a80x0_ucpe
+ 
+ uboot_2018_a3900_A
+-- 
+2.22.0
+

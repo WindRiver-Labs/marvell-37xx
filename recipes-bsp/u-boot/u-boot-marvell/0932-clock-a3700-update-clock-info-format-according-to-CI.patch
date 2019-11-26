@@ -1,0 +1,40 @@
+From d73d4f507ec3014cd2ed3ea0cd760b343623b48a Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Tue, 11 Dec 2018 14:05:18 +0100
+Subject: [PATCH 0932/1200] clock: a3700: update clock info format according to
+ CI requirements
+
+Change-Id: I3c8170a7b0b5bd1327b0397c88f3fb4ad7c419f8
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/61684
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+(cherry picked from commit edbaa1ed1dc839e7a76aa5e7fd9aa1c4a4691a9b)
+Reviewed-on: http://vgitil04.il.marvell.com:8080/61688
+Reviewed-on: https://sj1git1.cavium.com/1125
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/mach-mvebu/armada3700/clock.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/mach-mvebu/armada3700/clock.c b/arch/arm/mach-mvebu/armada3700/clock.c
+index 8176c7d742..f81ba48305 100644
+--- a/arch/arm/mach-mvebu/armada3700/clock.c
++++ b/arch/arm/mach-mvebu/armada3700/clock.c
+@@ -237,8 +237,8 @@ u32 soc_timer_clk_get(void)
+ 
+ void soc_print_clock_info(void)
+ {
+-	printf("       CPU    @ %d [MHz]\n", soc_cpu_clk_get());
+-	printf("       L2     @ %d [MHz]\n", soc_l2_clk_get());
+-	printf("       TClock @ %d [MHz]\n", soc_tclk_get());
+-	printf("       DDR    @ %d [MHz]\n", soc_ddr_clk_get());
++	printf("       CPU     %d [MHz]\n", soc_cpu_clk_get());
++	printf("       L2      %d [MHz]\n", soc_l2_clk_get());
++	printf("       TClock  %d [MHz]\n", soc_tclk_get());
++	printf("       DDR     %d [MHz]\n", soc_ddr_clk_get());
+ }
+-- 
+2.22.0
+

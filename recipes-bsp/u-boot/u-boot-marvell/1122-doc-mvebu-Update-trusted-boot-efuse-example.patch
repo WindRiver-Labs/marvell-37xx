@@ -1,0 +1,52 @@
+From 8944c77b7da621e473e61bcbdbc010e5a7654d91 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Sun, 19 May 2019 15:00:56 +0300
+Subject: [PATCH 1122/1200] doc/mvebu: Update trusted boot efuse example
+
+Update the trusted boot guide with AP LD1 programming example
+for SoCs based on AP807.
+
+Change-Id: Idd43d14cb70800ba152abd73ef8bfb8710c1dc80
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/9220
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ doc/mvebu/trusted_boot.txt | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/doc/mvebu/trusted_boot.txt b/doc/mvebu/trusted_boot.txt
+index ef63610f7c..8c47c30f62 100644
+--- a/doc/mvebu/trusted_boot.txt
++++ b/doc/mvebu/trusted_boot.txt
+@@ -297,6 +297,15 @@ A8K platforms
+ 	fuse prog -y 65 0 0x00000001 0x0000C000 0x00000000 0x00000000
+ 			  0x00000000 0x00000000 0x00000000 0x00000000
+ 
++	.. ATTENTION!::
++	Devices based on AP807 have different AP LD1 CPU-wakeup related fields.
++	For instance, the Armada-3900 DB board with boot device on AP SPI should
++	be programmed in the following way (boot device 0x2):
++
++	fuse prog -y 65 0 0x00000011 0x00003000 0x00000000 0x00000000
++			  0x00000000 0x00000000 0x00000000 0x00000000
++
++
+ 	/* enable trusted boot and disable JTAG permanent, select boot device
+ 	 * (from SB perspective, the value is 0x32 which means boot from CP0_SPI
+ 	 * Please see the HW sepcificaiton document for a list of supported
+@@ -310,8 +319,8 @@ A8K platforms
+ 	 * Please see the HW sepcificaiton document for a list of supported
+ 	 * values), disable ICU message LD1 in SB1
+ 	 */
+-		fuse prog -y 69 0 0x000000c9 0x00000001 0x00000000 0x00000000
+-				  0x00000000 0x00000000 0x00000000 0x00000000
++	fuse prog -y 69 0 0x000000c9 0x00000001 0x00000000 0x00000000
++			  0x00000000 0x00000000 0x00000000 0x00000000
+ 
+    .. Note::
+ 	HD_efuse (bank ID 0~63's bit56-63 must be 0x0 according to Functional
+-- 
+2.22.0
+

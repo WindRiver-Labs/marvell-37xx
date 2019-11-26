@@ -1,0 +1,35 @@
+From 1ab8125c858b5bc855780223413ff5e7e2c4c684 Mon Sep 17 00:00:00 2001
+From: Ben Peled <bpeled@marvell.com>
+Date: Tue, 12 Mar 2019 09:25:34 +0200
+Subject: [PATCH 1068/1200] fix: armada8k: soc: get_soc_table_index: don't work
+ for 9132
+
+wrong soc name prevent 9132 from being selected in get_soc_table index.
+Resulting the function return 9130 index instead.
+Changing the name to the right name fix it.
+
+Change-Id: Id69e87f5749491d2433ab3f42b14d2134850cf87
+Signed-off-by: Ben Peled <bpeled@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/5516
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/mach-mvebu/armada8k/soc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-mvebu/armada8k/soc.c b/arch/arm/mach-mvebu/armada8k/soc.c
+index da15808b36..8395e52530 100644
+--- a/arch/arm/mach-mvebu/armada8k/soc.c
++++ b/arch/arm/mach-mvebu/armada8k/soc.c
+@@ -134,7 +134,7 @@ static int get_soc_table_index(u32 *index)
+ 	} else if ((of_machine_is_compatible("marvell,cn9132-db"))) {
+ 		for (i = 0; i < ARRAY_SIZE(soc_info_table) && ret != 0; i++) {
+ 			if (strcmp(soc_info_table[i].soc_name,
+-				   "cn9132-A2") != 0)
++				   "cn9132-A1") != 0)
+ 				continue;
+ 			*index = i;
+ 			ret = 0;
+-- 
+2.22.0
+

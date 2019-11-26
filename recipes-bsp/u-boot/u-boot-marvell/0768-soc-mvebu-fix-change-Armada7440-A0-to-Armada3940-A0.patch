@@ -1,0 +1,42 @@
+From 9ae31b90d172d12e9d75be15a28e95e65da54b39 Mon Sep 17 00:00:00 2001
+From: Christine Gharzuzi <chrisg@marvell.com>
+Date: Tue, 26 Jun 2018 15:35:15 +0300
+Subject: [PATCH 0768/1200] soc: mvebu: fix: change Armada7440-A0 to
+ Armada3940-A0
+
+- A7440 device is renamed to A3940 to keep the same family
+  number of the A39x0
+
+- This patch fixes the SoC name for devices with AP807
+  rev 1, to be printed as A1 and not A0
+
+Change-Id: Ifdad2de765e608aaceba136dff9baf568f6d494a
+Signed-off-by: Christine Gharzuzi <chrisg@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/57347
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/57554
+---
+ arch/arm/mach-mvebu/armada8k/soc.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/mach-mvebu/armada8k/soc.c b/arch/arm/mach-mvebu/armada8k/soc.c
+index f4d5601dcf..07340d5b1b 100644
+--- a/arch/arm/mach-mvebu/armada8k/soc.c
++++ b/arch/arm/mach-mvebu/armada8k/soc.c
+@@ -44,9 +44,9 @@ struct soc_info {
+ };
+ 
+ static struct soc_info soc_info_table[] = {
+-	{ {0x7025, 0}, "Armada7640-A0", {0x807, 1}, {0x115, 0}, 1, 1},
+-	{ {0x6025, 0}, "Armada7440-A0", {0x807, 1}, {0x115, 0}, 1, 1, 2},
+-	{ {0x6025, 0}, "Armada3920-A0", {0x807, 1}, {0x115, 0}, 1, 1, 1},
++	{ {0x7025, 0}, "Armada7640-A1", {0x807, 1}, {0x115, 0}, 1, 1},
++	{ {0x6025, 0}, "Armada3940-A1", {0x807, 1}, {0x115, 0}, 1, 1, 2},
++	{ {0x6025, 0}, "Armada3920-A1", {0x807, 1}, {0x115, 0}, 1, 1, 1},
+ 	{ {0x6025, 0}, "Armada3900-A1", {0x807, 1}, {0x115, 0}, 1, 1, 0},
+ 	{ {0x7045, 0}, "Armada3920-A0", {0x807, 0}, {0x115, 0}, 1, 1, 1},
+ 	{ {0x7045, 0}, "Armada3900-A0", {0x807, 0}, {0x115, 0}, 1, 1, 0},
+-- 
+2.22.0
+

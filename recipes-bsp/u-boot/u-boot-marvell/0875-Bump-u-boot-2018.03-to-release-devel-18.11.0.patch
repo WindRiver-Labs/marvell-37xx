@@ -1,0 +1,23 @@
+From f843007b667232133b1fc17e632961a224599d78 Mon Sep 17 00:00:00 2001
+From: Igal Liberman <igall@marvell.com>
+Date: Thu, 1 Nov 2018 08:09:51 +0200
+Subject: [PATCH 0875/1200] Bump u-boot-2018.03 to release devel-18.11.0
+
+Change-Id: Ibaab02311e9d0fc668335fe6cebdf243856330c1
+Signed-off-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/60633
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+---
+ localversion | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/localversion b/localversion
+index 9b56397ee3..77fcebbbdb 100644
+--- a/localversion
++++ b/localversion
+@@ -1 +1 @@
+--devel-18.09.0
++-devel-18.11.0
+-- 
+2.22.0
+

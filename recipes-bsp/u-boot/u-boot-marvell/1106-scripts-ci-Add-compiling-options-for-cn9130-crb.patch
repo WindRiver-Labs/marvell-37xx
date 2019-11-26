@@ -1,0 +1,45 @@
+From 4aeb9840912418a38927a0d490efb23f75a19ccd Mon Sep 17 00:00:00 2001
+From: zxu <zouhaix@marvell.com>
+Date: Thu, 2 May 2019 15:21:57 +0800
+Subject: [PATCH 1106/1200] scripts:ci: Add compiling options for cn9130-crb
+
+Change-Id: Ie96228800567c92e53794ac8318f1d9593c4102e
+Signed-off-by: Zuohai Xu <zouhaix@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/8400
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+---
+ scripts/ci/compile.sh           | 2 ++
+ scripts/ci/supported_builds.txt | 2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index 97b421e141..f5beba37fc 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -124,6 +124,8 @@ case $build_name in
+ 	uboot_2018_cn9130_A ) device_tree="cn9130-db-A"; ;;
+ 	uboot_2018_cn9130_B ) device_tree="cn9130-db-B"; ;;
+ 	uboot_2018_cn9130_ddr32_A ) device_tree="cn9130-db-A"; ;;
++	uboot_2018_cn9130_crb_A ) device_tree="cn9130-crb-A"; ;;
++	uboot_2018_cn9130_crb_B ) device_tree="cn9130-crb-B"; ;;
+ 	uboot_2018_cn9131_A ) device_tree="cn9131-db-A"; ;;
+ 	uboot_2018_cn9131_B ) device_tree="cn9131-db-B"; ;;
+ 	uboot_2018_cn9131_ddr32_A ) device_tree="cn9131-db-A"; ;;
+diff --git a/scripts/ci/supported_builds.txt b/scripts/ci/supported_builds.txt
+index 771f834699..f82f025f89 100644
+--- a/scripts/ci/supported_builds.txt
++++ b/scripts/ci/supported_builds.txt
+@@ -36,6 +36,8 @@ uboot_2018_a3900_B
+ uboot_2018_cn9130_A
+ uboot_2018_cn9130_B
+ uboot_2018_cn9130_ddr32_A
++uboot_2018_cn9130_crb_A
++uboot_2018_cn9130_crb_B
+ uboot_2018_cn9131_A
+ uboot_2018_cn9132_A
+ uboot_2018_cn9131_ddr32_A
+-- 
+2.22.0
+

@@ -1,0 +1,98 @@
+From 56d2a049f067958ecef4407225eec3b3be1ddea1 Mon Sep 17 00:00:00 2001
+From: Ken Ma <make@marvell.com>
+Date: Fri, 8 Dec 2017 15:33:15 +0800
+Subject: [PATCH 0675/1200] dts: mvebu: a7/8k/a8kp: Align mdio/xmdio nodes to
+ marvell mdio driver
+
+- Add name for mdio;
+- Add xmdio node;
+- Disable mdio/xmdio in armada-cp110.dtsi and enable them in armada
+  70x0 and80x0 board dts files.
+
+Change-Id: Iad79acabedf16a4968325b3ca59788a893886a9e
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55402
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/armada-7040-db.dts    |  1 +
+ arch/arm/dts/armada-8040-db.dts    |  2 ++
+ arch/arm/dts/armada-8040-mcbin.dts |  8 ++++++++
+ arch/arm/dts/armada-cp110.dtsi     | 11 +++++++++++
+ 4 files changed, 22 insertions(+)
+
+diff --git a/arch/arm/dts/armada-7040-db.dts b/arch/arm/dts/armada-7040-db.dts
+index e134300238..7c6a582ceb 100644
+--- a/arch/arm/dts/armada-7040-db.dts
++++ b/arch/arm/dts/armada-7040-db.dts
+@@ -212,6 +212,7 @@
+ };
+ 
+ &cp0_mdio {
++	status = "okay";
+ 	phy0: ethernet-phy@0 {
+ 		reg = <0>;
+ 	};
+diff --git a/arch/arm/dts/armada-8040-db.dts b/arch/arm/dts/armada-8040-db.dts
+index 788ca4ce68..72b17a2af7 100644
+--- a/arch/arm/dts/armada-8040-db.dts
++++ b/arch/arm/dts/armada-8040-db.dts
+@@ -293,12 +293,14 @@
+ };
+ 
+ &cp0_mdio {
++	status = "okay";
+ 	phy1: ethernet-phy@1 {
+ 		reg = <1>;
+ 	};
+ };
+ 
+ &cp1_mdio {
++	status = "okay";
+ 	phy0: ethernet-phy@0 {
+ 		reg = <0>;
+ 	};
+diff --git a/arch/arm/dts/armada-8040-mcbin.dts b/arch/arm/dts/armada-8040-mcbin.dts
+index b69c346f61..4895413131 100644
+--- a/arch/arm/dts/armada-8040-mcbin.dts
++++ b/arch/arm/dts/armada-8040-mcbin.dts
+@@ -184,6 +184,14 @@
+ 	};
+ };
+ 
++&cp0_mdio {
++	status = "okay";
++};
++
++&cp0_xmdio {
++	status = "okay";
++};
++
+ &cp1_sata0 {
+ 	status = "okay";
+ };
+diff --git a/arch/arm/dts/armada-cp110.dtsi b/arch/arm/dts/armada-cp110.dtsi
+index 1862d08235..3656bd9de0 100644
+--- a/arch/arm/dts/armada-cp110.dtsi
++++ b/arch/arm/dts/armada-cp110.dtsi
+@@ -46,6 +46,17 @@
+ 				#size-cells = <0>;
+ 				compatible = "marvell,orion-mdio";
+ 				reg = <0x12a200 0x10>;
++				mdio-name = CP110_STRING_LABEL(mdio);
++				status = "disabled";
++			};
++
++			CP110_LABEL(xmdio): mdio@12a600 {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				compatible = "marvell,xmdio";
++				reg = <0x12a600 0x200>;
++				mdio-name = CP110_STRING_LABEL(xmdio);
++				status = "disabled";
+ 			};
+ 
+ 			CP110_LABEL(pinctl): pinctl@440000 {
+-- 
+2.22.0
+

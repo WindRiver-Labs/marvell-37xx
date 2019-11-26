@@ -1,0 +1,174 @@
+From f106079c689a1389c5268318bc03c2792c7ad8e1 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Fri, 14 Dec 2018 15:10:21 +0100
+Subject: [PATCH 0971/1200] arm64: mvebu: rename all references from a3900 to
+ cn9030
+
+Reflect the product name change in the code.
+
+Change-Id: I32ce7f978f6aa1a44493f4a62cf22af83eaefe1a
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/62086
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+Tested-by: Kostya Porotchkin <kostap@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/1875
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/Makefile                                  | 6 +++---
+ arch/arm/dts/{armada-3900-db.dtsi => cn9030-db.dtsi}   | 6 +++---
+ arch/arm/dts/{armada-3900-vd-A.dts => cn9030-vd-A.dts} | 6 +++---
+ arch/arm/dts/{armada-3900-vd-B.dts => cn9030-vd-B.dts} | 6 +++---
+ arch/arm/dts/{armada-3900.dtsi => cn9030.dtsi}         | 4 ++--
+ arch/arm/mach-mvebu/armada8k/soc.c                     | 2 +-
+ board/Marvell/mvebu_armada-8k/board.c                  | 2 +-
+ 7 files changed, 16 insertions(+), 16 deletions(-)
+ rename arch/arm/dts/{armada-3900-db.dtsi => cn9030-db.dtsi} (95%)
+ rename arch/arm/dts/{armada-3900-vd-A.dts => cn9030-vd-A.dts} (90%)
+ rename arch/arm/dts/{armada-3900-vd-B.dts => cn9030-vd-B.dts} (90%)
+ rename arch/arm/dts/{armada-3900.dtsi => cn9030.dtsi} (93%)
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index 5827413eb2..b085acbe19 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -104,8 +104,6 @@ dtb-$(CONFIG_ARCH_MVEBU) +=			\
+ 	armada-388-clearfog.dtb			\
+ 	armada-388-gp.dtb			\
+ 	armada-385-amc.dtb			\
+-	armada-3900-vd-A.dtb			\
+-	armada-3900-vd-B.dtb			\
+ 	armada-7020-amc.dtb			\
+ 	armada-7040-pcac.dtb	                \
+ 	armada-7040-db.dtb			\
+@@ -129,7 +127,9 @@ dtb-$(CONFIG_ARCH_MVEBU) +=			\
+ 	armada-xp-maxbcm.dtb			\
+ 	armada-xp-synology-ds414.dtb		\
+ 	armada-xp-theadorable.dtb		\
+-	armada-38x-controlcenterdc.dtb
++	armada-38x-controlcenterdc.dtb		\
++	cn9030-vd-A.dtb				\
++	cn9030-vd-B.dtb
+ 
+ dtb-$(CONFIG_ARCH_UNIPHIER_LD11) += \
+ 	uniphier-ld11-global.dtb \
+diff --git a/arch/arm/dts/armada-3900-db.dtsi b/arch/arm/dts/cn9030-db.dtsi
+similarity index 95%
+rename from arch/arm/dts/armada-3900-db.dtsi
+rename to arch/arm/dts/cn9030-db.dtsi
+index 4470dcfa33..bbc92cedfb 100644
+--- a/arch/arm/dts/armada-3900-db.dtsi
++++ b/arch/arm/dts/cn9030-db.dtsi
+@@ -3,11 +3,11 @@
+  * Copyright (C) 2018 Marvell International Ltd.
+  */
+ 
+-#include "armada-3900.dtsi" /* include SoC device tree */
++#include "cn9030.dtsi" /* include SoC device tree */
+ 
+ / {
+-	model = "DB-ARMADA-3900";
+-	compatible = "marvell,armada7040", "marvell,armada-ap806-quad",
++	model = "DB-CN-9030";
++	compatible = "marvell,cn9030", "marvell,armada-ap806-quad",
+ 		     "marvell,armada-ap806";
+ 
+ 	chosen {
+diff --git a/arch/arm/dts/armada-3900-vd-A.dts b/arch/arm/dts/cn9030-vd-A.dts
+similarity index 90%
+rename from arch/arm/dts/armada-3900-vd-A.dts
+rename to arch/arm/dts/cn9030-vd-A.dts
+index 52c38085fe..8565afdf95 100644
+--- a/arch/arm/dts/armada-3900-vd-A.dts
++++ b/arch/arm/dts/cn9030-vd-A.dts
+@@ -5,11 +5,11 @@
+  * https://spdx.org/licenses
+  */
+ 
+-#include "armada-3900-db.dtsi"
++#include "cn9030-db.dtsi"
+ 
+ / {
+-	model = "Marvell Armada 3900 Validation Development board (CP NOR) setup(A)";
+-	compatible = "marvell,armada3900-vd", "marvell,armada7040",
++	model = "Marvell CN9030 Validation Development board(CP NOR) setup(A)";
++	compatible = "marvell,cn9030-vd", "marvell,cn9030",
+ 		     "marvell,armada-ap806-quad", "marvell,armada-ap806";
+ 
+ 	aliases {
+diff --git a/arch/arm/dts/armada-3900-vd-B.dts b/arch/arm/dts/cn9030-vd-B.dts
+similarity index 90%
+rename from arch/arm/dts/armada-3900-vd-B.dts
+rename to arch/arm/dts/cn9030-vd-B.dts
+index 7c51076cbc..bd944d2969 100644
+--- a/arch/arm/dts/armada-3900-vd-B.dts
++++ b/arch/arm/dts/cn9030-vd-B.dts
+@@ -5,11 +5,11 @@
+  * https://spdx.org/licenses
+  */
+ 
+-#include "armada-3900-db.dtsi"
++#include "cn9030-db.dtsi"
+ 
+ / {
+-	model = "Marvell Armada 3900 Validation Development board(CP NOR) setup(B)";
+-	compatible = "marvell,armada3900-vd", "marvell,armada7040",
++	model = "Marvell CN9030 Validation Development board(CP NOR) setup(B)";
++	compatible = "marvell,cn9030-vd", "marvell,cn9030",
+ 		     "marvell,armada-ap806-quad", "marvell,armada-ap806";
+ 
+ 	aliases {
+diff --git a/arch/arm/dts/armada-3900.dtsi b/arch/arm/dts/cn9030.dtsi
+similarity index 93%
+rename from arch/arm/dts/armada-3900.dtsi
+rename to arch/arm/dts/cn9030.dtsi
+index 65a23c1c18..8b456ec707 100644
+--- a/arch/arm/dts/armada-3900.dtsi
++++ b/arch/arm/dts/cn9030.dtsi
+@@ -6,7 +6,7 @@
+  */
+ 
+ /*
+- * Device Tree file for the Armada 70x0 SoC, made of an AP806 Quad and
++ * Device Tree file for the CN 9030 SoC, made of an AP806 Quad and
+  * one CP110.
+  */
+ 
+@@ -26,7 +26,7 @@
+ #undef CP110_NUM
+ 
+ / {
+-	model = "Marvell Armada 3900";
++	model = "Marvell CN 9030";
+ 	compatible = "marvell,armada70x0", "marvell,armada-ap806-quad",
+ 		     "marvell,armada-ap806";
+ };
+diff --git a/arch/arm/mach-mvebu/armada8k/soc.c b/arch/arm/mach-mvebu/armada8k/soc.c
+index 1f944900a8..1f9afd17a3 100644
+--- a/arch/arm/mach-mvebu/armada8k/soc.c
++++ b/arch/arm/mach-mvebu/armada8k/soc.c
+@@ -51,7 +51,7 @@ struct soc_info {
+ 
+ static struct soc_info soc_info_table[] = {
+ 	{ {0x7025, 0}, "cn9130-A1",	{0x807, 2}, {0x115, 0}, 1, 3, 0},
+-	{ {0x6025, 0}, "Armada3900-A1", {0x807, 1}, {0x115, 0}, 1, 1, 0},
++	{ {0x6025, 0}, "cn9030-A1",	{0x807, 1}, {0x115, 0}, 1, 1, 0},
+ 	{ {0x7045, 0}, "Armada3900-A0", {0x807, 0}, {0x115, 0}, 1, 1, 0},
+ 	{ {0x7040, 1}, "Armada7040-A1", {0x806, 1}, {0x110, 1}, 1, 1 },
+ 	{ {0x7040, 2}, "Armada7040-A2", {0x806, 1}, {0x110, 2}, 1, 1 },
+diff --git a/board/Marvell/mvebu_armada-8k/board.c b/board/Marvell/mvebu_armada-8k/board.c
+index ff4cda4216..a84087d9e8 100644
+--- a/board/Marvell/mvebu_armada-8k/board.c
++++ b/board/Marvell/mvebu_armada-8k/board.c
+@@ -67,7 +67,7 @@ int board_late_init(void)
+ 	/* Adjust the USB 2.0 port TX output driver amplitude
+ 	 * for passing compatibility tests
+ 	 */
+-	if (of_machine_is_compatible("marvell,armada3900-vd")) {
++	if (of_machine_is_compatible("marvell,cn9030-vd")) {
+ 		u32 port;
+ 
+ 		for (port = 0; port < 2; port++)
+-- 
+2.22.0
+

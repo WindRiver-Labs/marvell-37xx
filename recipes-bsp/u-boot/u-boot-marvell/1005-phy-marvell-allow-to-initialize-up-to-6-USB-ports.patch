@@ -1,0 +1,33 @@
+From ece9565844b7db8eeed08a521522d461e51ee800 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Fri, 1 Feb 2019 12:08:07 +0100
+Subject: [PATCH 1005/1200] phy: marvell: allow to initialize up to 6 USB ports
+
+New products can contain up to 6 usb ports, therefore allow to initialize
+all relevant UTMI PHYs.
+
+Change-Id: I9a3e51f6f21bfe302181ad798c7f1586e148fceb
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/3166
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ drivers/phy/marvell/comphy_priv.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/phy/marvell/comphy_priv.h b/drivers/phy/marvell/comphy_priv.h
+index 889d88b33c..edb3b1e802 100644
+--- a/drivers/phy/marvell/comphy_priv.h
++++ b/drivers/phy/marvell/comphy_priv.h
+@@ -20,7 +20,7 @@
+ 
+ 
+ #define MAX_LANE_OPTIONS			10
+-#define MAX_UTMI_PHY_COUNT			3
++#define MAX_UTMI_PHY_COUNT			6
+ 
+ struct comphy_map {
+ 	u32 type;
+-- 
+2.22.0
+

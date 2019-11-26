@@ -1,0 +1,37 @@
+From 3bfda71c64a7fac4932b21a25015cc7c6d39c11a Mon Sep 17 00:00:00 2001
+From: Bin Meng <bmeng.cn@gmail.com>
+Date: Wed, 23 May 2018 23:40:48 -0700
+Subject: [PATCH 1186/1200] usb: xhci: Initialize dev_state to 0 in the input
+ slot context
+
+Per xHCI spec chapter 6.2.2 table 6-7, as input, software shall
+initialize the dev_state field to '0'. Though this does not seem
+to cause any issue with most xHC implementations, let's do this
+to conform with the spec.
+
+Change-Id: I1eca3e8464c588510572a3b4bf48360e45d7ef2a
+Signed-off-by: Bin Meng <bmeng.cn@gmail.com>
+Tested-by: Marek Vasut <marek.vasut@gmail.com>
+Tested-by: Matthias Blankertz <matthias.blankertz@cetitec.com>
+Reviewed-on: https://sj1git1.cavium.com/12546
+Reviewed-by: Chandrakala Chavva <cchavva@marvell.com>
+Tested-by: Chandrakala Chavva <cchavva@marvell.com>
+---
+ drivers/usb/host/xhci.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/usb/host/xhci.c b/drivers/usb/host/xhci.c
+index 505af8dc3a..99b0432151 100644
+--- a/drivers/usb/host/xhci.c
++++ b/drivers/usb/host/xhci.c
+@@ -1455,6 +1455,7 @@ static int xhci_update_hub_device(struct udevice *dev, struct usb_device *udev)
+ 		think_time = (think_time / 666) - 1;
+ 	if (udev->speed == USB_SPEED_HIGH)
+ 		slot_ctx->tt_info |= cpu_to_le32(TT_THINK_TIME(think_time));
++	slot_ctx->dev_state = 0;
+ 
+ 	return xhci_configure_endpoints(udev, false);
+ }
+-- 
+2.22.0
+

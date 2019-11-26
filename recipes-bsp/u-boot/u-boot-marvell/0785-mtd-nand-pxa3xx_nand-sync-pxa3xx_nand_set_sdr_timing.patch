@@ -1,0 +1,40 @@
+From a25e2f915eccb0971d6beabc4cd06c018237b005 Mon Sep 17 00:00:00 2001
+From: Ofer Heifetz <oferh@marvell.com>
+Date: Thu, 23 Nov 2017 16:14:41 +0200
+Subject: [PATCH 0785/1200] mtd: nand: pxa3xx_nand: sync
+ pxa3xx_nand_set_sdr_timing()
+
+Since the pxa3xx_nand driver was added there has been a discrepancy in
+pxa3xx_nand_set_sdr_timing() around the setting of tWP_min and tRP_min.
+This brings us into line with the current Linux code.
+
+Change-Id: I10238bb5eb65077fcf1a74969d2ce88a690edb33
+Signed-off-by: Chris Packham <judge.packham@gmail.com>
+Signed-off-by: Ofer Heifetz <oferh@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/47029
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55771
+---
+ drivers/mtd/nand/pxa3xx_nand.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mtd/nand/pxa3xx_nand.c b/drivers/mtd/nand/pxa3xx_nand.c
+index 094202b03c..53370f6933 100644
+--- a/drivers/mtd/nand/pxa3xx_nand.c
++++ b/drivers/mtd/nand/pxa3xx_nand.c
+@@ -350,9 +350,9 @@ static void pxa3xx_nand_set_sdr_timing(struct pxa3xx_nand_host *host,
+ 	u32 tCH_min = DIV_ROUND_UP(t->tCH_min, 1000);
+ 	u32 tCS_min = DIV_ROUND_UP(t->tCS_min, 1000);
+ 	u32 tWH_min = DIV_ROUND_UP(t->tWH_min, 1000);
+-	u32 tWP_min = DIV_ROUND_UP(t->tWC_min - tWH_min, 1000);
++	u32 tWP_min = DIV_ROUND_UP(t->tWC_min - t->tWH_min, 1000);
+ 	u32 tREH_min = DIV_ROUND_UP(t->tREH_min, 1000);
+-	u32 tRP_min = DIV_ROUND_UP(t->tRC_min - tREH_min, 1000);
++	u32 tRP_min = DIV_ROUND_UP(t->tRC_min - t->tREH_min, 1000);
+ 	u32 tR = chip->chip_delay * 1000;
+ 	u32 tWHR_min = DIV_ROUND_UP(t->tWHR_min, 1000);
+ 	u32 tAR_min = DIV_ROUND_UP(t->tAR_min, 1000);
+-- 
+2.22.0
+

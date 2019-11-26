@@ -1,0 +1,46 @@
+From 95db6fb42532109de40ce017cbfed84e1ac50999 Mon Sep 17 00:00:00 2001
+From: Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>
+Date: Tue, 25 Oct 2016 00:04:35 +0530
+Subject: [PATCH 0259/1200] 83xx, bringup: disable net init and pci
+ auto-config.
+
+there are issues in net init and pci auto config.
+time being disabling till the issue is fixed.
+
+** this is temp fix, needs to be reverted **
+
+Signed-off-by: Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>
+---
+ common/board_r.c         | 1 +
+ drivers/pci/pci-uclass.c | 3 ++-
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/common/board_r.c b/common/board_r.c
+index 482f506661..beabc1b2bb 100644
+--- a/common/board_r.c
++++ b/common/board_r.c
+@@ -575,6 +575,7 @@ static int initr_bbmii(void)
+ static int initr_net(void)
+ {
+ 	puts("Net:   ");
++	return 0;
+ 	eth_initialize();
+ #if defined(CONFIG_RESET_PHY_R)
+ 	debug("Reset Ethernet PHY\n");
+diff --git a/drivers/pci/pci-uclass.c b/drivers/pci/pci-uclass.c
+index 6789fea063..ca60384b41 100644
+--- a/drivers/pci/pci-uclass.c
++++ b/drivers/pci/pci-uclass.c
+@@ -1050,7 +1050,8 @@ static int pci_uclass_post_probe(struct udevice *bus)
+ 	if (ret)
+ 		return ret;
+ 
+-#ifdef CONFIG_PCI_PNP
++//#ifdef CONFIG_PCI_PNP
++#if 0
+ 	ret = pci_auto_config_devices(bus);
+ 	if (ret < 0)
+ 		return ret;
+-- 
+2.22.0
+

@@ -1,0 +1,41 @@
+From 3ba467eb56d85b7e717a7feb5691676a32d69387 Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Thu, 27 Jul 2017 03:33:23 +0300
+Subject: [PATCH 0410/1200] ahci: Allocate uclass private structure for the
+ SCSI device
+
+Allocate uclass private data to enable proper functioning
+
+Signed-off-by: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+---
+ drivers/ata/ahci-pci.c | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/ata/ahci-pci.c b/drivers/ata/ahci-pci.c
+index 5a45edc4e4..833e318834 100644
+--- a/drivers/ata/ahci-pci.c
++++ b/drivers/ata/ahci-pci.c
+@@ -12,8 +12,19 @@
+ static int ahci_pci_bind(struct udevice *dev)
+ {
+ 	struct udevice *scsi_dev;
++	int ret;
+ 
+-	return ahci_bind_scsi(dev, &scsi_dev);
++	ret = ahci_bind_scsi(dev, &scsi_dev);
++
++	if (ret)
++		goto out;
++
++	scsi_dev->uclass_priv = calloc(1, sizeof(struct ahci_uc_priv));
++	if (!scsi_dev->uclass_priv)
++		ret = -ENOMEM;
++
++out:
++	return ret;
+ }
+ 
+ static int ahci_pci_probe(struct udevice *dev)
+-- 
+2.22.0
+

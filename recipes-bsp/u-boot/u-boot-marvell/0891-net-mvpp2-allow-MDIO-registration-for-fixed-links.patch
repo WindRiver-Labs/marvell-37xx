@@ -1,0 +1,67 @@
+From f960edf1f76da32dc2479597d25d9e6ceb3d8206 Mon Sep 17 00:00:00 2001
+From: Igal Liberman <igall@marvell.com>
+Date: Wed, 7 Nov 2018 11:39:36 +0200
+Subject: [PATCH 0891/1200] net: mvpp2: allow MDIO registration for fixed links
+
+Currently, there are 2 valid cases for interface, PHY
+and mdio relation:
+  - If an interface has PHY handler, it'll call
+    mdio_mii_bus_get_from_phy(), which will register
+    MDIO bus.
+  - If we want to use fixed-link for an interface,
+    PHY handle is not defined in the DTS, and no
+    MDIO is registered.
+
+There is a third case, for some boards (with switch),
+the MDIO is used for switch configuration, but the interface
+itself uses fixed link. This patch allows this option by
+checking if fixed-link subnode is defined, in this case,
+MDIO bus is registers, but the PHY address is set to
+PHY_MAX_ADDR for this interface, so this interface will
+not try to access the PHY later on.
+
+In addition, remove unnecessary check after
+calling fdtdec_get_int().
+
+Change-Id: Ie9c52a5c7c84eb9a5d6a498a4d36e2652e84b826
+Signed-off-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/60753
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+Reviewed-by: Stefan Chulski <stefanc@marvell.com>
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+---
+ drivers/net/mvpp2.c | 13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/net/mvpp2.c b/drivers/net/mvpp2.c
+index 503448f1e9..f1ef356612 100644
+--- a/drivers/net/mvpp2.c
++++ b/drivers/net/mvpp2.c
+@@ -4722,15 +4722,20 @@ static int phy_info_parse(struct udevice *dev, struct mvpp2_port *port)
+ 	u32 phyaddr = 0;
+ 	int phy_mode = -1;
+ 	int ret;
++	int fixed_link = 0;
+ 
+ 	phy_node = fdtdec_lookup_phandle(gd->fdt_blob, port_node, "phy");
++	fixed_link = fdt_subnode_offset(gd->fdt_blob, port_node, "fixed-link");
+ 
+ 	if (phy_node > 0) {
+-		phyaddr = fdtdec_get_int(gd->fdt_blob, phy_node, "reg", 0);
+-		if (phyaddr < 0) {
+-			dev_err(&pdev->dev, "could not find phy address\n");
+-			return -1;
++		if (fixed_link != FDT_ERR_NOTFOUND) {
++			/* phy_addr is set to invalid value for fixed links */
++			phyaddr = PHY_MAX_ADDR;
++		} else {
++			phyaddr = fdtdec_get_int(gd->fdt_blob, phy_node,
++						 "reg", 0);
+ 		}
++
+ 		ret = mdio_mii_bus_get_from_phy(phy_node, &port->bus);
+ 		if (ret)
+ 			return ret;
+-- 
+2.22.0
+

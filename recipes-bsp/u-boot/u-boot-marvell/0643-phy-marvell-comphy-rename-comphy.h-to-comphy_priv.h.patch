@@ -1,0 +1,120 @@
+From e5f7b307e46387feae861fdc170297473e344e60 Mon Sep 17 00:00:00 2001
+From: Igal Liberman <igall@marvell.com>
+Date: Tue, 22 Aug 2017 12:39:27 +0300
+Subject: [PATCH 0643/1200] phy: marvell: comphy rename comphy.h to
+ comphy_priv.h
+
+This will allow to add a new file, comphy.h, in include/
+folder for external API calls.
+
+Change-Id: Ia062ecfcd51e53a8b290a4fa0e16c63b1a74aacb
+Signed-off-by: Igal Liberman <igall@marvell.com>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55201
+---
+ drivers/phy/marvell/comphy_a3700.h              |  2 +-
+ drivers/phy/marvell/comphy_core.c               |  2 +-
+ drivers/phy/marvell/comphy_cp110.c              |  2 +-
+ drivers/phy/marvell/comphy_mux.c                |  2 +-
+ drivers/phy/marvell/{comphy.h => comphy_priv.h} | 12 ++++++------
+ 5 files changed, 10 insertions(+), 10 deletions(-)
+ rename drivers/phy/marvell/{comphy.h => comphy_priv.h} (94%)
+
+diff --git a/drivers/phy/marvell/comphy_a3700.h b/drivers/phy/marvell/comphy_a3700.h
+index dd60b882dd..5c4fab4e34 100644
+--- a/drivers/phy/marvell/comphy_a3700.h
++++ b/drivers/phy/marvell/comphy_a3700.h
+@@ -7,7 +7,7 @@
+ #ifndef _COMPHY_A3700_H_
+ #define _COMPHY_A3700_H_
+ 
+-#include "comphy.h"
++#include "comphy_priv.h"
+ #include "comphy_hpipe.h"
+ 
+ #define MVEBU_REG(offs)			((uintptr_t)MVEBU_REGISTER(offs))
+diff --git a/drivers/phy/marvell/comphy_core.c b/drivers/phy/marvell/comphy_core.c
+index 1738a2b2e9..c7fe1c964f 100644
+--- a/drivers/phy/marvell/comphy_core.c
++++ b/drivers/phy/marvell/comphy_core.c
+@@ -12,7 +12,7 @@
+ #include <linux/errno.h>
+ #include <asm/io.h>
+ 
+-#include "comphy.h"
++#include "comphy_priv.h"
+ 
+ #define COMPHY_MAX_CHIP 4
+ 
+diff --git a/drivers/phy/marvell/comphy_cp110.c b/drivers/phy/marvell/comphy_cp110.c
+index bbfd1b1f88..2c963ee040 100644
+--- a/drivers/phy/marvell/comphy_cp110.c
++++ b/drivers/phy/marvell/comphy_cp110.c
+@@ -10,7 +10,7 @@
+ #include <asm/arch/cpu.h>
+ #include <asm/arch/soc.h>
+ 
+-#include "comphy.h"
++#include "comphy_priv.h"
+ #include "comphy_hpipe.h"
+ #include "sata.h"
+ #include "utmi_phy.h"
+diff --git a/drivers/phy/marvell/comphy_mux.c b/drivers/phy/marvell/comphy_mux.c
+index 2e6ea07eca..5637b01949 100644
+--- a/drivers/phy/marvell/comphy_mux.c
++++ b/drivers/phy/marvell/comphy_mux.c
+@@ -7,7 +7,7 @@
+ #include <common.h>
+ #include <asm/io.h>
+ 
+-#include "comphy.h"
++#include "comphy_priv.h"
+ #include "comphy_hpipe.h"
+ 
+ /*
+diff --git a/drivers/phy/marvell/comphy.h b/drivers/phy/marvell/comphy_priv.h
+similarity index 94%
+rename from drivers/phy/marvell/comphy.h
+rename to drivers/phy/marvell/comphy_priv.h
+index d5964e73d6..ca7319834d 100644
+--- a/drivers/phy/marvell/comphy.h
++++ b/drivers/phy/marvell/comphy_priv.h
+@@ -4,15 +4,15 @@
+  * SPDX-License-Identifier:	GPL-2.0+
+  */
+ 
+-#ifndef _COMPHY_H_
+-#define _COMPHY_H_
++#ifndef _COMPHY_PRIV_H_
++#define _COMPHY_PRIV_H_
+ 
+ #include <dt-bindings/comphy/comphy_data.h>
+ #include <fdtdec.h>
+ 
+ #if defined(DEBUG)
+-#define debug_enter()	printf("----> Enter %s\n", __func__);
+-#define debug_exit()	printf("<---- Exit  %s\n", __func__);
++#define debug_enter()	{ printf("----> Enter %s\n", __func__); }
++#define debug_exit()	{ printf("<---- Exit  %s\n", __func__); }
+ #else
+ #define debug_enter()
+ #define debug_exit()
+@@ -128,7 +128,7 @@ int comphy_cp110_init(struct chip_serdes_phy_config *ptr_chip_cfg,
+ 		      struct comphy_map *serdes_map);
+ #else
+ static inline int comphy_cp110_init(struct chip_serdes_phy_config *ptr_chip_cfg,
+-		      struct comphy_map *serdes_map)
++				    struct comphy_map *serdes_map)
+ {
+ 	/*
+ 	 * This function should never be called in this configuration, so
+@@ -151,5 +151,5 @@ void comphy_pcie_config_detect(u32 comphy_max_count,
+ 			       struct comphy_map *serdes_map);
+ void comphy_pcie_unit_general_config(u32 pex_index);
+ 
+-#endif /* _COMPHY_H_ */
++#endif /* _COMPHY_PRIV_H_ */
+ 
+-- 
+2.22.0
+

@@ -1,0 +1,49 @@
+From d722dc5809a5d4418502d4f493a579f31f1b0829 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Thu, 22 Nov 2018 18:53:07 +0200
+Subject: [PATCH 0910/1200] dts: mvebu: espressobin: Add optional eMMC device
+
+Add support for optional eMMC device (in disabled state).
+The board supports eMMC, but it usually not populated.
+
+Change-Id: Ia8d70ec3f95afd6596efc8a1c4b2ae3f9d5aad6a
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/61237
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/armada-3720-espressobin.dts | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/arch/arm/dts/armada-3720-espressobin.dts b/arch/arm/dts/armada-3720-espressobin.dts
+index 24da9df069..22fd23153a 100644
+--- a/arch/arm/dts/armada-3720-espressobin.dts
++++ b/arch/arm/dts/armada-3720-espressobin.dts
+@@ -145,6 +145,24 @@
+ 	status = "okay";
+ };
+ 
++&sdhci1 {
++	non-removable;
++	bus-width = <8>;
++	mmc-ddr-1_8v;
++	mmc-hs400-1_8v;
++	marvell,pad-type = "fixed-1-8v";
++	pinctrl-names = "default";
++	pinctrl-0 = <&mmc_pins>;
++	status = "disabled";
++
++	#address-cells = <1>;
++	#size-cells = <0>;
++	mmccard: mmccard@0 {
++		compatible = "mmc-card";
++		reg = <0>;
++	};
++};
++
+ &spi0 {
+ 	status = "okay";
+ 	pinctrl-names = "default";
+-- 
+2.22.0
+

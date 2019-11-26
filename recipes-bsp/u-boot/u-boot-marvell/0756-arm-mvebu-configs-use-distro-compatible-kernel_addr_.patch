@@ -1,0 +1,41 @@
+From 5fa7ec7e6ce85f7e807a9a6016f1e1adce67f698 Mon Sep 17 00:00:00 2001
+From: Andre Heider <a.heider@gmail.com>
+Date: Fri, 1 Dec 2017 07:54:34 +0100
+Subject: [PATCH 0756/1200] arm: mvebu: configs: use distro compatible
+ 'kernel_addr_r'
+
+Change-Id: Ic9fe915b5b7e1bd939a9e5756f1c28d5ba929cda
+Signed-off-by: Andre Heider <a.heider@gmail.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/47970
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/57409
+---
+ include/configs/mvebu_armada-common.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/include/configs/mvebu_armada-common.h b/include/configs/mvebu_armada-common.h
+index e8075611da..87bcfc716c 100644
+--- a/include/configs/mvebu_armada-common.h
++++ b/include/configs/mvebu_armada-common.h
+@@ -33,7 +33,7 @@
+ #define CONFIG_HAS_ETH2
+ #define CONFIG_ETHPRIME			"eth0"
+ #define CONFIG_ROOTPATH                 "/srv/nfs/" /* Default Dir for NFS */
+-#define CONFIG_EXTRA_ENV_SETTINGS	"kernel_addr=0x5000000\0"	\
++#define CONFIG_EXTRA_ENV_SETTINGS	"kernel_addr_r=0x5000000\0"	\
+ 					"initrd_addr=0xa00000\0"	\
+ 					"initrd_size=0x2000000\0"	\
+ 					"fdt_addr_r=0x4f00000\0"	\
+@@ -55,7 +55,7 @@
+ 						"tftpboot $ramdisk_addr_r " \
+ 						"$ramfs_name; else setenv " \
+ 						"ramdisk_addr_r -;fi\0"	\
+-					"get_images=tftpboot $kernel_addr " \
++					"get_images=tftpboot $kernel_addr_r " \
+ 						"$image_name; tftpboot " \
+ 						"$fdt_addr_r $fdt_name; " \
+ 						"run get_ramfs\0"	\
+-- 
+2.22.0
+

@@ -1,0 +1,28 @@
+From 1856b8cf644dfedda780a29ff753d3348e3ccbfa Mon Sep 17 00:00:00 2001
+From: Nithya <nithya.mani@caviumnetworks.com>
+Date: Tue, 12 Apr 2016 17:36:46 -0700
+Subject: [PATCH 0111/1200] Increase the FDT size
+
+With the new DT merge, DT size passed by BDK is increased.
+
+Signed-off-by: Nithya <nithya.mani@caviumnetworks.com>
+---
+ include/configs/thunderx_88xx.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/thunderx_88xx.h b/include/configs/thunderx_88xx.h
+index 9279b391a0..ee543d4a80 100644
+--- a/include/configs/thunderx_88xx.h
++++ b/include/configs/thunderx_88xx.h
+@@ -274,7 +274,7 @@
+ #define CONFIG_ENV_OFFSET		0xf00000
+ 
+ #define CONFIG_BDK_FDT_START		0xa00000
+-#define CONFIG_BDK_FDT_SIZE		0x10000
++#define CONFIG_BDK_FDT_SIZE		0x20000
+ 
+ #define CONFIG_SYS_I2C
+ #define CONFIG_SYS_I2C_THUNDERX
+-- 
+2.22.0
+

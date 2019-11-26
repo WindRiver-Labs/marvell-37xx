@@ -1,0 +1,65 @@
+From 1f18e62c9e87a689bd5df8f511039f10f3be82d8 Mon Sep 17 00:00:00 2001
+From: Yelena Krivosheev <yelena@marvell.com>
+Date: Mon, 23 Oct 2017 10:36:18 +0200
+Subject: [PATCH 0771/1200] fix: net: mvneta: handle bad RX descriptor
+
+Change-Id: I576d9f4f71d989ddbab2281e1624ff28637770e6
+Signed-off-by: Yelena Krivosheev <yelena@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/57546
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ drivers/net/mvneta.c | 17 ++++++++++++++++-
+ 1 file changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/net/mvneta.c b/drivers/net/mvneta.c
+index 83e3153768..dfdd664b57 100644
+--- a/drivers/net/mvneta.c
++++ b/drivers/net/mvneta.c
+@@ -524,8 +524,17 @@ static void mvneta_rxq_desc_num_update(struct mvneta_port *pp,
+ static struct mvneta_rx_desc *
+ mvneta_rxq_next_desc_get(struct mvneta_rx_queue *rxq)
+ {
++	struct mvneta_rx_desc *curr;
+ 	int rx_desc = rxq->next_desc_to_proc;
+ 
++	/* validate RX descriptor */
++	curr = rxq->descs + rx_desc;
++	if (curr->data_size == 0) {
++		/* do it to read real descriptor next time */
++		DSB;
++		return NULL;
++	}
++
+ 	rxq->next_desc_to_proc = MVNETA_QUEUE_NEXT_DESC(rxq, rx_desc);
+ 	return rxq->descs + rx_desc;
+ }
+@@ -1635,11 +1644,15 @@ static int mvneta_recv(struct udevice *dev, int flags, uchar **packetp)
+ 		 */
+ 		rx_desc = mvneta_rxq_next_desc_get(rxq);
+ 
++		if (!rx_desc)
++			return 0;
++
+ 		rx_status = rx_desc->status;
+ 		if (!mvneta_rxq_desc_is_first_last(rx_status) ||
+ 		    (rx_status & MVNETA_RXD_ERR_SUMMARY)) {
+ 			mvneta_rx_error(pp, rx_desc);
+-			/* leave the descriptor untouched */
++			/* invalidate the descriptor */
++			rx_desc->data_size = 0;
+ 			return -EIO;
+ 		}
+ 
+@@ -1659,6 +1672,8 @@ static int mvneta_recv(struct udevice *dev, int flags, uchar **packetp)
+ 		 * since only one was processed
+ 		 */
+ 		mvneta_rxq_desc_num_update(pp, rxq, 1, 1);
++		/* invalidate the descriptor */
++		rx_desc->data_size = 0;
+ 	}
+ 
+ 	return rx_bytes;
+-- 
+2.22.0
+

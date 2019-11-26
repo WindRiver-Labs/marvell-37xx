@@ -1,0 +1,130 @@
+From 1f15bb0c9a19a1d78a2e3a59f424d0752182d896 Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Tue, 3 May 2016 16:58:27 -0700
+Subject: [PATCH 0113/1200] PCI: DM: Add capability support
+
+This commit adds auxiliary functions for finding PCI
+capabilities without reliance on compat code
+
+Signed-off-by: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+---
+ drivers/pci/pci-uclass.c | 62 ++++++++++++++++++++++++++++++++++++++++
+ drivers/pci/pci_auto.c   |  3 +-
+ include/pci.h            | 10 +++++++
+ 3 files changed, 74 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/pci/pci-uclass.c b/drivers/pci/pci-uclass.c
+index ad43e8a27c..fe1708d79a 100644
+--- a/drivers/pci/pci-uclass.c
++++ b/drivers/pci/pci-uclass.c
+@@ -1302,6 +1302,68 @@ void *dm_pci_map_bar(struct udevice *dev, int bar, int flags)
+ 	return dm_pci_bus_to_virt(dev, pci_bus_addr, flags, 0, MAP_NOCACHE);
+ }
+ 
++/* Find the header pointer to the Capabilities*/
++int dm_pci_find_cap_start(struct udevice *dev, u8 hdr_type)
++{
++	u16 status;
++
++	dm_pci_read_config16(dev, PCI_STATUS, &status);
++
++	if (!(status & PCI_STATUS_CAP_LIST))
++		return 0;
++
++	switch (hdr_type) {
++	case PCI_HEADER_TYPE_NORMAL:
++	case PCI_HEADER_TYPE_BRIDGE:
++		return PCI_CAPABILITY_LIST;
++	case PCI_HEADER_TYPE_CARDBUS:
++		return PCI_CB_CAPABILITY_LIST;
++	default:
++		return 0;
++	}
++}
++
++int dm_pci_find_cap(struct udevice *dev, int pos, int cap)
++{
++	int ttl = PCI_FIND_CAP_TTL;
++	u8 id;
++	u8 next_pos;
++
++	while (ttl--) {
++		dm_pci_read_config8(dev, pos, &next_pos);
++		if (next_pos < CAP_START_POS)
++			break;
++		next_pos &= ~3;
++		pos = (int) next_pos;
++		dm_pci_read_config8(dev, pos + PCI_CAP_LIST_ID, &id);
++		if (id == 0xff)
++			break;
++		if (id == cap)
++			return pos;
++		pos += PCI_CAP_LIST_NEXT;
++	}
++	return 0;
++}
++
++/* Returns the address of the requested capability structure within the
++ * device's PCI configuration space or 0 in case the device does not
++ * support it.
++ * */
++int dm_pci_find_capability(struct udevice *dev, int cap)
++{
++	int pos;
++	u8 hdr_type;
++
++	dm_pci_read_config8(dev, PCI_HEADER_TYPE, &hdr_type);
++
++	pos = dm_pci_find_cap_start(dev, hdr_type & 0x7F);
++
++	if (pos)
++		pos = dm_pci_find_cap(dev, pos, cap);
++
++	return pos;
++}
++
+ UCLASS_DRIVER(pci) = {
+ 	.id		= UCLASS_PCI,
+ 	.name		= "pci",
+diff --git a/drivers/pci/pci_auto.c b/drivers/pci/pci_auto.c
+index c2bc32678a..35b76c1e80 100644
+--- a/drivers/pci/pci_auto.c
++++ b/drivers/pci/pci_auto.c
+@@ -310,11 +310,12 @@ int dm_pciauto_config_device(struct udevice *dev)
+ 	struct pci_region *pci_io;
+ 	unsigned int sub_bus = PCI_BUS(dm_pci_get_bdf(dev));
+ 	unsigned short class;
+-	bool enum_only = false;
++	bool enum_only;
+ 	struct udevice *ctlr = pci_get_controller(dev);
+ 	struct pci_controller *ctlr_hose = dev_get_uclass_priv(ctlr);
+ 	int n;
+ 
++	enum_only = dm_pci_find_capability(dev, PCI_CAP_ID_EA);
+ #ifdef CONFIG_PCI_ENUM_ONLY
+ 	enum_only = true;
+ #endif
+diff --git a/include/pci.h b/include/pci.h
+index fbe4c93cbd..ea3d734c6c 100644
+--- a/include/pci.h
++++ b/include/pci.h
+@@ -1546,6 +1546,16 @@ void *dm_pci_map_bar(struct udevice *dev, int bar, int flags);
+ #define dm_pci_io_to_virt(dev, addr, len, map_flags) \
+ 	dm_pci_bus_to_virt((dev), (addr), PCI_REGION_IO, (len), (map_flags))
+ 
++/**
++ * dm_pci_find_capability() - find a capability offset for a given device
++ *
++ * @dev: 	Device to check
++ * @cap:	Capability ID
++ * @return: capability offset if found, 0 otherwise
++ */
++int dm_pci_find_capability(struct udevice *dev, int cap);
++
++
+ /**
+  * dm_pci_find_device() - find a device by vendor/device ID
+  *
+-- 
+2.22.0
+

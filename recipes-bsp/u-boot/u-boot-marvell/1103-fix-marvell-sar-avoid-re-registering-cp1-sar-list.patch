@@ -1,0 +1,47 @@
+From 6b4c5693dd25d583b82fe7b1b5fb5322a97fb253 Mon Sep 17 00:00:00 2001
+From: Ben Peled <bpeled@marvell.com>
+Date: Wed, 1 May 2019 18:44:22 +0300
+Subject: [PATCH 1103/1200] fix: marvell: sar: avoid re-registering cp1 sar
+ list
+
+Old code was re-registering CP1 sar list because of wrong else statement
+and the existence of cp2.
+Checking for specific cp avoid re-registering cp1.
+So far we do not support any sar from cp2
+
+
+Change-Id: I15060b46c401d9da2f8a8764e8a71ed915e58fa6
+Signed-off-by: Ben Peled <bpeled@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/8361
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ drivers/misc/mvebu_sar/cp110_sar.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/misc/mvebu_sar/cp110_sar.c b/drivers/misc/mvebu_sar/cp110_sar.c
+index dca888eb76..d319c7d070 100644
+--- a/drivers/misc/mvebu_sar/cp110_sar.c
++++ b/drivers/misc/mvebu_sar/cp110_sar.c
+@@ -195,7 +195,7 @@ static int cp110_sar_register(struct udevice *dev, u32 sar_list[], int size)
+ 
+ int cp110_sar_init(struct udevice *dev)
+ {
+-	int ret;
++	int ret = 0;
+ 	struct dm_sar_pdata *priv = dev_get_priv(dev);
+ 
+ 	u32 cp0_sar_list[] = {
+@@ -212,7 +212,7 @@ int cp110_sar_init(struct udevice *dev)
+ 	if (!strcmp(priv->sar_name, "cp0-sar"))
+ 		ret = cp110_sar_register(dev, cp0_sar_list,
+ 					 ARRAY_SIZE(cp0_sar_list));
+-	else
++	else if (!strcmp(priv->sar_name, "cp1-sar"))
+ 		ret = cp110_sar_register(dev, cp1_sar_list,
+ 					 ARRAY_SIZE(cp1_sar_list));
+ 
+-- 
+2.22.0
+

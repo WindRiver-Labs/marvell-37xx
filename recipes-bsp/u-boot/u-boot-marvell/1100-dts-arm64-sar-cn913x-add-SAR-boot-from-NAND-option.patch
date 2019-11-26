@@ -1,0 +1,38 @@
+From 88717fe3abc3cac0139293cbbd72634c4c39b6fd Mon Sep 17 00:00:00 2001
+From: Alex Leibovich <alexl@marvell.com>
+Date: Sun, 28 Apr 2019 17:55:33 +0300
+Subject: [PATCH 1100/1200] dts: arm64: sar: cn913x: add SAR boot from NAND
+ option
+
+This change adds the option to set the boot device to NAND.
+
+Change-Id: I92890d4418e4b25ddd61c0037bdf4b8a14e8fc02
+Signed-off-by: Alex Leibovich <alexl@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/8199
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Tested-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/cn9130-db-dev-info.dtsi | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/dts/cn9130-db-dev-info.dtsi b/arch/arm/dts/cn9130-db-dev-info.dtsi
+index a7d0180553..f2e7c033b7 100644
+--- a/arch/arm/dts/cn9130-db-dev-info.dtsi
++++ b/arch/arm/dts/cn9130-db-dev-info.dtsi
+@@ -31,8 +31,10 @@
+ 				description = "Boot mode options";
+ 				start-bit = <4>;
+ 				bit-length = <6>;
+-				option-cnt = <2>;
+-				options = "0x2A", "AP_EMMC",
++				option-cnt = <4>;
++				options = "0xE", "CP0_NAND PIDI BW-8bit, PS-4KB, ECC-4bit\t(supported configuration: B)",
++					  "0xF", "CP0_NAND PIDI BW-8bit, PS-4KB, ECC-8bit\t(supported configuration: B)",
++					  "0x2A", "AP_EMMC",
+ 					  "0x32", "CP1_SPI_1 24bits";
+ 				default = <0x32>;
+ 				status = "okay";
+-- 
+2.22.0
+

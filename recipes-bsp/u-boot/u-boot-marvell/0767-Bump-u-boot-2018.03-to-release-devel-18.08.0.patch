@@ -1,0 +1,23 @@
+From 782d5e902657e910ed059ed8b966ca5a330556f6 Mon Sep 17 00:00:00 2001
+From: Igal Liberman <igall@marvell.com>
+Date: Sat, 30 Jun 2018 10:50:02 +0300
+Subject: [PATCH 0767/1200] Bump u-boot-2018.03 to release devel-18.08.0
+
+Change-Id: Id7b802a608b48173213082ada72c9fba7fe8ee54
+Signed-off-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/57523
+---
+ localversion | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 localversion
+
+diff --git a/localversion b/localversion
+new file mode 100644
+index 0000000000..4b1f00d854
+--- /dev/null
++++ b/localversion
+@@ -0,0 +1 @@
++-devel-18.08.0
+-- 
+2.22.0
+

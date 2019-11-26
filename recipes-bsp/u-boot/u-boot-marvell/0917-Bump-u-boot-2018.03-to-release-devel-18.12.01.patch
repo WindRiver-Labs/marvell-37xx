@@ -1,0 +1,22 @@
+From b349d87a4906ee47702ecc096543a39fa7995292 Mon Sep 17 00:00:00 2001
+From: Stefan Chulski <stefanc@marvell.com>
+Date: Tue, 27 Nov 2018 19:51:02 +0200
+Subject: [PATCH 0917/1200] Bump u-boot-2018.03 to release devel-18.12.01
+
+Change-Id: I48b674330fe6b2bd320bb44d48f19bab8cbe3b73
+Signed-off-by: Stefan Chulski <stefanc@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/61378
+---
+ localversion | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/localversion b/localversion
+index d6b2c545c7..e8a994ced2 100644
+--- a/localversion
++++ b/localversion
+@@ -1 +1 @@
+--devel-18.12.0
++-devel-18.12.01
+-- 
+2.22.0
+

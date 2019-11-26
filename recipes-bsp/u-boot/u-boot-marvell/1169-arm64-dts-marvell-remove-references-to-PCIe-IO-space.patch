@@ -1,0 +1,182 @@
+From 5b364b86f52a44bd6e424e265718d1212171b839 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Wed, 5 Jun 2019 11:04:28 +0200
+Subject: [PATCH 1169/1200] arm64: dts: marvell: remove references to PCIe IO
+ space.
+
+Hitherto the PCIe IO spaces were pointing to not-mapped or not valid
+addresses.  E.g. in case of a80x0, the PCIe IO 0xf900000 in fact is
+mapped to SPI1-CP1 but the PCIe IO description points to this address.
+Therefore remove all PCIe IO space related entries.
+
+Change-Id: Id806eb3cbd11b0f4a4de5dda06fcf0b6d1d3a9b2
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/10506
+Tested-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/armada-8020.dtsi  |  4 ----
+ arch/arm/dts/armada-8k.dtsi    |  4 ----
+ arch/arm/dts/armada-cp110.dtsi | 18 +++---------------
+ arch/arm/dts/cn9130.dtsi       |  2 --
+ arch/arm/dts/cn9131-db.dtsi    |  4 ----
+ arch/arm/dts/cn9132-db.dtsi    |  4 ----
+ 6 files changed, 3 insertions(+), 33 deletions(-)
+
+diff --git a/arch/arm/dts/armada-8020.dtsi b/arch/arm/dts/armada-8020.dtsi
+index a1283c454b..3f33e78e0b 100644
+--- a/arch/arm/dts/armada-8020.dtsi
++++ b/arch/arm/dts/armada-8020.dtsi
+@@ -53,25 +53,21 @@
+ #define CP110_BASE              0xf2000000
+ #define CP110_PCIE_MEM_BASE     0xf6000000
+ #define CP110_PCIE_MEM_OFFSET	0x1000000
+-#define CP110_PCIE_IO_BASE      0xf9000000
+ 
+ #include "armada-cp110.dtsi"
+ 
+ #undef CP110_NAME
+ #undef CP110_BASE
+-#undef CP110_PCIE_IO_BASE
+ #undef CP110_PCIE_MEM_BASE
+ 
+ #define CP110_NAME		cp1
+ #define CP110_BASE              0xf4000000
+ #define CP110_PCIE_MEM_BASE     0xfa000000
+-#define CP110_PCIE_IO_BASE      0xfd000000
+ 
+ #include "armada-cp110.dtsi"
+ 
+ #undef CP110_NAME
+ #undef CP110_BASE
+-#undef CP110_PCIE_IO_BASE
+ #undef CP110_PCIE_MEM_BASE
+ 
+ / {
+diff --git a/arch/arm/dts/armada-8k.dtsi b/arch/arm/dts/armada-8k.dtsi
+index d777537d5c..923466d135 100644
+--- a/arch/arm/dts/armada-8k.dtsi
++++ b/arch/arm/dts/armada-8k.dtsi
+@@ -13,12 +13,8 @@
+ 	((CP110_NUM % 2) * CP110_SPACE_SIZE))
+ 
+ #define CP110_PCIE_MEM_SIZE(iface)	(0xf00000)
+-#define CP110_PCIEx_CPU_IO_BASE(iface)		\
+-	(0xf9000000 + (CP110_NUM % 2) * 0x4010000 + (iface) *  0x10000)
+ #define CP110_PCIEx_CPU_MEM_BASE(iface)		\
+ 	(0xf6000000 + (CP110_NUM % 2) * 0x4000000 + (iface) *  0x1000000)
+-#define CP110_PCIEx_BUS_IO_BASE(iface)		\
+-		(CP110_PCIEx_CPU_IO_BASE(iface))
+ #define CP110_PCIEx_BUS_MEM_BASE(iface)		\
+ 		(CP110_PCIEx_CPU_MEM_BASE(iface))
+ #define CP110_PCIE_BUS_MEM_CFG			(0x82000000)
+diff --git a/arch/arm/dts/armada-cp110.dtsi b/arch/arm/dts/armada-cp110.dtsi
+index 90820fad27..c92c8d4f9d 100644
+--- a/arch/arm/dts/armada-cp110.dtsi
++++ b/arch/arm/dts/armada-cp110.dtsi
+@@ -271,12 +271,8 @@
+ 
+ 			bus-range = <0 0xff>;
+ 			ranges =
+-				/* downstream I/O */
+-				<0x81000000 U64_TO_U32_H(CP110_PCIEx_BUS_IO_BASE(0))
+-				U64_TO_U32_L(CP110_PCIEx_BUS_IO_BASE(0)) U64_TO_U32_H(CP110_PCIEx_CPU_IO_BASE(0))
+-				U64_TO_U32_L(CP110_PCIEx_CPU_IO_BASE(0)) 0 0x10000
+ 				/* non-prefetchable memory */
+-				CP110_PCIE_BUS_MEM_CFG U64_TO_U32_H(CP110_PCIEx_BUS_MEM_BASE(0))
++				<CP110_PCIE_BUS_MEM_CFG U64_TO_U32_H(CP110_PCIEx_BUS_MEM_BASE(0))
+ 				U64_TO_U32_L(CP110_PCIEx_BUS_MEM_BASE(0)) U64_TO_U32_H(CP110_PCIEx_CPU_MEM_BASE(0))
+ 				U64_TO_U32_L(CP110_PCIEx_CPU_MEM_BASE(0))
+ 				U64_TO_U32_H(CP110_PCIE_MEM_SIZE(0)) U64_TO_U32_L(CP110_PCIE_MEM_SIZE(0))>;
+@@ -298,12 +294,8 @@
+ 
+ 			bus-range = <0 0xff>;
+ 			ranges =
+-				/* downstream I/O */
+-				<0x81000000 U64_TO_U32_H(CP110_PCIEx_BUS_IO_BASE(1))
+-				U64_TO_U32_L(CP110_PCIEx_BUS_IO_BASE(1)) U64_TO_U32_H(CP110_PCIEx_CPU_IO_BASE(1))
+-				U64_TO_U32_L(CP110_PCIEx_CPU_IO_BASE(1)) 0 0x10000
+ 				/* non-prefetchable memory */
+-				CP110_PCIE_BUS_MEM_CFG U64_TO_U32_H(CP110_PCIEx_BUS_MEM_BASE(1))
++				<CP110_PCIE_BUS_MEM_CFG U64_TO_U32_H(CP110_PCIEx_BUS_MEM_BASE(1))
+ 				U64_TO_U32_L(CP110_PCIEx_BUS_MEM_BASE(1)) U64_TO_U32_H(CP110_PCIEx_CPU_MEM_BASE(1))
+ 				U64_TO_U32_L(CP110_PCIEx_CPU_MEM_BASE(1)) U64_TO_U32_H(CP110_PCIE_MEM_SIZE(1))
+ 				U64_TO_U32_L(CP110_PCIE_MEM_SIZE(1))>;
+@@ -325,12 +317,8 @@
+ 
+ 			bus-range = <0 0xff>;
+ 			ranges =
+-				/* downstream I/O */
+-				<0x81000000 U64_TO_U32_H(CP110_PCIEx_BUS_IO_BASE(2))
+-				U64_TO_U32_L(CP110_PCIEx_BUS_IO_BASE(2)) U64_TO_U32_H(CP110_PCIEx_CPU_IO_BASE(2))
+-				U64_TO_U32_L(CP110_PCIEx_CPU_IO_BASE(2)) 0 0x10000
+ 				/* non-prefetchable memory */
+-				CP110_PCIE_BUS_MEM_CFG U64_TO_U32_H(CP110_PCIEx_BUS_MEM_BASE(2))
++				<CP110_PCIE_BUS_MEM_CFG U64_TO_U32_H(CP110_PCIEx_BUS_MEM_BASE(2))
+ 				U64_TO_U32_L(CP110_PCIEx_BUS_MEM_BASE(2)) U64_TO_U32_H(CP110_PCIEx_CPU_MEM_BASE(2))
+ 				U64_TO_U32_L(CP110_PCIEx_CPU_MEM_BASE(2)) U64_TO_U32_H(CP110_PCIE_MEM_SIZE(2))
+ 				U64_TO_U32_L(CP110_PCIE_MEM_SIZE(2))>;
+diff --git a/arch/arm/dts/cn9130.dtsi b/arch/arm/dts/cn9130.dtsi
+index efed08a65c..c02af096e4 100644
+--- a/arch/arm/dts/cn9130.dtsi
++++ b/arch/arm/dts/cn9130.dtsi
+@@ -27,10 +27,8 @@
+ /* CP110-0 Settings */
+ #define CP110_NAME			cp0
+ #define CP110_NUM			0
+-#define CP110_PCIEx_CPU_IO_BASE(iface)	(0xf8000000 + (iface) * 0x10000)
+ #define CP110_PCIEx_CPU_MEM_BASE(iface)	((iface == 0) ? 0xc0000000 : \
+ 					 (0xe0000000 + (iface - 1) * 0x1000000))
+-#define CP110_PCIEx_BUS_IO_BASE(iface)	(CP110_PCIEx_CPU_IO_BASE(iface))
+ #define CP110_PCIEx_BUS_MEM_BASE(iface)	(CP110_PCIEx_CPU_MEM_BASE(iface))
+ 
+ #include "armada-cp110.dtsi"
+diff --git a/arch/arm/dts/cn9131-db.dtsi b/arch/arm/dts/cn9131-db.dtsi
+index 9a75abbe33..00f1f1ee13 100644
+--- a/arch/arm/dts/cn9131-db.dtsi
++++ b/arch/arm/dts/cn9131-db.dtsi
+@@ -8,18 +8,14 @@
+ #undef CP110_NAME
+ #undef CP110_NUM
+ #undef CP110_PCIE_MEM_SIZE
+-#undef CP110_PCIEx_CPU_IO_BASE
+ #undef CP110_PCIEx_CPU_MEM_BASE
+-#undef CP110_PCIEx_BUS_IO_BASE
+ #undef CP110_PCIEx_BUS_MEM_BASE
+ 
+ /* CP110-1 Settings */
+ #define CP110_NAME			cp1
+ #define CP110_NUM			1
+ #define CP110_PCIE_MEM_SIZE(iface)	(0xf00000)
+-#define CP110_PCIEx_CPU_IO_BASE(iface)	(0xf8030000 + (iface) * 0x10000)
+ #define CP110_PCIEx_CPU_MEM_BASE(iface)	(0xe2000000 + (iface) * 0x1000000)
+-#define CP110_PCIEx_BUS_IO_BASE(iface)	(CP110_PCIEx_CPU_IO_BASE(iface))
+ #define CP110_PCIEx_BUS_MEM_BASE(iface)	(CP110_PCIEx_CPU_MEM_BASE(iface))
+ 
+ #include "armada-cp110.dtsi"
+diff --git a/arch/arm/dts/cn9132-db.dtsi b/arch/arm/dts/cn9132-db.dtsi
+index 52c29e0816..add9f60237 100644
+--- a/arch/arm/dts/cn9132-db.dtsi
++++ b/arch/arm/dts/cn9132-db.dtsi
+@@ -8,18 +8,14 @@
+ #undef CP110_NAME
+ #undef CP110_NUM
+ #undef CP110_PCIE_MEM_SIZE
+-#undef CP110_PCIEx_CPU_IO_BASE
+ #undef CP110_PCIEx_CPU_MEM_BASE
+-#undef CP110_PCIEx_BUS_IO_BASE
+ #undef CP110_PCIEx_BUS_MEM_BASE
+ 
+ /* CP110-2 Settings */
+ #define CP110_NAME			cp2
+ #define CP110_NUM			2
+ #define CP110_PCIE_MEM_SIZE(iface)	(0xf00000)
+-#define CP110_PCIEx_CPU_IO_BASE(iface)	(0xf8060000 + (iface) *  0x10000)
+ #define CP110_PCIEx_CPU_MEM_BASE(iface)	(0xe5000000 + (iface) *  0x1000000)
+-#define CP110_PCIEx_BUS_IO_BASE(iface)	(CP110_PCIEx_CPU_IO_BASE(iface))
+ #define CP110_PCIEx_BUS_MEM_BASE(iface)	(CP110_PCIEx_CPU_MEM_BASE(iface))
+ 
+ #include "armada-cp110.dtsi"
+-- 
+2.22.0
+

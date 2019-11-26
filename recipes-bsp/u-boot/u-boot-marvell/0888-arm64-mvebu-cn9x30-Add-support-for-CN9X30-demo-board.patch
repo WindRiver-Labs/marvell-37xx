@@ -1,0 +1,200 @@
+From 8ed457aa1a03c97a6fc98d0b1c3b66ed23321db7 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Thu, 8 Nov 2018 11:27:00 +0200
+Subject: [PATCH 0888/1200] arm64: mvebu: cn9x30: Add support for CN9X30 demo
+ board
+
+Add support for CN9x30 demo board.
+
+Change-Id: I1d686ce8e4a516b19cd0bb6390efd4c669fd0523
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/60774
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/Makefile                  |  1 +
+ arch/arm/dts/marvell-CN9x30-demo-B.dts | 91 ++++++++++++++++++++++++++
+ arch/arm/mach-mvebu/armada8k/soc.c     | 40 +++++++----
+ 3 files changed, 120 insertions(+), 12 deletions(-)
+ create mode 100644 arch/arm/dts/marvell-CN9x30-demo-B.dts
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index b8e2d69918..4061403fb3 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -104,6 +104,7 @@ dtb-$(CONFIG_ARCH_MVEBU) +=			\
+ 	armada-385-amc.dtb			\
+ 	armada-3900-vd-A.dtb			\
+ 	armada-3900-vd-B.dtb			\
++	marvell-CN9x30-demo-B.dtb		\
+ 	armada-7020-amc.dtb			\
+ 	armada-7040-pcac.dtb	                \
+ 	armada-7040-db.dtb			\
+diff --git a/arch/arm/dts/marvell-CN9x30-demo-B.dts b/arch/arm/dts/marvell-CN9x30-demo-B.dts
+new file mode 100644
+index 0000000000..20eb43c122
+--- /dev/null
++++ b/arch/arm/dts/marvell-CN9x30-demo-B.dts
+@@ -0,0 +1,91 @@
++/*
++ * Copyright (C) 2018 Marvell International Ltd.
++ *
++ * SPDX-License-Identifier:    GPL-2.0
++ * https://spdx.org/licenses
++ */
++
++#include "armada-3900-db.dtsi"
++
++/ {
++	model = "Model: Marvell CN9x30 demo board (CP NOR) setup(B)";
++	compatible = "marvell,cn9x30-demo", "marvell,armada3900-vd",
++		     "marvell,armada7040", "marvell,armada-ap806-quad",
++		     "marvell,armada-ap806";
++
++	aliases {
++		i2c1 = &ap_i2c0;
++	};
++};
++
++/*
++ * AP related configuration
++ */
++&ap_i2c0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&ap_i2c0_pins>;
++	status = "okay";
++};
++
++/*
++ * CP related configuration
++ */
++&cp0_pinctl {
++		/* MPP Bus:
++		 *   NAND	[13,15-27]
++		 *   SMI	[32,34]
++		 *   XSMI	[35-36]
++		 *   I2C0	[37-38]
++		 *   USB	[44-45]
++		 *   UART1	[46-47,49,58]
++		 *   IHB	[56-57]
++		 *   UART0	[59-62]
++		 */
++		/*   0   1   2   3   4   5   6   7   8   9 */
++	pin-func = < 0   0   0   0   0   0   0   0   0   0
++		     0   0   0   2   0   1   1   1   1   1
++		     1   1   1   1   1   1   1   1   0   0
++		     0   0   7   0   7   7   7   2   2   0
++		     0   0   0   0   0   0   7   7   0   7
++		     0   0   0   0   0   0   0   0   7   7
++		     7   7   7>;
++};
++
++&cp0_nand {
++	status = "okay";
++};
++
++&cp0_comphy {
++
++	phy0 {
++		phy-type = <COMPHY_TYPE_PEX0>;
++		/delete-property/phy-speed;
++	};
++
++	phy1 {
++		phy-type = <COMPHY_TYPE_USB3_HOST0>;
++	};
++
++	phy2 {
++		phy-type = <COMPHY_TYPE_SFI0>;
++		phy-speed = <COMPHY_SPEED_5_15625G>;
++	};
++
++	phy3 {
++		phy-type = <COMPHY_TYPE_UNCONNECTED>;
++		/delete-property/phy-speed;
++	};
++
++	phy4 {
++		phy-type = <COMPHY_TYPE_SGMII1>;
++		phy-speed = <COMPHY_SPEED_1_25G>;
++	};
++};
++
++&cp0_eth0 {
++	phy-mode = "sfi";
++};
++
++&cp0_eth1 {
++	phy-mode = "sgmii";
++};
+diff --git a/arch/arm/mach-mvebu/armada8k/soc.c b/arch/arm/mach-mvebu/armada8k/soc.c
+index 5473f1981b..6d83bca97b 100644
+--- a/arch/arm/mach-mvebu/armada8k/soc.c
++++ b/arch/arm/mach-mvebu/armada8k/soc.c
+@@ -5,10 +5,11 @@
+  * https://spdx.org/licenses
+  */
+ 
+-#include <common.h>
+ #include <asm/arch-armada8k/cache_llc.h>
+ #include <asm/io.h>
+ #include <asm/arch/soc.h>
++#include <common.h>
++#include <dm/device.h>
+ #include <mvebu/mvebu_chip_sar.h>
+ 
+ #define CP_DEV_ID_STATUS_REG		(MVEBU_REGISTER(0x2400240))
+@@ -63,6 +64,15 @@ static struct soc_info soc_info_table[] = {
+ 	{ {0x8040, 1}, "Armada8040-A1", {0x806, 1}, {0x110, 1}, 1, 2 },
+ 	{ {0x8040, 2}, "Armada8040-A2", {0x806, 1}, {0x110, 2}, 1, 2 },
+ 	{ {0x8045, 0}, "Armada8040-B0", {0x806, 2}, {0x115, 0}, 1, 2 },
++	/*****************WARNING*********************
++	 * Keep the below entry as last in this array!
++	 * This entry is for SoC demo purpose only!
++	 * There is no way to distinguish between A3900
++	 * and cn9x30 on demo board until the device ID
++	 * is changed in the SoC HW.
++	 *****************WARNING*********************
++	 */
++	{ {0x6025, 0}, "CN9X30_DEMO", {0x807, 1}, {0x115, 0}, 1, 1, 0},
+ };
+ 
+ static int get_soc_type_rev(u32 *type, u32 *rev)
+@@ -109,17 +119,23 @@ static int get_soc_table_index(u32 *index)
+ 	get_soc_type_rev(&soc_type, &rev);
+ 	get_ap_soc_type(&ap_type);
+ 
+-	for (i = 0; i < ARRAY_SIZE(soc_info_table) && ret != 0; i++) {
+-		if ((soc_type != soc_info_table[i].soc.module_type) ||
+-		    (rev != soc_info_table[i].soc.module_rev) ||
+-		    ap_type != soc_info_table[i].ap.module_type)
+-			continue;
+-
+-		if (!get_soc_sub_rev(&sub_rev) &&
+-		    (sub_rev != soc_info_table[i].sub_rev))
+-			continue;
+-
+-		*index = i;
++	if (!of_machine_is_compatible("marvell,cn9x30-demo")) {
++		for (i = 0; i < ARRAY_SIZE(soc_info_table) && ret != 0; i++) {
++			if ((soc_type != soc_info_table[i].soc.module_type) ||
++			    (rev != soc_info_table[i].soc.module_rev) ||
++			    ap_type != soc_info_table[i].ap.module_type)
++				continue;
++
++			if (!get_soc_sub_rev(&sub_rev) &&
++			    (sub_rev != soc_info_table[i].sub_rev))
++				continue;
++
++			*index = i;
++			ret = 0;
++		}
++	} else {
++		/* For demo board just use the last table entry */
++		*index = ARRAY_SIZE(soc_info_table) - 1;
+ 		ret = 0;
+ 	}
+ 
+-- 
+2.22.0
+

@@ -1,0 +1,29 @@
+From c9e3ed46692d73f366e55eb30bbec15edbbbe095 Mon Sep 17 00:00:00 2001
+From: Suneel Garapati <sgarapati@caviumnetworks.com>
+Date: Tue, 10 Jul 2018 21:50:29 -0700
+Subject: [PATCH 0538/1200] drivers: scsi: print bus number during scan
+
+cavium socs support only one port/device per HBA.
+So all detected devices will be indexed as zero.
+For better readability, print hba index as bus number.
+
+Signed-off-by: Suneel Garapati <sgarapati@caviumnetworks.com>
+---
+ drivers/scsi/scsi.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/scsi/scsi.c b/drivers/scsi/scsi.c
+index df998921f5..487c3967c3 100644
+--- a/drivers/scsi/scsi.c
++++ b/drivers/scsi/scsi.c
+@@ -597,6 +597,7 @@ static int do_scsi_scan_one(struct udevice *dev, int id, int lun, bool verbose)
+ 	part_init(bdesc);
+ 
+ 	if (verbose) {
++		printf("Bus %d\n", dev->seq);
+ 		printf("  Device %d: ", 0);
+ 		dev_print(bdesc);
+ 	}
+-- 
+2.22.0
+

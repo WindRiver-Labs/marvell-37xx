@@ -1,0 +1,24 @@
+From c6a8c2124677d2a6557edfccef0bd2ab382c5297 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Tue, 15 Jan 2019 19:02:42 +0200
+Subject: [PATCH 0984/1200] Bump u-boot-2018.03 to release devel-19.01.0
+
+Change-Id: I3ddad4dbaab31c49cb1a4fcd414ad11f1511071d
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/2165
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Nadav Haklai <Nadav.Haklai@cavium.com>
+---
+ localversion | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/localversion b/localversion
+index e0412375e2..1b37aa7289 100644
+--- a/localversion
++++ b/localversion
+@@ -1 +1 @@
+--devel-18.12.3
++-devel-19.01.0
+-- 
+2.22.0
+

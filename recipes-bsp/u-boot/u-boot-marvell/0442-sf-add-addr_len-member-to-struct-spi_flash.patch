@@ -1,0 +1,98 @@
+From cc0afc64b9933ee90ced4c3a3985be672e31e7eb Mon Sep 17 00:00:00 2001
+From: Cyrille Pitchen <cyrille.pitchen@atmel.com>
+Date: Tue, 25 Jul 2017 15:00:59 +0800
+Subject: [PATCH 0442/1200] sf: add 'addr_len' member to 'struct spi_flash'
+
+This is a transitional patch to prepare the SPI FLASH sub-system to
+support the 4-byte address instruction set later.
+For now, flash->addr_len is always set to SPI_FLASH_3B_ADDR_LEN.
+
+Signed-off-by: Cyrille Pitchen <cyrille.pitchen@atmel.com>
+Signed-off-by: Wenyou Yang <wenyou.yang@microchip.com>
+---
+ drivers/mtd/spi/spi_flash.c | 13 ++++++++-----
+ include/spi_flash.h         |  2 ++
+ 2 files changed, 10 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mtd/spi/spi_flash.c b/drivers/mtd/spi/spi_flash.c
+index d51d336228..a30c3eeb6b 100644
+--- a/drivers/mtd/spi/spi_flash.c
++++ b/drivers/mtd/spi/spi_flash.c
+@@ -343,7 +343,7 @@ int spi_flash_cmd_erase_ops(struct spi_flash *flash, u32 offset, size_t len)
+ 		}
+ 	}
+ 
+-	spi_flash_command_init(&cmd, flash->erase_cmd, SPI_FLASH_3B_ADDR_LEN,
++	spi_flash_command_init(&cmd, flash->erase_cmd, flash->addr_len,
+ 			       SPI_FCMD_ERASE);
+ 	while (len) {
+ 		erase_addr = offset;
+@@ -402,7 +402,7 @@ int spi_flash_cmd_write_ops(struct spi_flash *flash, u32 offset,
+ 		}
+ 	}
+ 
+-	spi_flash_command_init(&cmd, flash->write_cmd, SPI_FLASH_3B_ADDR_LEN,
++	spi_flash_command_init(&cmd, flash->write_cmd, flash->addr_len,
+ 			       SPI_FCMD_WRITE);
+ 	cmd.proto = flash->write_proto;
+ 	for (actual = 0; actual < len; actual += chunk_len) {
+@@ -510,7 +510,7 @@ int spi_flash_cmd_read_ops(struct spi_flash *flash, u32 offset,
+ 		return 0;
+ 	}
+ 
+-	spi_flash_command_init(&cmd, flash->read_cmd, SPI_FLASH_3B_ADDR_LEN,
++	spi_flash_command_init(&cmd, flash->read_cmd, flash->addr_len,
+ 			       SPI_FCMD_READ);
+ 	cmd.proto = flash->read_proto;
+ 	cmd.num_wait_states = flash->dummy_byte * 8;
+@@ -565,7 +565,7 @@ static int sst_byte_write(struct spi_flash *flash, u32 offset, const void *buf)
+ 	int ret;
+ 	u8 sr = 0xFFu;
+ 
+-	spi_flash_command_init(&cmd, CMD_SST_BP, SPI_FLASH_3B_ADDR_LEN,
++	spi_flash_command_init(&cmd, CMD_SST_BP, flash->addr_len,
+ 			       SPI_FCMD_WRITE);
+ 	cmd.addr = offset;
+ 	cmd.data_len = 1;
+@@ -616,7 +616,7 @@ int sst_write_wp(struct spi_flash *flash, u32 offset, size_t len,
+ 	if (ret)
+ 		goto done;
+ 
+-	spi_flash_command_init(&cmd, CMD_SST_AAI_WP, SPI_FLASH_3B_ADDR_LEN,
++	spi_flash_command_init(&cmd, CMD_SST_AAI_WP, flash->addr_len,
+ 			       SPI_FCMD_WRITE);
+ 	cmd.addr = offset;
+ 	cmd.data_len = 2;
+@@ -1152,6 +1152,9 @@ int spi_flash_scan(struct spi_flash *flash)
+ 		flash->flags |= SNOR_F_USE_FSR;
+ #endif
+ 
++	/* Set the address length */
++	flash->addr_len = SPI_FLASH_3B_ADDR_LEN;
++
+ 	/* Configure the BAR - discover bank cmds and read current bank */
+ #ifdef CONFIG_SPI_FLASH_BAR
+ 	ret = read_bar(flash, info);
+diff --git a/include/spi_flash.h b/include/spi_flash.h
+index 32da4e3396..a7c6ae783a 100644
+--- a/include/spi_flash.h
++++ b/include/spi_flash.h
+@@ -45,6 +45,7 @@ struct spi_slave;
+  * @bank_read_cmd:	Bank read cmd
+  * @bank_write_cmd:	Bank write cmd
+  * @bank_curr:		Current flash bank
++ * @addr_len:		Number of bytes for the address
+  * @erase_cmd:		Erase cmd 4K, 32K, 64K
+  * @read_cmd:		Read cmd - Array Fast, Extn read and quad read.
+  * @write_cmd:		Write cmd - page and quad program.
+@@ -82,6 +83,7 @@ struct spi_flash {
+ 	u8 bank_write_cmd;
+ 	u8 bank_curr;
+ #endif
++	u8 addr_len;
+ 	u8 erase_cmd;
+ 	u8 read_cmd;
+ 	u8 write_cmd;
+-- 
+2.22.0
+

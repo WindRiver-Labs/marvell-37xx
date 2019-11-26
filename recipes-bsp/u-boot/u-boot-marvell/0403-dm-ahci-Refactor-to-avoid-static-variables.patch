@@ -1,0 +1,39 @@
+From ace9e5f1a4e61014936fc778f7ea3882ba5bdaef Mon Sep 17 00:00:00 2001
+From: Simon Glass <sjg@chromium.org>
+Date: Wed, 14 Jun 2017 21:28:34 -0600
+Subject: [PATCH 0403/1200] dm: ahci: Refactor to avoid static variables
+
+With driver model we need each device to have its own state. As a step
+towards this, restrict use of the global 'probe_ent' to just a few places
+in the file. This will allow us to add driver-model functions which can
+pass the correct data around.
+
+Signed-off-by: Simon Glass <sjg@chromium.org>
+Reviewed-by: Bin Meng <bmeng.cn@gmail.com>
+---
+ drivers/ata/ahci.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/ata/ahci.c b/drivers/ata/ahci.c
+index 1f720fe6de..aeb2f7e0be 100644
+--- a/drivers/ata/ahci.c
++++ b/drivers/ata/ahci.c
+@@ -438,6 +438,7 @@ static int ahci_init_one(struct ahci_uc_priv *uc_priv, struct udevice *dev)
+ static int ahci_init_one(struct ahci_uc_priv *uc_priv, pci_dev_t dev)
+ # endif
+ {
++	struct ahci_uc_priv *uc_priv;
+ #if !defined(CONFIG_DM_SCSI)
+ 	u16 vendor;
+ #ifdef CONFIG_DM_PCI
+@@ -1021,6 +1022,7 @@ void scsi_low_level_init(int busdevfunc)
+ #else
+ 	uc_priv = probe_ent;
+ #endif
++	uc_priv = probe_ent;
+ 
+ 	ahci_start_ports(uc_priv);
+ }
+-- 
+2.22.0
+

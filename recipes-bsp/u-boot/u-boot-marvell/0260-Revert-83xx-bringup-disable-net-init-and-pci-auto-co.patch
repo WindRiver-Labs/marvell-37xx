@@ -1,0 +1,41 @@
+From d429dba3fc4f07a9090b3c41d82cce2522080749 Mon Sep 17 00:00:00 2001
+From: Ganapatrao Kulkarni <ganapatrao.kulkarni@cavium.com>
+Date: Wed, 26 Oct 2016 00:19:42 +0530
+Subject: [PATCH 0260/1200] Revert "83xx, bringup: disable net init and pci
+ auto-config."
+
+This reverts commit 577f0692d44624b1fbbb41c303786f2a759faf07.
+---
+ common/board_r.c         | 1 -
+ drivers/pci/pci-uclass.c | 3 +--
+ 2 files changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/common/board_r.c b/common/board_r.c
+index beabc1b2bb..482f506661 100644
+--- a/common/board_r.c
++++ b/common/board_r.c
+@@ -575,7 +575,6 @@ static int initr_bbmii(void)
+ static int initr_net(void)
+ {
+ 	puts("Net:   ");
+-	return 0;
+ 	eth_initialize();
+ #if defined(CONFIG_RESET_PHY_R)
+ 	debug("Reset Ethernet PHY\n");
+diff --git a/drivers/pci/pci-uclass.c b/drivers/pci/pci-uclass.c
+index ca60384b41..6789fea063 100644
+--- a/drivers/pci/pci-uclass.c
++++ b/drivers/pci/pci-uclass.c
+@@ -1050,8 +1050,7 @@ static int pci_uclass_post_probe(struct udevice *bus)
+ 	if (ret)
+ 		return ret;
+ 
+-//#ifdef CONFIG_PCI_PNP
+-#if 0
++#ifdef CONFIG_PCI_PNP
+ 	ret = pci_auto_config_devices(bus);
+ 	if (ret < 0)
+ 		return ret;
+-- 
+2.22.0
+

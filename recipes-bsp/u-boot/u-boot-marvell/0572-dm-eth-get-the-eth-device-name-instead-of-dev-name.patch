@@ -1,0 +1,47 @@
+From 3b91bb1acaa6157de3fe58c781fe72831c26e287 Mon Sep 17 00:00:00 2001
+From: Suneel Garapati <sgarapati@caviumnetworks.com>
+Date: Tue, 7 Aug 2018 17:24:25 -0700
+Subject: [PATCH 0572/1200] dm: eth: get the eth device name instead of
+ dev->name
+
+with driver model, any command always updates ethact
+to dev->name which in this case is always "rvu_pf",
+alter the code to update ethact based on eth0/1/2 etc.
+otherwise all commands will act on first available device
+which could always be eth0(rvu_pf 0).
+Needs re-visit for better solution.
+
+Signed-off-by: Suneel Garapati <sgarapati@caviumnetworks.com>
+---
+ net/eth_common.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/net/eth_common.c b/net/eth_common.c
+index 66d0d22966..3b74d0d014 100644
+--- a/net/eth_common.c
++++ b/net/eth_common.c
+@@ -84,6 +84,7 @@ void eth_current_changed(void)
+ {
+ 	char *act = env_get("ethact");
+ 	char *ethrotate;
++	char ename[6];
+ 
+ 	/*
+ 	 * The call to eth_get_dev() below has a side effect of rotating
+@@ -96,8 +97,11 @@ void eth_current_changed(void)
+ 
+ 	/* update current ethernet name */
+ 	if (eth_get_dev()) {
+-		if (act == NULL || strcmp(act, eth_get_name()) != 0)
+-			env_set("ethact", eth_get_name());
++		if (act == NULL || strcmp(act, eth_get_name()) != 0) {
++			sprintf(ename, "eth%d", eth_get_dev()->seq);
++			env_set("ethact", ename);
++			//env_set("ethact", eth_get_name());
++		}
+ 	}
+ 	/*
+ 	 * remove the variable completely if there is no active
+-- 
+2.22.0
+

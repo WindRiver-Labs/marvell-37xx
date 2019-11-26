@@ -1,0 +1,42 @@
+From b69cf5245164a219825ef37485eeababdc37274a Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Thu, 6 Dec 2018 17:20:42 +0200
+Subject: [PATCH 0877/1200] fix: pci: Eliminate compilation warnings in CI
+ builds
+
+Remove warnings caused by pci-uclass code that shifts 32-bit
+values left by 32.
+
+Change-Id: Iba48bdc7b42cad523579853f5feb9a8e4512acdc
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+---
+ drivers/pci/pci-uclass.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/pci/pci-uclass.c b/drivers/pci/pci-uclass.c
+index 1c974b7f44..181f174e8d 100644
+--- a/drivers/pci/pci-uclass.c
++++ b/drivers/pci/pci-uclass.c
+@@ -1451,8 +1451,6 @@ void *dm_pci_map_bar(struct udevice *dev, int bar, size_t *size, int flags)
+ 			bar_response = 0;
+ 			dm_pci_read_config32(dev, bar + 4, &bar_response);
+ 		}
+-		if (!bar_response)
+-			pci_bus_start |= (pci_addr_t)bar_response << 32;
+ 	}
+ 
+ 	if (!pdata->is_phys) {
+@@ -1581,8 +1579,9 @@ static int dm_pci_ea_entry_read(struct udevice *dev, int offset, int *bei, pci_a
+ 	if (base & PCI_EA_IS_64) {
+ 		dm_pci_read_config32(dev, ent_offset, &base);
+ 		ent_offset += sizeof(u32);
+-
++#ifdef CONFIG_SYS_PCI_64BIT
+ 		*start |= (pci_addr_t)base << 32;
++#endif
+ 	}
+ 
+ 	debug("EA (%u,%u) start = %lx\n", PCI_EA_BEI(dw0), prop, (unsigned long)*start);
+-- 
+2.22.0
+

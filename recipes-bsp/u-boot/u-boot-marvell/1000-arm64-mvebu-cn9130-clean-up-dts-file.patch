@@ -1,0 +1,46 @@
+From e19a79863a0408cc77c95b14cb0bb489298e233f Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Wed, 23 Jan 2019 11:48:17 +0100
+Subject: [PATCH 1000/1200] arm64: mvebu: cn9130: clean up dts file
+
+Cosmetic change only - no functional impact.
+
+Change-Id: If8745429004e4b56cc41e284a83a3f290934eed2
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/2959
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/cn9130-db.dtsi | 1 -
+ arch/arm/dts/cn9130.dtsi    | 3 ---
+ 2 files changed, 4 deletions(-)
+
+diff --git a/arch/arm/dts/cn9130-db.dtsi b/arch/arm/dts/cn9130-db.dtsi
+index 47f893934d..26e8f40dd9 100644
+--- a/arch/arm/dts/cn9130-db.dtsi
++++ b/arch/arm/dts/cn9130-db.dtsi
+@@ -71,7 +71,6 @@
+ 			};
+ 		};
+ 	};
+-
+ };
+ 
+ /*
+diff --git a/arch/arm/dts/cn9130.dtsi b/arch/arm/dts/cn9130.dtsi
+index c7ac1d0e41..bf17ef163e 100644
+--- a/arch/arm/dts/cn9130.dtsi
++++ b/arch/arm/dts/cn9130.dtsi
+@@ -35,9 +35,6 @@
+ 
+ #include "armada-cp110.dtsi"
+ 
+-#undef CP110_NAME
+-#undef CP110_NUM
+-
+ / {
+ 	model = "Marvell CN 9030";
+ 	compatible = "marvell,armada70x0", "marvell,armada-ap806-quad",
+-- 
+2.22.0
+

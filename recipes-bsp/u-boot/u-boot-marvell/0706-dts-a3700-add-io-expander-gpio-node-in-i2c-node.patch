@@ -1,0 +1,42 @@
+From f04c3e40a16969c5366de3847c169a0ba12c6a06 Mon Sep 17 00:00:00 2001
+From: zachary <zhangzg@marvell.com>
+Date: Fri, 17 Mar 2017 10:47:57 +0800
+Subject: [PATCH 0706/1200] dts: a3700: add io expander gpio node in i2c node
+
+Change-Id: Id0f63958025a939d7f02f5977a4df5bd8968037e
+Signed-off-by: zachary <zhangzg@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/37872
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55107
+Tested-by: Hua Jing <jinghua@marvell.com>
+---
+ arch/arm/dts/armada-3720-db.dts | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/arch/arm/dts/armada-3720-db.dts b/arch/arm/dts/armada-3720-db.dts
+index b8ff684588..c1e0c1d752 100644
+--- a/arch/arm/dts/armada-3720-db.dts
++++ b/arch/arm/dts/armada-3720-db.dts
+@@ -91,8 +91,18 @@
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&i2c1_pins>;
+ 	status = "okay";
++
++	#address-cells = <1>;
++	#size-cells = <0>;
++	expander0: pca953x@22 {
++		compatible = "nxp,pca9555";
++                #gpio-cells = <2>;
++		reg = <0x22>;
++		status = "okay";
++	};
+ };
+ 
++
+ /* CON3 */
+ &sata {
+ 	status = "okay";
+-- 
+2.22.0
+

@@ -1,0 +1,41 @@
+From 4f07c0eed10b6ea7b2f9d78eb86140abd53cd4c7 Mon Sep 17 00:00:00 2001
+From: Aaron Williams <aaron.williams@cavium.com>
+Date: Tue, 8 Nov 2016 20:02:37 -0800
+Subject: [PATCH 0288/1200] Added compatibility with the Cavium driver which
+ emulates the generic driver.
+
+Signed-off-by: Aaron Williams <aaron.williams@cavium.com>
+---
+ cmd/mmc.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/cmd/mmc.c b/cmd/mmc.c
+index 58fdc36f08..1000ceb249 100644
+--- a/cmd/mmc.c
++++ b/cmd/mmc.c
+@@ -10,6 +10,10 @@
+ #include <console.h>
+ #include <mmc.h>
+ 
++#ifdef CONFIG_CAVIUM_MMC
++extern void print_mmc_device_info(struct mmc *mmc);
++#endif
++
+ static int curr_device = -1;
+ 
+ static void print_mmcinfo(struct mmc *mmc)
+@@ -123,7 +127,11 @@ static int do_mmcinfo(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+ 	if (!mmc)
+ 		return CMD_RET_FAILURE;
+ 
++#ifdef CONFIG_CAVIUM_MMC
++	print_mmc_device_info(mmc);
++#else
+ 	print_mmcinfo(mmc);
++#endif
+ 	return CMD_RET_SUCCESS;
+ }
+ 
+-- 
+2.22.0
+

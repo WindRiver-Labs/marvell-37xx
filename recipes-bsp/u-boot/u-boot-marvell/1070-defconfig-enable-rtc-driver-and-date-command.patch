@@ -1,0 +1,61 @@
+From 822cbcad484d2752f602eb9a05fbe8f0510ae722 Mon Sep 17 00:00:00 2001
+From: Alex Leibovich <alexl@marvell.com>
+Date: Sun, 10 Mar 2019 11:53:19 +0200
+Subject: [PATCH 1070/1200] defconfig: enable rtc driver and date command
+
+Added rtc to mcbin, armada and 91xx defconfigs
+
+Change-Id: I4ecdd198b9de4f941df779037ecd02dd0795d310
+Signed-off-by: Alex Leibovich <alexl@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/5444
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+---
+ configs/mvebu_db_armada8k_defconfig   | 2 ++
+ configs/mvebu_db_cn91xx_defconfig     | 2 ++
+ configs/mvebu_mcbin-88f8040_defconfig | 2 ++
+ 3 files changed, 6 insertions(+)
+
+diff --git a/configs/mvebu_db_armada8k_defconfig b/configs/mvebu_db_armada8k_defconfig
+index 0d8599f621..75af420728 100644
+--- a/configs/mvebu_db_armada8k_defconfig
++++ b/configs/mvebu_db_armada8k_defconfig
+@@ -65,6 +65,8 @@ CONFIG_MVEBU_COMPHY_SUPPORT=y
+ CONFIG_PINCTRL=y
+ CONFIG_PINCTRL_ARMADA_8K=y
+ CONFIG_DM_REGULATOR_FIXED=y
++CONFIG_DM_RTC=y
++CONFIG_MARVELL_RTC=y
+ CONFIG_DM_REGULATOR_GPIO=y
+ # CONFIG_SPL_SERIAL_PRESENT is not set
+ CONFIG_DEBUG_UART_BASE=0xf0512000
+diff --git a/configs/mvebu_db_cn91xx_defconfig b/configs/mvebu_db_cn91xx_defconfig
+index 0d8599f621..75af420728 100644
+--- a/configs/mvebu_db_cn91xx_defconfig
++++ b/configs/mvebu_db_cn91xx_defconfig
+@@ -65,6 +65,8 @@ CONFIG_MVEBU_COMPHY_SUPPORT=y
+ CONFIG_PINCTRL=y
+ CONFIG_PINCTRL_ARMADA_8K=y
+ CONFIG_DM_REGULATOR_FIXED=y
++CONFIG_DM_RTC=y
++CONFIG_MARVELL_RTC=y
+ CONFIG_DM_REGULATOR_GPIO=y
+ # CONFIG_SPL_SERIAL_PRESENT is not set
+ CONFIG_DEBUG_UART_BASE=0xf0512000
+diff --git a/configs/mvebu_mcbin-88f8040_defconfig b/configs/mvebu_mcbin-88f8040_defconfig
+index bccbc8903f..23aa257ec2 100644
+--- a/configs/mvebu_mcbin-88f8040_defconfig
++++ b/configs/mvebu_mcbin-88f8040_defconfig
+@@ -60,6 +60,8 @@ CONFIG_MVEBU_COMPHY_SUPPORT=y
+ CONFIG_PINCTRL=y
+ CONFIG_PINCTRL_ARMADA_8K=y
+ CONFIG_DM_REGULATOR_FIXED=y
++CONFIG_DM_RTC=y
++CONFIG_MARVELL_RTC=y
+ # CONFIG_SPL_SERIAL_PRESENT is not set
+ CONFIG_DEBUG_UART_BASE=0xf0512000
+ CONFIG_DEBUG_UART_CLOCK=200000000
+-- 
+2.22.0
+

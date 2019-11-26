@@ -1,0 +1,55 @@
+From f7f84c72429509de419133b4ddf8d3dbc2f3e4b2 Mon Sep 17 00:00:00 2001
+From: Stefan Chulski <stefanc@marvell.com>
+Date: Sun, 28 Apr 2019 17:46:01 +0300
+Subject: [PATCH 1097/1200] ci: cn9131: added ci build for cn9131-B with NAND
+ support
+
+Added automation build for cn9131 setup B with NAND.
+
+Change-Id: I69f9de2b178e4aa1292a1288207e8864b34548ea
+Signed-off-by: Stefan Chulski <stefanc@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/8198
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ scripts/ci/compile.sh           | 4 +++-
+ scripts/ci/supported_builds.txt | 1 +
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index 4a08fe869b..97b421e141 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -125,6 +125,7 @@ case $build_name in
+ 	uboot_2018_cn9130_B ) device_tree="cn9130-db-B"; ;;
+ 	uboot_2018_cn9130_ddr32_A ) device_tree="cn9130-db-A"; ;;
+ 	uboot_2018_cn9131_A ) device_tree="cn9131-db-A"; ;;
++	uboot_2018_cn9131_B ) device_tree="cn9131-db-B"; ;;
+ 	uboot_2018_cn9131_ddr32_A ) device_tree="cn9131-db-A"; ;;
+ 	uboot_2018_cn9132_A ) device_tree="cn9132-db-A"; ;;
+ 	uboot_2018_cn9132_ddr32_A ) device_tree="cn9132-db-A"; ;;
+@@ -164,7 +165,8 @@ fi
+ config_cmd=""
+ if [[ $build_name == "uboot_2018_a70x0_D" ||
+ 	$build_name == "uboot_2018_a80x0_D" ||
+-	$build_name == "uboot_2018_cn9130_B" ]]; then
++	$build_name == "uboot_2018_cn9130_B" ||
++	$build_name == "uboot_2018_cn9131_B" ]]; then
+ 	config_cmd="""
+ 	./scripts/config -d CONFIG_MVEBU_SPI_BOOT
+ 	./scripts/config -e CONFIG_MVEBU_NAND_BOOT
+diff --git a/scripts/ci/supported_builds.txt b/scripts/ci/supported_builds.txt
+index 80545f7e65..771f834699 100644
+--- a/scripts/ci/supported_builds.txt
++++ b/scripts/ci/supported_builds.txt
+@@ -37,6 +37,7 @@ uboot_2018_cn9130_A
+ uboot_2018_cn9130_B
+ uboot_2018_cn9130_ddr32_A
+ uboot_2018_cn9131_A
++uboot_2018_cn9132_A
+ uboot_2018_cn9131_ddr32_A
+ uboot_2018_cn9132_A
+ uboot_2018_cn9132_ddr32_A
+-- 
+2.22.0
+

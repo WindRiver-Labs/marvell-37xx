@@ -1,0 +1,32 @@
+From a8530f6001434ddcfeab8cad286c16cbeaf6c6c8 Mon Sep 17 00:00:00 2001
+From: Alex Leibovich <alexl@marvell.com>
+Date: Mon, 11 Feb 2019 15:17:05 +0200
+Subject: [PATCH 1018/1200] common: added cpuidle default initialization
+
+The cpuidle will be initialized to cpuidle.off=1.
+Previously it was not initialized, and could cause boot hanging.
+
+Change-Id: I37c2a706c48bdede53bf8118adedba26aa3c2d8a
+Signed-off-by: Alex Leibovich <alexl@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/3803
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ include/configs/mvebu_armada-common.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/configs/mvebu_armada-common.h b/include/configs/mvebu_armada-common.h
+index 84be257c17..b40cfa42d4 100644
+--- a/include/configs/mvebu_armada-common.h
++++ b/include/configs/mvebu_armada-common.h
+@@ -49,6 +49,7 @@
+ 					"hostname=marvell\0"		\
+ 					"ramdisk_addr_r=0x8000000\0"	\
+ 					"ramfs_name=-\0"		\
++					"cpuidle=cpuidle.off=1\0"	\
+ 					"fdt_name=fdt.dtb\0"		\
+ 					"netdev=eth0\0"			\
+ 					"ethaddr=00:51:82:11:22:00\0"	\
+-- 
+2.22.0
+

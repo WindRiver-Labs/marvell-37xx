@@ -1,0 +1,52 @@
+From 2c90e5d4ff0f34fa3c1bb272a7bad2660307b0d7 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Wed, 7 Nov 2018 17:56:09 +0200
+Subject: [PATCH 0886/1200] fix: dts: Remap primary spi on setup E boards
+
+The CP0 SPI1 is always used as boot and environment device.
+This patch fixes mapping of primary spi flash to always point
+to CP0 SPI1. Without this fix u-boot on configuration E fails
+to detect the environment settigns since it checks AP SPI0 instead
+of CP0 SPI1
+
+Change-Id: I7e019f4acdd5f498f885dae294b070625659445f
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/60767
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+---
+ arch/arm/dts/armada-7040-db-E.dts | 4 ++--
+ arch/arm/dts/armada-8040-db-E.dts | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/dts/armada-7040-db-E.dts b/arch/arm/dts/armada-7040-db-E.dts
+index fbd19312e1..871734f881 100644
+--- a/arch/arm/dts/armada-7040-db-E.dts
++++ b/arch/arm/dts/armada-7040-db-E.dts
+@@ -20,8 +20,8 @@
+ 	};
+ 
+ 	aliases {
+-		i2c0 = &ap_i2c0;
+-		spi0 = &ap_spi0;
++		i2c0 = &cp0_i2c0;
++		spi0 = &cp0_spi1;
+ 		fuse0 = &ap_hd_efuse0;
+ 		fuse1 = &ap_ld_efuse0;
+ 		fuse2 = &ap_ld_efuse1;
+diff --git a/arch/arm/dts/armada-8040-db-E.dts b/arch/arm/dts/armada-8040-db-E.dts
+index 47e50620ba..22d4617d2a 100644
+--- a/arch/arm/dts/armada-8040-db-E.dts
++++ b/arch/arm/dts/armada-8040-db-E.dts
+@@ -20,7 +20,7 @@
+ 
+ 	aliases {
+ 		i2c0 = &cp0_i2c0;
+-		spi0 = &ap_spi0;
++		spi0 = &cp1_spi1;
+ 		fuse1 = &ap_ld_efuse0;
+ 		fuse2 = &ap_ld_efuse1;
+ 		fuse3 = &cp0_ld_efuse0;
+-- 
+2.22.0
+

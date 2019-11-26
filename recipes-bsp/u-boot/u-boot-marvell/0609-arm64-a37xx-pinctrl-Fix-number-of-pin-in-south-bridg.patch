@@ -1,0 +1,38 @@
+From 114be6288f653d02e4ebb495d5cd090d7d122851 Mon Sep 17 00:00:00 2001
+From: Ken Ma <make@marvell.com>
+Date: Mon, 21 Aug 2017 15:38:52 +0800
+Subject: [PATCH 0609/1200] arm64: a37xx: pinctrl: Fix number of pin in south
+ bridge
+
+On the south bridge we have pin from 0 to 29, so it gives 30 pins (and
+not 29).
+
+Change-Id: Ic8b35e6ae6e429870b1adb2cef43e30db7948e40
+Reviewed-on: http://vgitil04.il.marvell.com:8080/43285
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+Cc: Simon Glass <sjg@chromium.org>
+Cc: Stefan Roese <sr@denx.de>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/52524
+Tested-by: Hua Jing <jinghua@marvell.com>
+---
+ drivers/pinctrl/mvebu/pinctrl-armada-37xx.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/pinctrl/mvebu/pinctrl-armada-37xx.c b/drivers/pinctrl/mvebu/pinctrl-armada-37xx.c
+index 2bf853eba1..d058fbace8 100644
+--- a/drivers/pinctrl/mvebu/pinctrl-armada-37xx.c
++++ b/drivers/pinctrl/mvebu/pinctrl-armada-37xx.c
+@@ -189,7 +189,7 @@ const struct armada_37xx_pin_data armada_37xx_pin_nb = {
+ };
+ 
+ const struct armada_37xx_pin_data armada_37xx_pin_sb = {
+-	.nr_pins = 29,
++	.nr_pins = 30,
+ 	.name = "GPIO2",
+ 	.groups = armada_37xx_sb_groups,
+ 	.ngroups = ARRAY_SIZE(armada_37xx_sb_groups),
+-- 
+2.22.0
+

@@ -1,0 +1,37 @@
+From f652835e6edafebbbe2ac27bb3e8d269661ac220 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Thu, 13 Sep 2018 16:08:14 +0300
+Subject: [PATCH 0861/1200] fix: dts: a3900: switch to 8-bit ECC usage
+
+The MT29F8G08ABACAWP NAND chip used on A3900 DB platforms
+uses 4-bit ECC strength, which is lower then recommended by
+the chip manufacturer.
+This patch sets ECC strength to 8-bit for all A3900 DB boards.
+
+Change-Id: I2d1d0fe4c95166ba1ec3cedc444b95f28af43860
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/59900
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/armada-3900-db.dtsi | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/arch/arm/dts/armada-3900-db.dtsi b/arch/arm/dts/armada-3900-db.dtsi
+index 25d8ec0cbd..4470dcfa33 100644
+--- a/arch/arm/dts/armada-3900-db.dtsi
++++ b/arch/arm/dts/armada-3900-db.dtsi
+@@ -80,6 +80,10 @@
+ /*
+  * CP related configuration
+  */
++&cp0_nand {
++	nand-ecc-strength = <8>;
++};
++
+ &cp0_pinctl {
+ 	cp0_xhci0_vbus_pins: cp0-xhci0-vbus-pins {
+ 		marvell,pins = <44>;
+-- 
+2.22.0
+

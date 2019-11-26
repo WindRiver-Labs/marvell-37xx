@@ -1,0 +1,355 @@
+From 88c520544fe258781c7add87be91b450ccf942fe Mon Sep 17 00:00:00 2001
+From: Ken Ma <make@marvell.com>
+Date: Wed, 6 Dec 2017 14:20:49 +0800
+Subject: [PATCH 0673/1200] dm: mdio: add a uclass for MDIO
+
+Add a uclass which provides access to MDIO busses and includes
+operations required by MDIO.
+The implementation is based on the existing mii/phy/mdio data
+structures and APIs.
+This patch also adds evice tree binding for MDIO bus.
+
+Change-Id: I1461ec75c99f6afc7f7fef92ed5a2a226adc67f8
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55400
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ doc/device-tree-bindings/mdio/mdio-bus.txt |  54 ++++++++++
+ drivers/Kconfig                            |   2 +
+ drivers/Makefile                           |   1 +
+ drivers/mdio/Kconfig                       |  12 +++
+ drivers/mdio/Makefile                      |   6 ++
+ drivers/mdio/mdio-uclass.c                 | 119 +++++++++++++++++++++
+ include/dm/uclass-id.h                     |   1 +
+ include/mdio.h                             |  62 +++++++++++
+ 8 files changed, 257 insertions(+)
+ create mode 100644 doc/device-tree-bindings/mdio/mdio-bus.txt
+ create mode 100644 drivers/mdio/Kconfig
+ create mode 100644 drivers/mdio/Makefile
+ create mode 100644 drivers/mdio/mdio-uclass.c
+ create mode 100644 include/mdio.h
+
+diff --git a/doc/device-tree-bindings/mdio/mdio-bus.txt b/doc/device-tree-bindings/mdio/mdio-bus.txt
+new file mode 100644
+index 0000000000..68d8b253ce
+--- /dev/null
++++ b/doc/device-tree-bindings/mdio/mdio-bus.txt
+@@ -0,0 +1,54 @@
++MDIO (Management Data Input/Output) busses
++
++MDIO busses can be described with a node for the MDIO master device
++and a set of child nodes for each phy on the bus.
++
++The MDIO node requires the following properties:
++- #address-cells  - number of cells required to define phy address on
++                    the MDIO bus.
++- #size-cells     - should be zero.
++- compatible      - name of MDIO bus controller following generic names
++                    recommended practice.
++- reg	          - address and length of the MDIO register.
++
++Optional property:
++- mdio-name       - MDIO bus name
++
++The child nodes of the MDIO driver are the individual PHY devices
++connected to this MDIO bus. They must have a "reg" property given the
++PHY address on the MDIO bus.
++- reg             - (required) phy address in MDIO bus.
++
++Example for cp110 MDIO node at the SoC level:
++	cp0_mdio: mdio@12a200 {
++		#address-cells = <1>;
++		#size-cells = <0>;
++		compatible = "marvell,orion-mdio";
++		reg = <0x12a200 0x10>;
++		mdio-name = "cp0-mdio";
++	};
++
++	cp0_xmdio: mdio@12a600 {
++		#address-cells = <1>;
++		#size-cells = <0>;
++		compatible = "marvell,xmdio";
++		reg = <0x12a600 0x200>;
++		mdio-name = "cp0-xmdio";
++	};
++
++And at the board level, example for armada-8040-mcbin board:
++	&cp0_mdio {
++		ge_phy: ethernet-phy@0 {
++			reg = <0>;
++		};
++	};
++
++	&cp0_xmdio {
++		phy0: ethernet-phy@0 {
++			reg = <0>;
++		};
++
++		phy8: ethernet-phy@8 {
++			reg = <8>;
++		};
++	};
+diff --git a/drivers/Kconfig b/drivers/Kconfig
+index c2e813f5ad..e34f85bc90 100644
+--- a/drivers/Kconfig
++++ b/drivers/Kconfig
+@@ -42,6 +42,8 @@ source "drivers/led/Kconfig"
+ 
+ source "drivers/mailbox/Kconfig"
+ 
++source "drivers/mdio/Kconfig"
++
+ source "drivers/memory/Kconfig"
+ 
+ source "drivers/misc/Kconfig"
+diff --git a/drivers/Makefile b/drivers/Makefile
+index 02fd848a67..2bba85ce64 100644
+--- a/drivers/Makefile
++++ b/drivers/Makefile
+@@ -81,6 +81,7 @@ obj-y += pcmcia/
+ obj-y += dfu/
+ obj-$(CONFIG_X86) += pch/
+ obj-y += phy/marvell/
++obj-y += mdio/
+ obj-y += rtc/
+ obj-y += scsi/
+ obj-y += sound/
+diff --git a/drivers/mdio/Kconfig b/drivers/mdio/Kconfig
+new file mode 100644
+index 0000000000..1f87e9498a
+--- /dev/null
++++ b/drivers/mdio/Kconfig
+@@ -0,0 +1,12 @@
++#
++# MDIO infrastructure and drivers
++#
++
++menu "MDIO Support"
++
++config DM_MDIO
++	bool "Enable Driver Model for MDIO drivers"
++	depends on DM
++	help
++	  Enable driver model for MDIO access.
++endmenu
+diff --git a/drivers/mdio/Makefile b/drivers/mdio/Makefile
+new file mode 100644
+index 0000000000..9b290c0cc5
+--- /dev/null
++++ b/drivers/mdio/Makefile
+@@ -0,0 +1,6 @@
++# SPDX-License-Identifier: GPL-2.0+
++#
++# Copyright (C) 2018 Marvell International Ltd.
++# Author: Ken Ma<make@marvell.com>
++
++obj-$(CONFIG_DM_MDIO) += mdio-uclass.o
+diff --git a/drivers/mdio/mdio-uclass.c b/drivers/mdio/mdio-uclass.c
+new file mode 100644
+index 0000000000..251776b870
+--- /dev/null
++++ b/drivers/mdio/mdio-uclass.c
+@@ -0,0 +1,119 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2018 Marvell International Ltd.
++ * Author: Ken Ma<make@marvell.com>
++ */
++
++#include <common.h>
++#include <fdtdec.h>
++#include <errno.h>
++#include <dm.h>
++#include <dm/uclass.h>
++#include <dm/uclass-internal.h>
++#include <miiphy.h>
++#include <mdio.h>
++
++DECLARE_GLOBAL_DATA_PTR;
++
++int mdio_mii_bus_get(struct udevice *mdio_dev, struct mii_dev **bus)
++{
++	*bus = *(struct mii_dev **)dev_get_uclass_platdata(mdio_dev);
++
++	return 0;
++}
++
++int mdio_device_get_from_phy(int phy_node, struct udevice **devp)
++{
++	int mdio_off;
++
++	mdio_off = fdt_parent_offset(gd->fdt_blob, phy_node);
++	return uclass_get_device_by_of_offset(UCLASS_MDIO, mdio_off,
++					      devp);
++}
++
++int mdio_mii_bus_get_from_phy(int phy_node, struct mii_dev **bus)
++{
++	struct udevice *mdio_dev;
++	int ret;
++
++	ret = mdio_device_get_from_phy(phy_node, &mdio_dev);
++	if (ret)
++		return ret;
++
++	*bus = *(struct mii_dev **)dev_get_uclass_platdata(mdio_dev);
++
++	return 0;
++}
++
++int mdio_device_get_from_eth(struct udevice *eth, struct udevice **devp)
++{
++	int dev_node = dev_of_offset(eth);
++	int phy_node;
++
++	phy_node = fdtdec_lookup_phandle(gd->fdt_blob, dev_node, "phy");
++	if (phy_node > 0)
++		return mdio_device_get_from_phy(phy_node, devp);
++
++	/*
++	 * If there is no phy reference under the ethernet fdt node,
++	 * it is not an error since the ethernet device may do not use
++	 * mode; so in this case, the output mdio device pointer is set
++	 * as NULL.
++	 */
++	*devp = NULL;
++	return 0;
++}
++
++int mdio_mii_bus_get_from_eth(struct udevice *eth, struct mii_dev **bus)
++{
++	struct udevice *mdio_dev;
++	int ret;
++
++	ret = mdio_device_get_from_eth(eth, &mdio_dev);
++	if (ret)
++		return ret;
++
++	if (mdio_dev)
++		*bus = *(struct mii_dev **)dev_get_uclass_platdata(mdio_dev);
++	else
++		*bus = NULL;
++
++	return 0;
++}
++
++static int mdio_uclass_pre_probe(struct udevice *dev)
++{
++	struct mii_dev **pbus = dev_get_uclass_platdata(dev);
++	struct mii_dev *bus;
++	const char *name;
++
++	bus = mdio_alloc();
++	if (!bus) {
++		printf("Failed to allocate MDIO bus @%p\n",
++		       devfdt_get_addr_ptr(dev));
++		return -1;
++	}
++
++	name = fdt_getprop(gd->fdt_blob, dev_of_offset(dev),
++			   "mdio-name", NULL);
++	if (name)
++		strncpy(bus->name, name, MDIO_NAME_LEN);
++	*pbus = bus;
++
++	return 0;
++}
++
++static int mdio_uclass_post_probe(struct udevice *dev)
++{
++	struct mii_dev **pbus = dev_get_uclass_platdata(dev);
++
++	return mdio_register(*pbus);
++}
++
++UCLASS_DRIVER(mdio) = {
++	.id		= UCLASS_MDIO,
++	.name		= "mdio",
++	.pre_probe	= mdio_uclass_pre_probe,
++	.post_probe	= mdio_uclass_post_probe,
++	.per_device_platdata_auto_alloc_size = sizeof(struct mii_dev *),
++};
+diff --git a/include/dm/uclass-id.h b/include/dm/uclass-id.h
+index 07fabc3ce6..cb104ebbdd 100644
+--- a/include/dm/uclass-id.h
++++ b/include/dm/uclass-id.h
+@@ -49,6 +49,7 @@ enum uclass_id {
+ 	UCLASS_LPC,		/* x86 'low pin count' interface */
+ 	UCLASS_MAILBOX,		/* Mailbox controller */
+ 	UCLASS_MASS_STORAGE,	/* Mass storage device */
++	UCLASS_MDIO,		/* MDIO device */
+ 	UCLASS_MISC,		/* Miscellaneous device */
+ 	UCLASS_MMC,		/* SD / MMC card or chip */
+ 	UCLASS_MOD_EXP,		/* RSA Mod Exp device */
+diff --git a/include/mdio.h b/include/mdio.h
+new file mode 100644
+index 0000000000..8a228db8f4
+--- /dev/null
++++ b/include/mdio.h
+@@ -0,0 +1,62 @@
++/* SPDX-License-Identifier: GPL-2.0+ */
++/*
++ * Copyright (C) 2018 Marvell International Ltd.
++ * Author: Ken Ma<make@marvell.com>
++ */
++
++#ifndef _MDIO_H_
++#define _MDIO_H_
++
++#include <dm.h>	/* Because we dereference struct udevice here */
++#include <phy.h>
++
++/**
++ * mdio_mii_bus_get() - Get mii bus from mdio udevice
++ *
++ * @mdio_dev:	mdio udevice
++ * @bus:	mii bus
++ * @returns 0 on success, error code otherwise.
++ */
++int mdio_mii_bus_get(struct udevice *mdio_dev, struct mii_dev **bus);
++
++/**
++ * mdio_device_get_from_phy() - Get the mdio udevice which the phy belongs to
++ *
++ * @phy_node:	phy node offset
++ * @devp:	mdio udevice
++ * @returns 0 on success, error code otherwise.
++ */
++int mdio_device_get_from_phy(int phy_node, struct udevice **devp);
++
++/**
++ * mdio_mii_bus_get_from_phy() - Get the mii bus which the phy belongs to
++ *
++ * @phy_node:	phy node offset
++ * @bus:	mii bus
++ * @returns 0 on success, error code otherwise.
++ */
++int mdio_mii_bus_get_from_phy(int phy_node, struct mii_dev **bus);
++
++/**
++ * mdio_device_get_from_eth() - When there is a phy reference of "phy = <&...>"
++ *                      under a ethernet udevice fdt node, this function can
++ *                      get the mdio udevice which the phy belongs to
++ *
++ * @dev:	the ethernet udevice which contains the phy reference
++ * @devp:	mdio udevice
++ * @returns 0 on success, error code otherwise.
++ */
++int mdio_device_get_from_eth(struct udevice *eth, struct udevice **devp);
++
++/**
++ * mdio_mii_bus_get_from_eth() - When there is a phy reference of
++ *                      "phy = <&...>" under a ethernet udevice fdt node, this
++ *                      function can get the mii bus which the phy belongs to
++ *
++ * @eth:	the ethernet udevice which contains the phy reference
++ * @bus:	mii bus
++ * @returns 0 on success, error code otherwise.
++ */
++int mdio_mii_bus_get_from_eth(struct udevice *eth, struct mii_dev **bus);
++
++#endif /* _MDIO_H_ */
+-- 
+2.22.0
+

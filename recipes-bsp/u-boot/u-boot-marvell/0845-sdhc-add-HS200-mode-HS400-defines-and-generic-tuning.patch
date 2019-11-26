@@ -1,0 +1,158 @@
+From 52e781d3feb5a6b5eadb8564eed2048b3a6904ed Mon Sep 17 00:00:00 2001
+From: Wojciech Macek <wma@semihalf.com>
+Date: Mon, 20 Aug 2018 09:20:28 +0200
+Subject: [PATCH 0845/1200] sdhc: add HS200 mode, HS400 defines and generic
+ tuning routine
+
+Commit includes:
+1. New defines for HS400 mode. For now, they are used
+   during printing capabilities.
+
+2. Added HS200 8 bit mode to preferred table.
+
+3. Generic tuning routine. It also provides interface
+   for tuning_pre and tuning_post if machine-dependent
+   code requires to run some quirks prior/after
+   an actual tuning happens.
+
+Change-Id: I6c7c878d569e9e08eec8185b40dcf78e8b46fa45
+Signed-off-by: Wojciech Macek <wma@semihalf.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/59229
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ drivers/mmc/mmc.c   |  7 +++++++
+ drivers/mmc/sdhci.c | 39 +++++++++++++++++++++++++++++++++++++++
+ include/mmc.h       |  2 ++
+ include/sdhci.h     |  4 ++++
+ 4 files changed, 52 insertions(+)
+
+diff --git a/drivers/mmc/mmc.c b/drivers/mmc/mmc.c
+index c930893300..87a622bd3c 100644
+--- a/drivers/mmc/mmc.c
++++ b/drivers/mmc/mmc.c
+@@ -169,6 +169,7 @@ const char *mmc_mode_name(enum bus_mode mode)
+ 	      [MMC_HS_52]	= "MMC High Speed (52MHz)",
+ 	      [MMC_DDR_52]	= "MMC DDR52 (52MHz)",
+ 	      [MMC_HS_200]	= "HS200 (200MHz)",
++	      [MMC_HS_400]	= "HS400 (400MHz)",
+ 	};
+ 
+ 	if (mode >= MMC_MODES_END)
+@@ -193,6 +194,7 @@ static uint mmc_mode2freq(struct mmc *mmc, enum bus_mode mode)
+ 	      [UHS_DDR50]	= 50000000,
+ 	      [UHS_SDR104]	= 208000000,
+ 	      [MMC_HS_200]	= 200000000,
++	      [MMC_HS_400]	= 400000000,
+ 	};
+ 
+ 	if (mode == MMC_LEGACY)
+@@ -1788,6 +1790,11 @@ static inline int mmc_set_lowest_voltage(struct mmc *mmc, enum bus_mode mode,
+ 
+ static const struct mode_width_tuning mmc_modes_by_pref[] = {
+ #if CONFIG_IS_ENABLED(MMC_HS200_SUPPORT)
++	{
++		.mode = MMC_HS_200,
++		.widths = MMC_MODE_8BIT | MMC_MODE_8BIT,
++		.tuning = MMC_CMD_SEND_TUNING_BLOCK_HS200
++	},
+ 	{
+ 		.mode = MMC_HS_200,
+ 		.widths = MMC_MODE_8BIT | MMC_MODE_4BIT,
+diff --git a/drivers/mmc/sdhci.c b/drivers/mmc/sdhci.c
+index d31793a7b7..6a46cb059e 100644
+--- a/drivers/mmc/sdhci.c
++++ b/drivers/mmc/sdhci.c
+@@ -504,6 +504,42 @@ static int sdhci_init(struct mmc *mmc)
+ }
+ 
+ #ifdef CONFIG_DM_MMC
++
++#ifdef MMC_SUPPORTS_TUNING
++static int sdhci_execute_tuning(struct udevice *dev, uint32_t opcode)
++{
++	struct mmc *mmc = mmc_get_mmc_dev(dev);
++	struct sdhci_host *host = mmc->priv;
++	int err = 0;
++
++	if (host->ops->execute_tuning_pre) {
++		err = (*host->ops->execute_tuning_pre)(host, opcode);
++		if (err) {
++			printf("%s: error encountered running tuning_pre\n",
++			       __func__);
++			return err;
++		}
++	}
++
++	err = mmc_send_tuning(mmc, opcode, NULL);
++	if (err) {
++		printf("%s: error encountered during tuning\n", __func__);
++		return err;
++	}
++
++	if (host->ops->execute_tuning_post) {
++		err = (*host->ops->execute_tuning_post)(host, opcode);
++		if (err) {
++			printf("%s: error encountered running tuning_post\n",
++			       __func__);
++			return err;
++		}
++	}
++
++	return err;
++}
++#endif
++
+ int sdhci_probe(struct udevice *dev)
+ {
+ 	struct mmc *mmc = mmc_get_mmc_dev(dev);
+@@ -514,6 +550,9 @@ int sdhci_probe(struct udevice *dev)
+ const struct dm_mmc_ops sdhci_ops = {
+ 	.send_cmd	= sdhci_send_command,
+ 	.set_ios	= sdhci_set_ios,
++#ifdef MMC_SUPPORTS_TUNING
++	.execute_tuning	= sdhci_execute_tuning,
++#endif
+ };
+ #else
+ static const struct mmc_ops sdhci_ops = {
+diff --git a/include/mmc.h b/include/mmc.h
+index 4a21b0d363..08da6205cb 100644
+--- a/include/mmc.h
++++ b/include/mmc.h
+@@ -66,6 +66,7 @@
+ #define MMC_MODE_HS_52MHz	MMC_CAP(MMC_HS_52)
+ #define MMC_MODE_DDR_52MHz	MMC_CAP(MMC_DDR_52)
+ #define MMC_MODE_HS200		MMC_CAP(MMC_HS_200)
++#define MMC_MODE_HS400		MMC_CAP(MMC_HS_400)
+ 
+ #define MMC_MODE_8BIT		BIT(30)
+ #define MMC_MODE_4BIT		BIT(29)
+@@ -540,6 +541,7 @@ enum bus_mode {
+ 	UHS_DDR50,
+ 	UHS_SDR104,
+ 	MMC_HS_200,
++	MMC_HS_400,
+ 	MMC_MODES_END
+ };
+ 
+diff --git a/include/sdhci.h b/include/sdhci.h
+index 7e84012f60..1fefeabbbe 100644
+--- a/include/sdhci.h
++++ b/include/sdhci.h
+@@ -237,6 +237,10 @@ struct sdhci_ops {
+ 	void	(*set_control_reg)(struct sdhci_host *host);
+ 	void	(*set_ios_post)(struct sdhci_host *host);
+ 	void	(*set_clock)(struct sdhci_host *host, u32 div);
++#ifdef MMC_SUPPORTS_TUNING
++	int	(*execute_tuning_pre)(struct sdhci_host *host, u32 opcode);
++	int	(*execute_tuning_post)(struct sdhci_host *host, u32 opcode);
++#endif
+ };
+ 
+ struct sdhci_host {
+-- 
+2.22.0
+

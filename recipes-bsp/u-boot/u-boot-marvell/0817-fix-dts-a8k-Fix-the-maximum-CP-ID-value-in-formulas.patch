@@ -1,0 +1,44 @@
+From 8b82932ed59b94f0863b27eec129b1e00c7d97e1 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Wed, 25 Jul 2018 17:23:18 +0300
+Subject: [PATCH 0817/1200] fix: dts: a8k: Fix the maximum CP ID value in
+ formulas
+
+Limit the maximum CP number value to 1 in address calculation
+formulas in armada-8k.dtsi file.
+
+Change-Id: I4f2565ad21ed35fddfe1a9ff961116014e9ca1dc
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/58411
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/armada-8k.dtsi | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/dts/armada-8k.dtsi b/arch/arm/dts/armada-8k.dtsi
+index 99cef71684..a708ec83a2 100644
+--- a/arch/arm/dts/armada-8k.dtsi
++++ b/arch/arm/dts/armada-8k.dtsi
+@@ -9,14 +9,14 @@
+ /* This defines used to calculate the base address of each CP */
+ #define CP110_BASE_OFFSET			(0xf2000000)
+ #define CP110_SPACE_SIZE			(0x02000000)
+-#define CP110_BASE				\
+-		(CP110_BASE_OFFSET + (CP110_NUM * CP110_SPACE_SIZE))
++#define CP110_BASE				(CP110_BASE_OFFSET + \
++	((CP110_NUM % 2) * CP110_SPACE_SIZE))
+ 
+ #define CP110_PCIE_MEM_SIZE			(0xf00000)
+ #define CP110_PCIEx_CPU_IO_BASE(iface)		\
+-		(0xf9000000 + CP110_NUM * 0x4010000 + (iface) *  0x10000)
++	(0xf9000000 + (CP110_NUM % 2) * 0x4010000 + (iface) *  0x10000)
+ #define CP110_PCIEx_CPU_MEM_BASE(iface)		\
+-		(0xf6000000 + CP110_NUM * 0x4000000 + (iface) *  0x1000000)
++	(0xf6000000 + (CP110_NUM % 2) * 0x4000000 + (iface) *  0x1000000)
+ #define CP110_PCIEx_BUS_IO_BASE(iface)		\
+ 		(CP110_PCIEx_CPU_IO_BASE(iface))
+ #define CP110_PCIEx_BUS_MEM_BASE(iface)		\
+-- 
+2.22.0
+

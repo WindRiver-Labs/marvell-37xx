@@ -1,0 +1,50 @@
+From 7540b5cd28b7f25230081515a7264606a297e429 Mon Sep 17 00:00:00 2001
+From: Wilson Ding <dingwei@marvell.com>
+Date: Wed, 13 Dec 2017 19:05:22 +0800
+Subject: [PATCH 0620/1200] arm64: a37xx: defconfigs: enable aardvark pcie
+ driver
+
+Change-Id: I14115c14b7ab8d139ca7f81617cbadb2a6b6b4e9
+Signed-off-by: Wilson Ding <dingwei@marvell.com>
+Cc: Simon Glass <sjg@chromium.org>
+Cc: Stefan Roese <sr@denx.de>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/52535
+Tested-by: Hua Jing <jinghua@marvell.com>
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+---
+ configs/mvebu_db-88f3720_defconfig          | 3 +++
+ configs/mvebu_espressobin-88f3720_defconfig | 3 +++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/configs/mvebu_db-88f3720_defconfig b/configs/mvebu_db-88f3720_defconfig
+index 04a72d6abc..d1a6158e62 100644
+--- a/configs/mvebu_db-88f3720_defconfig
++++ b/configs/mvebu_db-88f3720_defconfig
+@@ -45,6 +45,9 @@ CONFIG_SPI_FLASH_SPANSION=y
+ CONFIG_SPI_FLASH_STMICRO=y
+ CONFIG_PHYLIB=y
+ CONFIG_PHY_GIGE=y
++CONFIG_PCI=y
++CONFIG_DM_PCI=y
++CONFIG_PCI_AARDVARK=y
+ CONFIG_MVEBU_COMPHY_SUPPORT=y
+ CONFIG_PINCTRL=y
+ CONFIG_PINCTRL_ARMADA_37XX=y
+diff --git a/configs/mvebu_espressobin-88f3720_defconfig b/configs/mvebu_espressobin-88f3720_defconfig
+index f422a160eb..920d6f433d 100644
+--- a/configs/mvebu_espressobin-88f3720_defconfig
++++ b/configs/mvebu_espressobin-88f3720_defconfig
+@@ -45,6 +45,9 @@ CONFIG_SPI_FLASH_STMICRO=y
+ CONFIG_SPI_FLASH_WINBOND=y
+ CONFIG_PHYLIB=y
+ CONFIG_PHY_GIGE=y
++CONFIG_PCI=y
++CONFIG_DM_PCI=y
++CONFIG_PCI_AARDVARK=y
+ CONFIG_MVEBU_COMPHY_SUPPORT=y
+ CONFIG_PINCTRL=y
+ CONFIG_PINCTRL_ARMADA_37XX=y
+-- 
+2.22.0
+

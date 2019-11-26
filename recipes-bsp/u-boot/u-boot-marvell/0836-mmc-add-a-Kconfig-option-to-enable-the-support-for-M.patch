@@ -1,0 +1,38 @@
+From f6aa726b73c856ecd64412375ffc029857de0b94 Mon Sep 17 00:00:00 2001
+From: Jean-Jacques Hiblot <jjhiblot@ti.com>
+Date: Thu, 4 Jan 2018 15:23:32 +0100
+Subject: [PATCH 0836/1200] mmc: add a Kconfig option to enable the support for
+ MMC write operations
+
+This allows using CONFIG_IS_ENABLED(MMC_WRITE) to compile out code
+needed only if write support is required.
+The option is added for u-boot and for SPL
+
+Change-Id: I607fd502f6b3f1963bdf2e2e505767130325d949
+Signed-off-by: Jean-Jacques Hiblot <jjhiblot@ti.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/58917
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ drivers/mmc/Kconfig | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/drivers/mmc/Kconfig b/drivers/mmc/Kconfig
+index b3f878c9e6..1006600b82 100644
+--- a/drivers/mmc/Kconfig
++++ b/drivers/mmc/Kconfig
+@@ -17,11 +17,6 @@ config MMC_WRITE
+ 	help
+ 	  Enable write access to MMC and SD Cards
+ 
+-config MMC_BROKEN_CD
+-	bool "Poll for broken card detection case"
+-	help
+-	  If card  detection feature is broken, just poll to detect.
+-
+ config DM_MMC
+ 	bool "Enable MMC controllers using Driver Model"
+ 	depends on DM
+-- 
+2.22.0
+

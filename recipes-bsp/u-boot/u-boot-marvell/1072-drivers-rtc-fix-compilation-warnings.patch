@@ -1,0 +1,48 @@
+From 01b9455adf051b53572ba1ed0ea22c04ff9a5bbc Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Wed, 13 Mar 2019 10:32:42 +0200
+Subject: [PATCH 1072/1200] drivers/rtc: fix compilation warnings
+
+Fix the code for eliminating compilation warning for
+cases when the ERRATA_FE_3124064 is defined.
+
+Change-Id: I1f2014f969c9ceb584c5b48d821592c83894a54b
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/5608
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ drivers/rtc/marvell_rtc.c | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/rtc/marvell_rtc.c b/drivers/rtc/marvell_rtc.c
+index 77dbffc1c5..9017537fd2 100644
+--- a/drivers/rtc/marvell_rtc.c
++++ b/drivers/rtc/marvell_rtc.c
+@@ -142,19 +142,18 @@ void marvell_rtc_errata(struct udevice *dev)
+ 
+ static int marvell_rtc_probe(struct udevice *dev)
+ {
++#ifdef ERRATA_FE_3124064
++	marvell_rtc_errata(dev);
++#else
+ 	/* Get the rtc register base address */
+ 	struct rtc_unit_config *rtc_cfg = dev_get_priv(dev);
+ 	uintptr_t rtc_base;
++	unsigned long reg;
+ 
+ 	rtc_cfg->rtc_base = (void *)devfdt_get_addr_index(dev, 0);
+ 	rtc_base = (uintptr_t)rtc_cfg->rtc_base;
+ 
+ 	/* Update RTC-MBUS bridge timing parameters */
+-#ifdef ERRATA_FE_3124064
+-	marvell_rtc_errata(dev);
+-#else
+-	unsigned long reg;
+-
+ 	reg = RTC_READ_REG(rtc_base, MV_RTC1_SOC_OFFSET);
+ 	reg &= ~RTC_READ_OUTPUT_DELAY_MASK;
+ 	reg |= 0x1F << RTC_READ_OUTPUT_DELAY_OFFS;
+-- 
+2.22.0
+

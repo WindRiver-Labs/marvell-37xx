@@ -1,0 +1,35 @@
+From 9e01b5a687350ba463b9fa8e82040fbb2dd81ee4 Mon Sep 17 00:00:00 2001
+From: Bin Meng <bmeng.cn@gmail.com>
+Date: Wed, 23 May 2018 23:40:50 -0700
+Subject: [PATCH 1184/1200] usb: xhci: Handle endianness in
+ xhci_set_configuration()
+
+In xhci_set_configuration(), 'Context Entries' field in the slot
+context was cleared with mask LAST_CTX_MASK, but it should have
+taken the endianness into consideration.
+
+Change-Id: I73936663cc5119fd3eadb84526e02f2915012453
+Signed-off-by: Bin Meng <bmeng.cn@gmail.com>
+Reviewed-on: https://sj1git1.cavium.com/12548
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Chandrakala Chavva <cchavva@marvell.com>
+---
+ drivers/usb/host/xhci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/usb/host/xhci.c b/drivers/usb/host/xhci.c
+index e8212e5e6d..a5db3f2a59 100644
+--- a/drivers/usb/host/xhci.c
++++ b/drivers/usb/host/xhci.c
+@@ -537,7 +537,7 @@ static int xhci_set_configuration(struct usb_device *udev)
+ 	/* slot context */
+ 	xhci_slot_copy(ctrl, in_ctx, out_ctx);
+ 	slot_ctx = xhci_get_slot_ctx(ctrl, in_ctx);
+-	slot_ctx->dev_info &= ~(LAST_CTX_MASK);
++	slot_ctx->dev_info &= ~(cpu_to_le32(LAST_CTX_MASK));
+ 	slot_ctx->dev_info |= cpu_to_le32(LAST_CTX(max_ep_flag + 1) | 0);
+ 
+ 	xhci_endpoint_copy(ctrl, in_ctx, out_ctx, 0);
+-- 
+2.22.0
+

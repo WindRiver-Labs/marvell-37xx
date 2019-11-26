@@ -1,0 +1,49 @@
+From e3d3d27827019d309ec9c44a7bcc1b88e8b269be Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Tue, 13 Nov 2018 17:45:23 +0200
+Subject: [PATCH 0894/1200] dts: mvebu: Add support for boot from NAND 4KB page
+ 8b ECC
+
+Change-Id: I4018800a2562b4ad1e9d5aacac9e1df5a6588cd7
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/60885
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/armada-7040-dev-info.dtsi | 3 ++-
+ arch/arm/dts/armada-8040-dev-info.dtsi | 3 ++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/dts/armada-7040-dev-info.dtsi b/arch/arm/dts/armada-7040-dev-info.dtsi
+index bfbd9ccf52..42b63f0968 100644
+--- a/arch/arm/dts/armada-7040-dev-info.dtsi
++++ b/arch/arm/dts/armada-7040-dev-info.dtsi
+@@ -50,8 +50,9 @@
+ 				description = "Boot mode options";
+ 				start-bit = <4>;
+ 				bit-length = <6>;
+-				option-cnt = <13>;
++				option-cnt = <14>;
+ 				options = "0xE", "NAND IHB BW-8bit, PS-4KB, ECC-4bit",
++					  "0xF", "NAND IHB BW-8bit, PS-4KB, ECC-8bit",
+ 					  "0x28", "AP_SD",
+ 					  "0x29", "CP_SD",
+ 					  "0x2A", "AP_EMMC",
+diff --git a/arch/arm/dts/armada-8040-dev-info.dtsi b/arch/arm/dts/armada-8040-dev-info.dtsi
+index 4ce015c142..c1ddc445d7 100644
+--- a/arch/arm/dts/armada-8040-dev-info.dtsi
++++ b/arch/arm/dts/armada-8040-dev-info.dtsi
+@@ -48,8 +48,9 @@
+ 				description = "Boot mode options";
+ 				start-bit = <4>;
+ 				bit-length = <6>;
+-				option-cnt = <6>;
++				option-cnt = <7>;
+ 				options = "0xE", "CP1_NAND IHB BW-8bit, PS-4KB, ECC-4bit\t(supported configuration: D)",
++					  "0xF", "CP1_NAND IHB BW-8bit, PS-4KB, ECC-8bit\t(supported configuration: D)",
+ 					  "0x29", "CP0_SD\t\t\t\t\t(supported configurations: C, D and E)",
+ 					  "0x2A", "AP_EMMC\t\t\t\t\t(supported configurations: A, B, C and D)",
+ 					  "0x2B", "CP0_EMMC\t\t\t\t\t(supported configurations: A and B)",
+-- 
+2.22.0
+

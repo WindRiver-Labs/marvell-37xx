@@ -1,0 +1,25 @@
+From 30ff4a425a692a6b8561cf4d929d29e15ee838e0 Mon Sep 17 00:00:00 2001
+From: Chandrakala Chavva <cchavva@caviumnetworks.com>
+Date: Mon, 12 Sep 2016 19:06:51 -0700
+Subject: [PATCH 0251/1200] net:thunderx: Define alternate_pkg()
+
+Signed-off-by: Chandrakala Chavva <cchavva@caviumnetworks.com>
+---
+ include/common.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/common.h b/include/common.h
+index b09c1adbb2..0fe73ae5b3 100644
+--- a/include/common.h
++++ b/include/common.h
+@@ -425,6 +425,7 @@ int board_late_init (void);
+ int board_postclk_init (void); /* after clocks/timebase, before env/serial */
+ int board_early_init_r (void);
+ void board_poweroff (void);
++bool alternate_pkg (void);
+ 
+ #if defined(CONFIG_SYS_DRAM_TEST)
+ int testdram(void);
+-- 
+2.22.0
+

@@ -1,0 +1,37 @@
+From 511b82cfb21287c1b3eebfcaab92db7883e16cd0 Mon Sep 17 00:00:00 2001
+From: David Sniatkiwicz <davidsn@marvell.com>
+Date: Sun, 21 May 2017 18:21:55 +0300
+Subject: [PATCH 0782/1200] fix: nand: pxa3xx: Add WA for eliminating flash
+ ready timeout
+
+add delay before processing the status flags in pxa3xx_nand_irq().
+
+Change-Id: I4793d9dfc9c21567a82fc48d35d5efd419ba92c4
+Signed-off-by: David Sniatkiwicz <davidsn@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/39740
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/39757
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55767
+---
+ drivers/mtd/nand/pxa3xx_nand.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/mtd/nand/pxa3xx_nand.c b/drivers/mtd/nand/pxa3xx_nand.c
+index a3ca3373e4..86f76ac44a 100644
+--- a/drivers/mtd/nand/pxa3xx_nand.c
++++ b/drivers/mtd/nand/pxa3xx_nand.c
+@@ -584,6 +584,9 @@ static irqreturn_t pxa3xx_nand_irq(struct pxa3xx_nand_info *info)
+ 		cmd_done        = NDSR_CS1_CMDD;
+ 	}
+ 
++	/* TODO - find out why we need the delay during write operation. */
++	ndelay(1);
++
+ 	status = nand_readl(info, NDSR);
+ 
+ 	if (status & NDSR_UNCORERR)
+-- 
+2.22.0
+

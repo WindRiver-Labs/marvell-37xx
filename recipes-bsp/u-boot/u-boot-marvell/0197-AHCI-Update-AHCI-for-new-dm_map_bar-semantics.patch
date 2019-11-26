@@ -1,0 +1,40 @@
+From d29263c27c249109920f5523c36198597b578925 Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Wed, 18 May 2016 23:23:48 -0400
+Subject: [PATCH 0197/1200] AHCI: Update AHCI for new dm_map_bar() semantics
+
+Signed-off-by: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+---
+ drivers/ata/ahci.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/ata/ahci.c b/drivers/ata/ahci.c
+index 690d35c890..1f720fe6de 100644
+--- a/drivers/ata/ahci.c
++++ b/drivers/ata/ahci.c
+@@ -440,6 +440,8 @@ static int ahci_init_one(struct ahci_uc_priv *uc_priv, pci_dev_t dev)
+ {
+ #if !defined(CONFIG_DM_SCSI)
+ 	u16 vendor;
++#ifdef CONFIG_DM_PCI
++	size_t size;
+ #endif
+ 	int rc;
+ 
+@@ -456,7 +458,7 @@ static int ahci_init_one(struct ahci_uc_priv *uc_priv, pci_dev_t dev)
+ #if !defined(CONFIG_DM_SCSI)
+ #ifdef CONFIG_DM_PCI
+ 	uc_priv->mmio_base = dm_pci_map_bar(dev, PCI_BASE_ADDRESS_5,
+-					      PCI_REGION_MEM);
++					    &size, PCI_REGION_MEM);
+ 
+ 	/* Take from kernel:
+ 	 * JMicron-specific fixup:
+@@ -1218,4 +1220,3 @@ __weak int scsi_bus_reset(struct udevice *dev)
+ 
+ 	return 0;
+ }
+-#endif
+-- 
+2.22.0
+

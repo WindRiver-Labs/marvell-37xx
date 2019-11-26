@@ -1,0 +1,128 @@
+From ca8c658b551f63cc775deeabd93dfccac3a3f395 Mon Sep 17 00:00:00 2001
+From: Igal Liberman <igall@marvell.com>
+Date: Wed, 14 Nov 2018 15:03:00 +0200
+Subject: [PATCH 0900/1200] dts: a3900: enable MDIO and network interfaces
+
+Configure MDIO and network interfaces on setup A & B:
+Setup A:
+	- eth0: SFI (5GB), PHY0.
+	- eth1: SFI (5GB), PHY1.
+
+Setup B (VD and Demo):
+	- eth0: SFI (5GB), PHY0.
+        - eth1: SGMII (1GB), PHY1.
+
+Change-Id: Ie0e30743c23d1fa8b0deefd784caafdce79e067e
+Signed-off-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/60912
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+Reviewed-by: Stefan Chulski <stefanc@marvell.com>
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+---
+ arch/arm/dts/armada-3900-vd-A.dts      | 18 ++++++++++++++++++
+ arch/arm/dts/armada-3900-vd-B.dts      | 18 ++++++++++++++++++
+ arch/arm/dts/marvell-CN9x30-demo-B.dts | 18 ++++++++++++++++++
+ 3 files changed, 54 insertions(+)
+
+diff --git a/arch/arm/dts/armada-3900-vd-A.dts b/arch/arm/dts/armada-3900-vd-A.dts
+index dd10ea8f0e..52c38085fe 100644
+--- a/arch/arm/dts/armada-3900-vd-A.dts
++++ b/arch/arm/dts/armada-3900-vd-A.dts
+@@ -80,10 +80,28 @@
+ 	};
+ };
+ 
++&cp0_xmdio {
++	status = "okay";
++	phy0: ethernet-phy@0 {
++		reg = <0>;
++	};
++	phy1: ethernet-phy@1 {
++		reg = <1>;
++	};
++};
++
++&cp0_ethernet {
++	status = "okay";
++};
++
+ &cp0_eth0 {
++	status = "okay";
+ 	phy-mode = "sfi";
++	phy = <&phy0>;
+ };
+ 
+ &cp0_eth1 {
++	status = "okay";
+ 	phy-mode = "sfi";
++	phy = <&phy1>;
+ };
+diff --git a/arch/arm/dts/armada-3900-vd-B.dts b/arch/arm/dts/armada-3900-vd-B.dts
+index 7aa5f19126..7c51076cbc 100644
+--- a/arch/arm/dts/armada-3900-vd-B.dts
++++ b/arch/arm/dts/armada-3900-vd-B.dts
+@@ -81,10 +81,28 @@
+ 	};
+ };
+ 
++&cp0_xmdio {
++	status = "okay";
++	phy0: ethernet-phy@0 {
++		reg = <0>;
++	};
++	phy1: ethernet-phy@1 {
++		reg = <1>;
++	};
++};
++
++&cp0_ethernet {
++	status = "okay";
++};
++
+ &cp0_eth0 {
++	status = "okay";
+ 	phy-mode = "sfi";
++	phy = <&phy0>;
+ };
+ 
+ &cp0_eth1 {
++	status = "okay";
+ 	phy-mode = "sgmii";
++	phy = <&phy1>;
+ };
+diff --git a/arch/arm/dts/marvell-CN9x30-demo-B.dts b/arch/arm/dts/marvell-CN9x30-demo-B.dts
+index 20eb43c122..4a06c75eaf 100644
+--- a/arch/arm/dts/marvell-CN9x30-demo-B.dts
++++ b/arch/arm/dts/marvell-CN9x30-demo-B.dts
+@@ -82,10 +82,28 @@
+ 	};
+ };
+ 
++&cp0_xmdio {
++	status = "okay";
++	phy0: ethernet-phy@0 {
++		reg = <0>;
++	};
++	phy1: ethernet-phy@1 {
++		reg = <1>;
++	};
++};
++
++&cp0_ethernet {
++	status = "okay";
++};
++
+ &cp0_eth0 {
++	status = "okay";
+ 	phy-mode = "sfi";
++	phy = <&phy0>;
+ };
+ 
+ &cp0_eth1 {
++	status = "okay";
+ 	phy-mode = "sgmii";
++	phy = <&phy1>;
+ };
+-- 
+2.22.0
+

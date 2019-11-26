@@ -1,0 +1,25 @@
+From 82a01b7cad33cbe499c67d5384bbe591b84f8eba Mon Sep 17 00:00:00 2001
+From: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+Date: Tue, 18 Jun 2019 11:31:24 -0700
+Subject: [PATCH 1174/1200] Bump u-boot-2018.03 to release 3.0.0
+
+Change-Id: I75e0482902061d9373275a4d28ea2ac196d605ab
+Signed-off-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+Reviewed-on: https://sj1git1.cavium.com/11213
+Reviewed-by: Liron Himi <lironh@marvell.com>
+Reviewed-by: Chandrakala Chavva <cchavva@marvell.com>
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+---
+ localversion | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/localversion b/localversion
+index d04b1df3b7..0ff253c38b 100644
+--- a/localversion
++++ b/localversion
+@@ -1 +1 @@
+--2.0.0
++-3.0.0
+-- 
+2.22.0
+

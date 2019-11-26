@@ -1,0 +1,44 @@
+From 9f21f177b867391dc4c2465736c50776cf295c1f Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Mon, 24 Dec 2018 14:42:24 +0200
+Subject: [PATCH 0933/1200] script: ci: a3700: change the environment location
+ for MMC boot
+
+The boot from eMMC requires not only usage of the appropriate
+DTS file, but also changing the u-boto configuration file.
+This patch replaces boot source and environemnt location in
+u-boot configuration file from SPI flash to MMC for builds
+producing the "boot from eMMC" images.
+
+Change-Id: Ia5bbe307114aa41272dcfee9955b94cb6ed8739b
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/1196
+Reviewed-by: Lior Levin <Lior.Levin@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Tested-by: sa_ip-sw-jenkins
+---
+ scripts/ci/compile.sh | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index e2ad764a7f..14844088c6 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -161,6 +161,14 @@ if [[ $build_name == "uboot_2018_a70x0_D" ||
+ 	./scripts/config -d CONFIG_ENV_IS_IN_SPI_FLASH
+ 	./scripts/config -e CONFIG_ENV_IS_IN_NAND
+ 	"""
++elif [[ $build_name == "uboot_2018_a37xx_espressobin_ddr4_v7_1G_emmc" ||
++	$build_name == "uboot_2018_a37xx_espressobin_ddr4_v7_2G_emmc" ]]; then
++	config_cmd="""
++	./scripts/config -d CONFIG_MVEBU_SPI_BOOT
++	./scripts/config -e CONFIG_MVEBU_MMC_BOOT
++	./scripts/config -d CONFIG_ENV_IS_IN_SPI_FLASH
++	./scripts/config -e CONFIG_ENV_IS_IN_MMC
++	"""
+ fi
+ 
+ build_flags="" # not used in u-boot-2018
+-- 
+2.22.0
+

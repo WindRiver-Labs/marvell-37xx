@@ -1,0 +1,85 @@
+From da522b48bfd65ea59acc1bd91b9a00bf81928d5d Mon Sep 17 00:00:00 2001
+From: Alex Leibovich <alexl@marvell.com>
+Date: Sun, 10 Mar 2019 11:50:43 +0200
+Subject: [PATCH 1071/1200] dts: a70x0: a80x0: 91xx: add rtc device tree node
+
+Added rtc module to dtsi files.
+
+Change-Id: I2fd05d1cfd40418597477364aad6dd97bb3a89dc
+Signed-off-by: Alex Leibovich <alexl@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/5443
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/armada-70x0.dtsi  | 4 ++++
+ arch/arm/dts/armada-8040.dtsi  | 4 ++++
+ arch/arm/dts/armada-cp110.dtsi | 6 ++++++
+ arch/arm/dts/cn9130.dtsi       | 4 ++++
+ 4 files changed, 18 insertions(+)
+
+diff --git a/arch/arm/dts/armada-70x0.dtsi b/arch/arm/dts/armada-70x0.dtsi
+index 61db213832..d6b9cab366 100644
+--- a/arch/arm/dts/armada-70x0.dtsi
++++ b/arch/arm/dts/armada-70x0.dtsi
+@@ -29,6 +29,10 @@
+ 		     "marvell,armada-ap806";
+ };
+ 
++&cp0_rtc {
++	status = "okay";
++};
++
+ &cp0_pinctl {
+ 	compatible = "marvell,mvebu-pinctrl", "marvell,armada-7k-pinctrl";
+ 	bank-name ="cp0-110";
+diff --git a/arch/arm/dts/armada-8040.dtsi b/arch/arm/dts/armada-8040.dtsi
+index ee9ddf6f0e..9d701c4a87 100644
+--- a/arch/arm/dts/armada-8040.dtsi
++++ b/arch/arm/dts/armada-8040.dtsi
+@@ -75,6 +75,10 @@
+ 		     "marvell,armada-ap806";
+ };
+ 
++&cp0_rtc {
++	status = "okay";
++};
++
+ &cp0_pinctl {
+ 	compatible = "marvell,mvebu-pinctrl", "marvell,armada-8k-cpm-pinctrl";
+ 	bank-name ="cp0-110";
+diff --git a/arch/arm/dts/armada-cp110.dtsi b/arch/arm/dts/armada-cp110.dtsi
+index 3aa95ec196..481165add2 100644
+--- a/arch/arm/dts/armada-cp110.dtsi
++++ b/arch/arm/dts/armada-cp110.dtsi
+@@ -225,6 +225,12 @@
+ 				status = "disabled";
+ 			};
+ 
++			CP110_LABEL(rtc): rtc-reg@284000 {
++				compatible = "marvell,armada-8k-rtc";
++				reg = <0x284000 104>;
++				status = "disabled";
++			};
++
+ 			CP110_LABEL(ethernet): ethernet@0 {
+ 				compatible = "marvell,armada-7k-pp22";
+ 				reg = <0x0 0x100000>, <0x129000 0xb000>;
+diff --git a/arch/arm/dts/cn9130.dtsi b/arch/arm/dts/cn9130.dtsi
+index bf17ef163e..d60fff239f 100644
+--- a/arch/arm/dts/cn9130.dtsi
++++ b/arch/arm/dts/cn9130.dtsi
+@@ -41,6 +41,10 @@
+ 		     "marvell,armada-ap806";
+ };
+ 
++&cp0_rtc {
++	status = "okay";
++};
++
+ &cp0_pinctl {
+ 	compatible = "marvell,mvebu-pinctrl", "marvell,armada-8k-cpm-pinctrl";
+ 	bank-name ="cp0-110";
+-- 
+2.22.0
+

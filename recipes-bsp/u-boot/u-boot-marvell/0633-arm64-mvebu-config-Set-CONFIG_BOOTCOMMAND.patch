@@ -1,0 +1,72 @@
+From 89816ccbbc5f955bdf4c7d1d2ccf35855db91a50 Mon Sep 17 00:00:00 2001
+From: Ken Ma <make@marvell.com>
+Date: Fri, 11 May 2018 16:17:31 +0800
+Subject: [PATCH 0633/1200] arm64: mvebu: config: Set CONFIG_BOOTCOMMAND
+
+This patch sets CONFIG_BOOTCOMMAND to "run get_images;
+run set_bootargs; booti $kernel_addr $ramfs_addr $fdt_addr"
+for A8k and A3k.
+
+Change-Id: I78a81f208d62107997c4ec25c57a3a68d2e20ab0
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55220
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ configs/mvebu_db-88f3720_defconfig          | 1 +
+ configs/mvebu_db_armada8k_defconfig         | 1 +
+ configs/mvebu_espressobin-88f3720_defconfig | 1 +
+ configs/mvebu_mcbin-88f8040_defconfig       | 1 +
+ 4 files changed, 4 insertions(+)
+
+diff --git a/configs/mvebu_db-88f3720_defconfig b/configs/mvebu_db-88f3720_defconfig
+index 33d3a5bbc4..96017faac7 100644
+--- a/configs/mvebu_db-88f3720_defconfig
++++ b/configs/mvebu_db-88f3720_defconfig
+@@ -8,6 +8,7 @@ CONFIG_DEBUG_UART=y
+ CONFIG_AHCI=y
+ CONFIG_DISTRO_DEFAULTS=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
++CONFIG_BOOTCOMMAND="run get_images; run set_bootargs; booti $kernel_addr $ramfs_addr $fdt_addr"
+ CONFIG_SYS_CONSOLE_ENV_OVERWRITE=y
+ CONFIG_SYS_CONSOLE_INFO_QUIET=y
+ # CONFIG_DISPLAY_CPUINFO is not set
+diff --git a/configs/mvebu_db_armada8k_defconfig b/configs/mvebu_db_armada8k_defconfig
+index f898d1f7f5..067a276442 100644
+--- a/configs/mvebu_db_armada8k_defconfig
++++ b/configs/mvebu_db_armada8k_defconfig
+@@ -9,6 +9,7 @@ CONFIG_DEBUG_UART=y
+ CONFIG_AHCI=y
+ CONFIG_DISTRO_DEFAULTS=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
++CONFIG_BOOTCOMMAND="run get_images; run set_bootargs; booti $kernel_addr $ramfs_addr $fdt_addr"
+ CONFIG_SYS_CONSOLE_ENV_OVERWRITE=y
+ CONFIG_SYS_CONSOLE_INFO_QUIET=y
+ # CONFIG_DISPLAY_CPUINFO is not set
+diff --git a/configs/mvebu_espressobin-88f3720_defconfig b/configs/mvebu_espressobin-88f3720_defconfig
+index 6b117e93fd..a75049d94e 100644
+--- a/configs/mvebu_espressobin-88f3720_defconfig
++++ b/configs/mvebu_espressobin-88f3720_defconfig
+@@ -8,6 +8,7 @@ CONFIG_DEBUG_UART=y
+ CONFIG_AHCI=y
+ CONFIG_DISTRO_DEFAULTS=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
++CONFIG_BOOTCOMMAND="run get_images; run set_bootargs; booti $kernel_addr $ramfs_addr $fdt_addr"
+ CONFIG_SYS_CONSOLE_ENV_OVERWRITE=y
+ CONFIG_SYS_CONSOLE_INFO_QUIET=y
+ # CONFIG_DISPLAY_CPUINFO is not set
+diff --git a/configs/mvebu_mcbin-88f8040_defconfig b/configs/mvebu_mcbin-88f8040_defconfig
+index b6ea2e2078..e6586980bc 100644
+--- a/configs/mvebu_mcbin-88f8040_defconfig
++++ b/configs/mvebu_mcbin-88f8040_defconfig
+@@ -9,6 +9,7 @@ CONFIG_DEBUG_UART=y
+ CONFIG_AHCI=y
+ CONFIG_DISTRO_DEFAULTS=y
+ # CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
++CONFIG_BOOTCOMMAND="run get_images; run set_bootargs; booti $kernel_addr $ramfs_addr $fdt_addr"
+ CONFIG_SYS_CONSOLE_ENV_OVERWRITE=y
+ CONFIG_SYS_CONSOLE_INFO_QUIET=y
+ # CONFIG_DISPLAY_CPUINFO is not set
+-- 
+2.22.0
+

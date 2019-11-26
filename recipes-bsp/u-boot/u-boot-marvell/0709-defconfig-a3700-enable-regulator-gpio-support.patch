@@ -1,0 +1,45 @@
+From 8caa15eaabe57a8e18bc0430b89602ca4a74fac6 Mon Sep 17 00:00:00 2001
+From: Evan Wang <xswang@marvell.com>
+Date: Sat, 1 Apr 2017 10:26:28 +0800
+Subject: [PATCH 0709/1200] defconfig: a3700: enable regulator-gpio support
+
+- This patch enables regulator-gpio driver in
+  a3700 SoC default config.
+
+Change-Id: Ieecf4a574b0f9de1f2d7f590b5499eaa9da4292b
+Signed-off-by: Evan Wang <xswang@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/53590
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+Tested-by: Hua Jing <jinghua@marvell.com>
+---
+ configs/mvebu_db-88f3720_defconfig          | 1 +
+ configs/mvebu_espressobin-88f3720_defconfig | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/configs/mvebu_db-88f3720_defconfig b/configs/mvebu_db-88f3720_defconfig
+index 2d0a6ec192..79e7601222 100644
+--- a/configs/mvebu_db-88f3720_defconfig
++++ b/configs/mvebu_db-88f3720_defconfig
+@@ -57,6 +57,7 @@ CONFIG_PCI_AARDVARK=y
+ CONFIG_MVEBU_COMPHY_SUPPORT=y
+ CONFIG_PINCTRL=y
+ CONFIG_PINCTRL_ARMADA_37XX=y
++CONFIG_DM_REGULATOR_GPIO=y
+ # CONFIG_SPL_SERIAL_PRESENT is not set
+ CONFIG_DEBUG_MVEBU_A3700_UART=y
+ CONFIG_DEBUG_UART_BASE=0xd0012000
+diff --git a/configs/mvebu_espressobin-88f3720_defconfig b/configs/mvebu_espressobin-88f3720_defconfig
+index a75049d94e..5168d20b50 100644
+--- a/configs/mvebu_espressobin-88f3720_defconfig
++++ b/configs/mvebu_espressobin-88f3720_defconfig
+@@ -56,6 +56,7 @@ CONFIG_PCI_AARDVARK=y
+ CONFIG_MVEBU_COMPHY_SUPPORT=y
+ CONFIG_PINCTRL=y
+ CONFIG_PINCTRL_ARMADA_37XX=y
++CONFIG_DM_REGULATOR_GPIO=y
+ # CONFIG_SPL_SERIAL_PRESENT is not set
+ CONFIG_DEBUG_MVEBU_A3700_UART=y
+ CONFIG_DEBUG_UART_BASE=0xd0012000
+-- 
+2.22.0
+

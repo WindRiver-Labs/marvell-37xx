@@ -1,0 +1,115 @@
+From 2b58a6a3a7bdbf73aa631b64c8d99dca9551bf20 Mon Sep 17 00:00:00 2001
+From: Igal Liberman <igall@marvell.com>
+Date: Tue, 20 Nov 2018 12:34:32 +0200
+Subject: [PATCH 0906/1200] doc: mvebu: update build instructions with ci
+ scripts usage
+
+In addition, small cosmetics updates across the document.
+
+Change-Id: I287aced32b45b7bc0262f90747250407fb103de2
+Signed-off-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/61089
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Lior Levin <levin@marvell.com>
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+---
+ doc/mvebu/build.txt | 59 +++++++++++++++++++++++++++++++++++----------
+ 1 file changed, 46 insertions(+), 13 deletions(-)
+
+diff --git a/doc/mvebu/build.txt b/doc/mvebu/build.txt
+index 5c4441d3a7..350ccc2588 100644
+--- a/doc/mvebu/build.txt
++++ b/doc/mvebu/build.txt
+@@ -2,27 +2,60 @@ U-Boot Build Instructions
+ =========================
+ 
+ This document describes how to compile U-Boot and how to change U-Boot
+-configuration.
++configuration. The are 2 methods to compile u-boot:
+ 
+-Build Procedure
+-----------------
++1. Using prepared scripts
++
++2. Manual compilation
++
++Both methods will be described in this documents.
++
++System preparations (for both methods)
++--------------------------------------
+ 1. Install required packages::
+ 
+-		# sudo apt-get install libssl-dev
+-		# sudo apt-get install device-tree-compiler
+-		# sudo apt-get install swig libpython-dev
++		> sudo apt-get install libssl-dev
++		> sudo apt-get install device-tree-compiler
++		> sudo apt-get install swig libpython-dev
+ 
+ 2. Set the cross compiler::
+ 
+-		# export CROSS_COMPILE=/path/to/toolchain/aarch64-linux-gnu
++		> export CROSS_COMPILE=/path/to/toolchain/aarch64-linux-gnu
++
++Build with scripts
++------------------
++The script is located in the u-boot tree **./scripts/ci/**
++
++Script usage::
++
++		> ./scripts/ci/compile.sh --help
++
++		Usage: compile [--no_configure] [--echo_only] BUILD_NAME
++		 or:   compile --list
++		 or:   compile --help
++
++		Compiles u-boot similar to the given CI build
++
++		 -N, --no_configure   Skip configuration steps (mrproper, make defconfig)
++		 -e, --echo_only      Print out the compilation sequence but do not execute it
++		 -l, --list           List all supported BUILD_NAME values and exit
++		 -h, --help           Display this help and exit
++
++		Prerequisites:       CROSS_COMPILE must point to the cross compiler
++
++Examples::
++
++		MacchiatoBin build: ./scripts/ci/compile.sh uboot_2018_a80x0_mcbin
+ 
+-3. Clean-up old residuals::
++Manual build procedure
++----------------------
++1. Clean-up old residuals::
+ 
+-		# make mrproper
++		> make mrproper
+ 
+-4. Configure the U-Boot::
++2. Configure the U-Boot::
+ 
+-		# make <defconfig_file>
++		> make <defconfig_file>
+ 
+    - For the Armada-70x0/80x0 DB board and Armada-7020 AMC use
+      "make mvebu_db_armada8k_defconfig"
+@@ -31,7 +64,7 @@ Build Procedure
+    - For the Armada-3700 EsspressoBin use
+      "make mvebu_espressobin-88f3720_defconfig"
+ 
+-5. Configure the device-tree and build the U-Boot image:
++3. Configure the device-tree and build the U-Boot image:
+ 
+ 	All device-tree files are located in ./arch/arm/dts/ folder.
+ 	Information about the different configuration available for the
+@@ -44,7 +77,7 @@ Build Procedure
+ 	In order to compile u-boot with a specific device-tree,
+ 	use the following::
+ 
+-		# make DEVICE_TREE=<name>
++		> make DEVICE_TREE=<name>
+ 
+ 	- For the Armada-70x0 DB use "make DEVICE_TREE=armada-7040-db[-X]"
+ 	- For the Armada-7020 AMC use "make DEVICE_TREE=armada-7020-amc"
+-- 
+2.22.0
+

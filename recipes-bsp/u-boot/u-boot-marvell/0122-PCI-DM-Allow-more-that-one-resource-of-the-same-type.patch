@@ -1,0 +1,38 @@
+From 8587ace3709dbd8b4265eec8f2a73c757658a4b8 Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Tue, 3 May 2016 22:58:30 -0700
+Subject: [PATCH 0122/1200] PCI: DM: Allow more that one resource of the same
+ type
+
+Current code only allows 1 resource of the same type
+which is an artificial limitation. This commit lifts
+this limitation allowing for several address windows of the same type
+
+Signed-off-by: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+---
+ drivers/pci/pci-uclass.c | 9 ++-------
+ 1 file changed, 2 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/pci/pci-uclass.c b/drivers/pci/pci-uclass.c
+index 3a28391287..e37a825b76 100644
+--- a/drivers/pci/pci-uclass.c
++++ b/drivers/pci/pci-uclass.c
+@@ -874,13 +874,8 @@ static int decode_regions(struct pci_controller *hose, ofnode parent_node,
+ 		} else {
+ 			continue;
+ 		}
+-		pos = -1;
+-		for (i = 0; i < hose->region_count; i++) {
+-			if (hose->regions[i].flags == type)
+-				pos = i;
+-		}
+-		if (pos == -1)
+-			pos = hose->region_count++;
++
++		pos = hose->region_count++;
+ 		debug(" - type=%d, pos=%d\n", type, pos);
+ 		pci_set_region(hose->regions + pos, pci_addr, addr, size, type);
+ 	}
+-- 
+2.22.0
+

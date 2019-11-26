@@ -1,0 +1,43 @@
+From b5747fec1d55b10619b1b0dfb4728ac1a78368c2 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Wed, 6 Mar 2019 15:25:59 +0100
+Subject: [PATCH 1079/1200] arm64: dts: cn9131: configure MPP to xSMI instead
+ of SMI
+
+The MPP35 and MPP36 are wired to 3310 PHY and should be configured for xSMI
+instead of SMI.
+
+Change-Id: I39d892094ba848b6f522a959d93d9da286b3695e
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/5330
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/cn9131-db.dtsi | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/dts/cn9131-db.dtsi b/arch/arm/dts/cn9131-db.dtsi
+index 67490fe357..4a0c1a4503 100644
+--- a/arch/arm/dts/cn9131-db.dtsi
++++ b/arch/arm/dts/cn9131-db.dtsi
+@@ -136,7 +136,7 @@
+ 	 *	[17-27]	GPIO (Default)
+ 	 *	[28]	SATA1_PRESENT_ACTIVEn
+ 	 *	[29-34]	GPIO (Default)
+-	 *	[35-36]	SMI
++	 *	[35-36]	xSMI
+ 	 *	[37-38] I2C0
+ 	 *	[39-62]	GPIO
+ 	 */
+@@ -144,7 +144,7 @@
+ 	pin-func = < 0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x0
+ 		     0x0  0x0  0x0  0x3  0x3  0x3  0x3  0x0  0x0  0x0
+ 		     0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x9  0x0
+-		     0x0  0x0  0x0  0x0  0x0  0x8  0x8  0x2  0x2  0x0
++		     0x0  0x0  0x0  0x0  0x0  0x7  0x7  0x2  0x2  0x0
+ 		     0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x0
+ 		     0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x0
+ 		     0x0  0x0  0x0 >;
+-- 
+2.22.0
+

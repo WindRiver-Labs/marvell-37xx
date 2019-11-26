@@ -1,0 +1,38 @@
+From 0727593d0a2e1cb8e88fab07a1fbbe99bef0b618 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Tue, 28 Aug 2018 18:04:09 +0300
+Subject: [PATCH 0850/1200] fix: mvebu: Add SPI parameters for environment
+ setup
+
+Add definitions for CONFIG_ENV_SPI_BUS and CONFIG_ENV_SPI_CS
+to Armada-388-GP board configuration
+
+Change-Id: I71593040773dfb4f5e47a6228d439677ca9209fc
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/59561
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ include/configs/db-88f6820-gp.h | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/include/configs/db-88f6820-gp.h b/include/configs/db-88f6820-gp.h
+index db7346a1b1..aada56b7f3 100644
+--- a/include/configs/db-88f6820-gp.h
++++ b/include/configs/db-88f6820-gp.h
+@@ -31,6 +31,12 @@
+ #define CONFIG_SYS_I2C_SLAVE		0x0
+ #define CONFIG_SYS_I2C_SPEED		100000
+ 
++/*
++ * SPI Flash configuration for the environemnt access
++ */
++#define CONFIG_ENV_SPI_BUS		0
++#define CONFIG_ENV_SPI_CS		0
++
+ /* SPI NOR flash default params, used by sf commands */
+ #define CONFIG_SF_DEFAULT_SPEED		1000000
+ #define CONFIG_SF_DEFAULT_MODE		SPI_MODE_3
+-- 
+2.22.0
+

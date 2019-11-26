@@ -1,0 +1,51 @@
+From 5c55ba655f7fc74d619d76ef49b0ab9e3a2134ed Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Tue, 14 May 2019 17:32:10 +0200
+Subject: [PATCH 1166/1200] scripts/ci: add a388-gp to supported builds
+
+Change-Id: I78688890b850033925158d777e044f3e8873fb19
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/10037
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Lior Levin <Lior.Levin@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ scripts/ci/compile.sh           | 2 ++
+ scripts/ci/supported_builds.txt | 1 +
+ 2 files changed, 3 insertions(+)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index 299aa0f37b..5c43fe2370 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -85,6 +85,7 @@ case $build_name in
+ 	*_a80x0_mcbin* ) defconfig="mvebu_mcbin-88f8040_defconfig"; ;;
+ 	*_a80x0_ucpe* )  defconfig="mvebu_ucpe-88f8040_defconfig"; ;;
+ 	*_a80x0* )       defconfig="mvebu_db_armada8k_defconfig"; ;;
++	*_a388_gp )    defconfig="db-88f6820-gp_defconfig"; ;;
+ 	*_a3900* )       defconfig="mvebu_db_armada8k_defconfig"; ;;
+ 	*_cn9* )        defconfig="mvebu_db_cn91xx_defconfig"; ;;
+ 	*_a37xx_espressobin_* )
+@@ -119,6 +120,7 @@ case $build_name in
+ 	uboot_2018_a80x0_mcbin* ) device_tree="armada-8040-mcbin"; ;;
+ 	uboot_2018_a80x0_ucpe* ) device_tree="armada-8040-ucpe"; ;;
+ 
++	uboot_2018_a388_gp ) device_tree="armada-388-gp"; ;;
+ 	uboot_2018_a3900_A ) device_tree="armada-3900-vd-A"; ;;
+ 	uboot_2018_a3900_B ) device_tree="armada-3900-vd-B"; ;;
+ 	uboot_2018_cn9130_A ) device_tree="cn9130-db-A"; ;;
+diff --git a/scripts/ci/supported_builds.txt b/scripts/ci/supported_builds.txt
+index 1bb11d8743..8a19692de2 100644
+--- a/scripts/ci/supported_builds.txt
++++ b/scripts/ci/supported_builds.txt
+@@ -31,6 +31,7 @@ uboot_2018_a80x0_mcbin_single_shot_pm
+ uboot_2018_a80x0_ucpe
+ uboot_2018_a80x0_ddr32
+ 
++uboot_2018_a388_gp
+ uboot_2018_a3900_A
+ uboot_2018_a3900_B
+ uboot_2018_cn9130_A
+-- 
+2.22.0
+

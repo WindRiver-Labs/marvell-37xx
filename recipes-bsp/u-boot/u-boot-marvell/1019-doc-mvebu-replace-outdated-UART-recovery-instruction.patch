@@ -1,0 +1,96 @@
+From c2f8cc40e975c93ac37b56b0be8ddbb972e79385 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Wed, 13 Feb 2019 12:39:30 +0200
+Subject: [PATCH 1019/1200] doc/mvebu: replace outdated UART recovery
+ instructions
+
+Update the UART recovery flow with new instructions based on
+the dedicated script usage.
+
+Change-Id: I91cb393da114e271af1e4a2ba9e28d590b8505d9
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/3943
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Nadav Haklai <Nadav.Haklai@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ doc/mvebu/uart_boot.txt | 54 +++++++++++++++++++++--------------------
+ 1 file changed, 28 insertions(+), 26 deletions(-)
+
+diff --git a/doc/mvebu/uart_boot.txt b/doc/mvebu/uart_boot.txt
+index 19f4d3ed41..9d9dc3b3aa 100644
+--- a/doc/mvebu/uart_boot.txt
++++ b/doc/mvebu/uart_boot.txt
+@@ -1,41 +1,43 @@
+ UART boot
+ =========
+ 
+-UART boot for Armada-70x0/80x0
+-------------------------------
++UART boot for Armada-70x0/80x0/3900 and OcteonTX2 CN913x
++----------------------------------------------------------
+ 
+-UART boot is used to load flash-image.bin using the Xmodem interface
+-when the board boots for the first time or when the board fails to
+-boot.
++UART recovery is a method of loading boot flash image using Xmodem protocol
++when the target board is used for the first time or when the board fails to
++start due to invalid flash image located on its boot device.
+ 
+-1. Set the board to receiving mode using either of the following
+-   methods:
++1. The entire process is greatly simplified with a dedicated script usage.
++   The script is located under /tools folder and named mrvl_uart.sh.
++   This script supports 2 parameters - the serial interface and the
++   path to flash image::
+ 
+-	- Start a terminal application (e.g. minicom), and send the
+-	  Xmodem_boot_pattern.bin file in ASCII (located under
+-          /tools/marvell/xmodem/xmodem_boot.pattern),
+-	  (for minicom do: Ctrl+A, then S, then select ASCII), and
+-	  reset the board at the same time.
+-	- This option is only relevant for Marvell development boards:
+-	  Set the boot source to UART, using boot source DIP-switch
+-	  pins, and then reset the board.
++	mrvl_uart.sh <port> <file>
+ 
+-2. After booting from UART, or sending the pattern file, characters
+-   are displayed on the screen every second. These are the Xmodem
+-   NACKs that indicate readiness to send the new ATF with the Xmodem
+-   protocol.
++2. Power on the board, connect it to the Linux workstation using serail cable,
++   run the script and follow the on-screen instructions.
++   Below is the example for A-8040 board connected to /dev/ttyUSB0 serial line::
+ 
+-3. Start the TTY transfer using the Xmodem protocol
+-   (for minicom do: Ctrl+A, then S, and select the Xmodem protocol).
++	./tools/mrvl_uart.sh /dev/ttyUSB0 /srv/tftp/flash-image-a8040-db.bin
+ 
+-4. Select flash-image.bin file, and start the transfer.
++   The script generates UART escape sequence pattern and requests
++   the target board reset::
+ 
+-5. When the transfer is done, U-Boot will start and you should hit
+-   'return' to get the U-Boot prompt.
++	Using device connected on serial port "/dev/ttyUSB0"
++	Loading flash image file "/srv/tftp/flash-image-a8040-db.bin"
++	Recovery will run at 115200 baud
++	========================================
++	Press the "Reset" button on the target board and the "Enter" key on the host keyboard simultaneously
+ 
+-6. Refer to "doc/mvebu/cmd/bubt.txt" for instructions how to burn
+-   flash-image.bin to the boot device
++3. Once "Enter" key is pressed, the script sends escape pattern to the target
++   board (interrupting normal boot flow) followed by X-modem transfer of the flash image.
++   When the download process ends, the "minicom" application is started on the
++   same serial port, presenting u-boot startup messages.
+ 
++4. Note that after downloading flash image using UART recovery it is still required
++   to burn the image on the target board boot device, since serial image boot uses
++   binary loaded to the target DRAM.
+ 
+ UART boot for Armada-3700 platform
+ ----------------------------------
+-- 
+2.22.0
+

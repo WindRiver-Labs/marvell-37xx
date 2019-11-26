@@ -1,0 +1,45 @@
+From 1fd242ce8371a824196f540ae34cdfb1861237d4 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Sun, 25 Nov 2018 21:39:37 +0100
+Subject: [PATCH 0915/1200] i2c: mv_i2c: implement handler required by "i2c
+ reset" cmd
+
+After this change the "i2c reset" command can be used which will allow
+to re-initialize I2C Controller.
+
+Change-Id: I3c5ff8a846513c1d06efd6f0f4bd9d7822d3e7ea
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/61317
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Marcin Wojtas <mw@semihalf.com>
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+---
+ drivers/i2c/mv_i2c.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/drivers/i2c/mv_i2c.c b/drivers/i2c/mv_i2c.c
+index bb1e4fce53..cb0efa14d0 100644
+--- a/drivers/i2c/mv_i2c.c
++++ b/drivers/i2c/mv_i2c.c
+@@ -586,9 +586,18 @@ static int mv_i2c_probe(struct udevice *bus)
+ 	return 0;
+ }
+ 
++static int mv_i2c_reset(struct udevice *bus)
++{
++	struct mv_i2c_priv *priv = dev_get_priv(bus);
++
++	i2c_reset(priv->base);
++	return 0;
++}
++
+ static const struct dm_i2c_ops mv_i2c_ops = {
+ 	.xfer		= mv_i2c_xfer,
+ 	.set_bus_speed	= mv_i2c_set_bus_speed,
++	.deblock	= mv_i2c_reset,
+ };
+ 
+ static const struct udevice_id mv_i2c_ids[] = {
+-- 
+2.22.0
+

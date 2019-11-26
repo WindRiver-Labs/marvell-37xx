@@ -1,0 +1,41 @@
+From 88b002068935b73e62d96f1f3deb74f3ebb12aa9 Mon Sep 17 00:00:00 2001
+From: David Sniatkiwicz <davidsn@marvell.com>
+Date: Tue, 26 Jun 2018 15:31:33 +0300
+Subject: [PATCH 0766/1200] Revert "gpio: pca953x_gpio: Make live-tree
+ compatible"
+
+This reverts commit f62ca2cd2ab8171f603960da9203ceb6ee8a1efd.
+
+Change-Id: I2e7893a2b4e32b0f2ad24ffe4275b2a9c3b2904c
+Reviewed-on: http://vgitil04.il.marvell.com:8080/57357
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ drivers/gpio/pca953x_gpio.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/gpio/pca953x_gpio.c b/drivers/gpio/pca953x_gpio.c
+index 08742f90c6..6d15f36aa0 100644
+--- a/drivers/gpio/pca953x_gpio.c
++++ b/drivers/gpio/pca953x_gpio.c
+@@ -50,6 +50,8 @@ enum {
+ #define MAX_BANK 5
+ #define BANK_SZ 8
+ 
++DECLARE_GLOBAL_DATA_PTR;
++
+ /*
+  * struct pca953x_info - Data for pca953x
+  *
+@@ -253,7 +255,7 @@ static int pca953x_probe(struct udevice *dev)
+ 	int size;
+ 	const u8 *tmp;
+ 
+-	addr = dev_read_addr(dev);
++	addr = fdtdec_get_int(gd->fdt_blob, dev_of_offset(dev), "reg", 0);
+ 	if (addr == 0)
+ 		return -ENODEV;
+ 
+-- 
+2.22.0
+

@@ -1,0 +1,27 @@
+From d62ce7fd2916c2b1ba796298f731f57be5fa4b78 Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Sat, 14 May 2016 17:36:31 -0400
+Subject: [PATCH 0164/1200] pci: Add Cavium Vendor ID
+
+Some driver are alraedy using it and all future drivers will use
+this Vendor ID
+
+Signed-off-by: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+---
+ include/pci_ids.h | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/include/pci_ids.h b/include/pci_ids.h
+index fdda679cc0..bdf56ea408 100644
+--- a/include/pci_ids.h
++++ b/include/pci_ids.h
+@@ -3129,3 +3129,6 @@
+ #define PCI_DEVICE_ID_XEN_PLATFORM	0x0001
+ 
+ #define PCI_VENDOR_ID_OCZ		0x1b85
++
++#define PCI_VENDOR_ID_CAVIUM		0x177d
++
+-- 
+2.22.0
+

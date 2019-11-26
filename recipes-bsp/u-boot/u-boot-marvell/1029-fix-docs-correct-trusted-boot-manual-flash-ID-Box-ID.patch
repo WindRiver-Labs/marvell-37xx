@@ -1,0 +1,32 @@
+From 54e26b5924b41e17694e733c9a559a9130ebaf03 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Wed, 6 Feb 2019 13:59:58 +0200
+Subject: [PATCH 1029/1200] fix: docs: correct trusted boot manual flash ID ->
+ Box ID
+
+Change-Id: Iaa2081b7d31311c280950853d2cdb07840daa628
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/3579
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Nadav Haklai <Nadav.Haklai@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ doc/mvebu/trusted_boot.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/doc/mvebu/trusted_boot.txt b/doc/mvebu/trusted_boot.txt
+index 15338c4fe5..ef63610f7c 100644
+--- a/doc/mvebu/trusted_boot.txt
++++ b/doc/mvebu/trusted_boot.txt
+@@ -275,7 +275,7 @@ A8K platforms
+ 	/* prog flash ID to efuse row 30 */
+ 	fuse prog -y 30 0 0xbaddf00d 0x00000000 0x1
+ 
+-	/* prog flash ID to efuse row 31 */
++	/* prog Box ID to efuse row 31 */
+ 	fuse prog -y 31 0 0xdeadbeef 0x00000000 0x1
+ 
+ 	/* LD efuse rows(256bits width) programming */
+-- 
+2.22.0
+

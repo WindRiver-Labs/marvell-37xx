@@ -1,0 +1,70 @@
+From 8d01544c95b9576fe045eee5d12518dad06fe60d Mon Sep 17 00:00:00 2001
+From: Aaron Williams <aaron.williams@cavium.com>
+Date: Thu, 21 Sep 2017 15:52:22 -0700
+Subject: [PATCH 0464/1200] Allow DHCP server to specify tftp server address
+
+This patch adds support so that the DHCP server can specify the IP
+address of a TFTP server to load images from by using option 150 as
+specified in RFC5859.
+
+Signed-off-by: Aaron Williams <aaron.williams@cavium.com>
+---
+ README      | 7 +++++++
+ net/bootp.c | 9 +++++++++
+ 2 files changed, 16 insertions(+)
+
+diff --git a/README b/README
+index 5cf90a482a..549c4adbf0 100644
+--- a/README
++++ b/README
+@@ -1531,6 +1531,7 @@ The following options need to be configured:
+ 		CONFIG_BOOTP_BOOTFILESIZE
+ 		CONFIG_BOOTP_SEND_HOSTNAME
+ 		CONFIG_BOOTP_NTPSERVER
++		CONFIG_BOOTP_TFTP_SERVERIP
+ 		CONFIG_BOOTP_TIMEOFFSET
+ 		CONFIG_BOOTP_VENDOREX
+ 		CONFIG_BOOTP_MAY_FAIL
+@@ -1551,6 +1552,12 @@ The following options need to be configured:
+ 		of the "hostname" environment variable is passed as
+ 		option 12 to the DHCP server.
+ 
++		CONFIG_BOOTP_TFTP_SERVERIP - Some DHCP servers can send
++		the IP address of the TFTP server.  By setting this,
++		the DHCP client will automatically set the serverip
++		based on the response from the DHCP server via option
++		150.
++
+ 		CONFIG_BOOTP_DHCP_REQUEST_DELAY
+ 
+ 		A 32bit value in microseconds for a delay between
+diff --git a/net/bootp.c b/net/bootp.c
+index efa959971c..04191f966d 100644
+--- a/net/bootp.c
++++ b/net/bootp.c
+@@ -588,6 +588,10 @@ static int dhcp_extended(u8 *e, int message_type, struct in_addr server_ip,
+ #if defined(CONFIG_BOOTP_NTPSERVER)
+ 	*e++  = 42;
+ 	*cnt += 1;
++#endif
++#if defined(CONFIG_BOOTP_TFTP_SERVERIP)
++	*e++ = 150;
++	*cnt += 1;
+ #endif
+ 	/* no options, so back up to avoid sending an empty request list */
+ 	if (*cnt == 0)
+@@ -894,6 +898,11 @@ static void dhcp_process_options(uchar *popt, uchar *end)
+ 			memcpy(&net_boot_file_name, popt + 2, size);
+ 			net_boot_file_name[size] = 0;
+ 			break;
++#if defined(CONFIG_BOOTP_TFTP_SERVERIP)
++		case 150:
++			net_copy_ip(&net_server_ip, (u32 *)(popt + 2));
++			break;
++#endif
+ 		default:
+ #if defined(CONFIG_BOOTP_VENDOREX)
+ 			if (dhcp_vendorex_proc(popt))
+-- 
+2.22.0
+

@@ -1,0 +1,232 @@
+From bd520761481f1c1a4d905cb5a61d9055212b701c Mon Sep 17 00:00:00 2001
+From: Cyrille Pitchen <cyrille.pitchen@atmel.com>
+Date: Tue, 25 Jul 2017 15:01:00 +0800
+Subject: [PATCH 0443/1200] sf: add new option to support SPI flash above 16MiB
+
+The patch provides an alternative method to support SPI flash size greater
+than 16MiB (128Mib).
+
+Indeed using the Base Address Register (BAR) is stateful. Hence, once the
+BAR has been modified, if a spurious CPU reset occurs with no reset/power
+off at the SPI flash side, early boot loarders may try to read from offset
+0 but fails because of the new BAR value.
+
+On the other hand, using the 4-byte address instruction set is stateless.
+When supported by the SPI flash memory, it allows us to access memory data
+area above 16MiB without changing the internal state of this SPI flash
+memory. Then if a spirious reboot occurs, early boot loaders can still
+access data from offset 0.
+
+Signed-off-by: Cyrille Pitchen <cyrille.pitchen@atmel.com>
+Signed-off-by: Wenyou Yang <wenyou.yang@microchip.com>
+---
+ drivers/mtd/spi/Kconfig       | 16 +++++-
+ drivers/mtd/spi/sf_internal.h | 18 +++++++
+ drivers/mtd/spi/spi_flash.c   | 92 ++++++++++++++++++++++++++++++++---
+ 3 files changed, 119 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/mtd/spi/Kconfig b/drivers/mtd/spi/Kconfig
+index 6ba255d676..c7c1562603 100644
+--- a/drivers/mtd/spi/Kconfig
++++ b/drivers/mtd/spi/Kconfig
+@@ -34,14 +34,28 @@ config SPI_FLASH
+ 
+ 	  If unsure, say N
+ 
++choice
++	prompt "Support SPI flash above 16MiB"
++	depends on SPI_FLASH
++	optional
++
+ config SPI_FLASH_BAR
+ 	bool "SPI flash Bank/Extended address register support"
+-	depends on SPI_FLASH
+ 	help
+ 	  Enable the SPI flash Bank/Extended address register support.
+ 	  Bank/Extended address registers are used to access the flash
+ 	  which has size > 16MiB in 3-byte addressing.
+ 
++config SPI_FLASH_4BAIS
++	bool "SPI flash 4-byte address instruction set support"
++	help
++	  Convert the selected 3-byte address op codes into their associated
++	  4-byte address op codes. Using this instruction set does not change
++	  the internal state of the SPI flash device.
++
++endchoice
++
++
+ config SF_DUAL_FLASH
+ 	bool "SPI DUAL flash memory support"
+ 	depends on SPI_FLASH
+diff --git a/drivers/mtd/spi/sf_internal.h b/drivers/mtd/spi/sf_internal.h
+index 8b8c951bcc..30994f9f46 100644
+--- a/drivers/mtd/spi/sf_internal.h
++++ b/drivers/mtd/spi/sf_internal.h
+@@ -27,6 +27,7 @@ enum spi_nor_option_flags {
+ };
+ 
+ #define SPI_FLASH_3B_ADDR_LEN		3
++#define SPI_FLASH_4B_ADDR_LEN		4
+ #define SPI_FLASH_CMD_LEN		(1 + SPI_FLASH_3B_ADDR_LEN + 16)
+ #define SPI_FLASH_16MB_BOUN		0x1000000
+ 
+@@ -64,6 +65,19 @@ enum spi_nor_option_flags {
+ #define CMD_READ_CONFIG			0x35
+ #define CMD_FLAG_STATUS			0x70
+ 
++/* 4-byte address instruction set */
++#define CMD_READ_ARRAY_SLOW_4B		0x13
++#define CMD_READ_ARRAY_FAST_4B		0x0c
++#define CMD_READ_DUAL_OUTPUT_FAST_4B	0x3c
++#define CMD_READ_DUAL_IO_FAST_4B	0xbc
++#define CMD_READ_QUAD_OUTPUT_FAST_4B	0x6c
++#define CMD_READ_QUAD_IO_FAST_4B	0xec
++#define CMD_PAGE_PROGRAM_4B		0x12
++#define CMD_PAGE_PROGRAM_1_1_4_4B	0x34
++#define CMD_PAGE_PROGRAM_1_4_4_4B	0x3e
++#define CMD_ERASE_4K_4B			0x21
++#define CMD_ERASE_64K_4B		0xdc
++
+ /* Bank addr access commands */
+ #ifdef CONFIG_SPI_FLASH_BAR
+ # define CMD_BANKADDR_BRWR		0x17
+@@ -133,6 +147,10 @@ struct spi_flash_info {
+ #define RD_QUADIO		BIT(6)	/* use Quad IO Read */
+ #define RD_DUALIO		BIT(7)	/* use Dual IO Read */
+ #define RD_FULL			(RD_QUAD | RD_DUAL | RD_QUADIO | RD_DUALIO)
++#define NO_4BAIS		BIT(8)	/*
++					 * 4-byte address instruction set
++					 * NOT supported
++					 */
+ };
+ 
+ extern const struct spi_flash_info spi_flash_ids[];
+diff --git a/drivers/mtd/spi/spi_flash.c b/drivers/mtd/spi/spi_flash.c
+index a30c3eeb6b..57d4d1d45c 100644
+--- a/drivers/mtd/spi/spi_flash.c
++++ b/drivers/mtd/spi/spi_flash.c
+@@ -197,6 +197,67 @@ bar_end:
+ }
+ #endif
+ 
++#ifdef CONFIG_SPI_FLASH_4BAIS
++static u8 spi_flash_convert_opcode(u8 opcode, const u8 table[][2], size_t size)
++{
++	size_t i;
++
++	for (i = 0; i < size; i++)
++		if (table[i][0] == opcode)
++			return table[i][1];
++
++	/* No conversion found, keep input op code. */
++	return opcode;
++}
++
++static u8 spi_flash_convert_3to4_read(u8 opcode)
++{
++	static const u8 spi_flash_3to4_read[][2] = {
++		{CMD_READ_ARRAY_SLOW,		CMD_READ_ARRAY_SLOW_4B},
++		{CMD_READ_ARRAY_FAST,		CMD_READ_ARRAY_FAST_4B},
++		{CMD_READ_DUAL_OUTPUT_FAST,	CMD_READ_DUAL_OUTPUT_FAST_4B},
++		{CMD_READ_DUAL_IO_FAST,		CMD_READ_DUAL_IO_FAST_4B},
++		{CMD_READ_QUAD_OUTPUT_FAST,	CMD_READ_QUAD_OUTPUT_FAST_4B},
++		{CMD_READ_QUAD_IO_FAST,		CMD_READ_QUAD_IO_FAST_4B},
++	};
++
++	return spi_flash_convert_opcode(opcode, spi_flash_3to4_read,
++					ARRAY_SIZE(spi_flash_3to4_read));
++}
++
++static u8 spi_flash_convert_3to4_write(u8 opcode)
++{
++	static const u8 spi_flash_3to4_write[][2] = {
++		{CMD_PAGE_PROGRAM,		CMD_PAGE_PROGRAM_4B},
++		{CMD_PAGE_PROGRAM_1_1_4,	CMD_PAGE_PROGRAM_1_1_4_4B},
++		{CMD_PAGE_PROGRAM_1_4_4,	CMD_PAGE_PROGRAM_1_4_4_4B},
++	};
++
++	return spi_flash_convert_opcode(opcode, spi_flash_3to4_write,
++					ARRAY_SIZE(spi_flash_3to4_write));
++}
++
++static u8 spi_flash_convert_3to4_erase(u8 opcode)
++{
++	static const u8 spi_flash_3to4_erase[][2] = {
++		{CMD_ERASE_4K,	CMD_ERASE_4K_4B},
++		{CMD_ERASE_64K,	CMD_ERASE_64K_4B},
++	};
++
++	return spi_flash_convert_opcode(opcode, spi_flash_3to4_erase,
++					ARRAY_SIZE(spi_flash_3to4_erase));
++}
++
++static void spi_flash_set_4byte_addr_opcodes(struct spi_flash *flash,
++					     const struct spi_flash_info *info)
++{
++	flash->read_cmd = spi_flash_convert_3to4_read(flash->read_cmd);
++	flash->write_cmd = spi_flash_convert_3to4_write(flash->write_cmd);
++	flash->erase_cmd = spi_flash_convert_3to4_erase(flash->erase_cmd);
++	flash->addr_len = SPI_FLASH_4B_ADDR_LEN;
++}
++#endif
++
+ #ifdef CONFIG_SF_DUAL_FLASH
+ static void spi_flash_dual(struct spi_flash *flash, u32 *addr)
+ {
+@@ -1001,6 +1062,7 @@ int spi_flash_scan(struct spi_flash *flash)
+ {
+ 	struct spi_slave *spi = flash->spi;
+ 	const struct spi_flash_info *info = NULL;
++	bool above_16MB;
+ 	int ret;
+ 
+ 	info = spi_flash_read_id(flash);
+@@ -1155,6 +1217,26 @@ int spi_flash_scan(struct spi_flash *flash)
+ 	/* Set the address length */
+ 	flash->addr_len = SPI_FLASH_3B_ADDR_LEN;
+ 
++	above_16MB = ((flash->dual_flash == SF_SINGLE_FLASH) &&
++		      (flash->size > SPI_FLASH_16MB_BOUN)) ||
++		     ((flash->dual_flash > SF_SINGLE_FLASH) &&
++		      (flash->size > SPI_FLASH_16MB_BOUN << 1));
++
++	/*
++	 * replace the selected 3-byte address op codes with the associated
++	 * 4-byte address op codes, if needed (flash->size > 16 MiB)
++	 */
++#ifdef CONFIG_SPI_FLASH_4BAIS
++	if (above_16MB) {
++		if (info->flags & NO_4BAIS) {
++			puts("SF: Warning - Only lower 16MiB accessible,");
++			puts(" 4-byte address instruction set not supported\n");
++		} else {
++			spi_flash_set_4byte_addr_opcodes(flash, info);
++		}
++	}
++#endif
++
+ 	/* Configure the BAR - discover bank cmds and read current bank */
+ #ifdef CONFIG_SPI_FLASH_BAR
+ 	ret = read_bar(flash, info);
+@@ -1180,13 +1262,11 @@ int spi_flash_scan(struct spi_flash *flash)
+ 	puts("\n");
+ #endif
+ 
+-#ifndef CONFIG_SPI_FLASH_BAR
+-	if (((flash->dual_flash == SF_SINGLE_FLASH) &&
+-	     (flash->size > SPI_FLASH_16MB_BOUN)) ||
+-	     ((flash->dual_flash > SF_SINGLE_FLASH) &&
+-	     (flash->size > SPI_FLASH_16MB_BOUN << 1))) {
++#if !defined(CONFIG_SPI_FLASH_BAR) && !defined(CONFIG_SPI_FLASH_4BAIS)
++	if (above_16MB) {
+ 		puts("SF: Warning - Only lower 16MiB accessible,");
+-		puts(" Full access #define CONFIG_SPI_FLASH_BAR\n");
++		puts(" Full access #define CONFIG_SPI_FLASH_BAR");
++		puts(" or CONFIG_SPI_FLASH_4BAIS\n");
+ 	}
+ #endif
+ 
+-- 
+2.22.0
+

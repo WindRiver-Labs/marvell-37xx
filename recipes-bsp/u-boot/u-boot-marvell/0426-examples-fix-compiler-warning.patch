@@ -1,0 +1,26 @@
+From f0faa93b8358e9b14965f2dca4e954086bc9eb3a Mon Sep 17 00:00:00 2001
+From: Suneel Garapati <sgarapati@caviumnetworks.com>
+Date: Wed, 2 Aug 2017 15:58:48 -0700
+Subject: [PATCH 0426/1200] examples: fix compiler warning
+
+Signed-off-by: Suneel Garapati <sgarapati@caviumnetworks.com>
+---
+ examples/standalone/stubs.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/examples/standalone/stubs.c b/examples/standalone/stubs.c
+index 7dee57e48c..854cc86ccd 100644
+--- a/examples/standalone/stubs.c
++++ b/examples/standalone/stubs.c
+@@ -292,8 +292,6 @@ const char message[] = "stack-protector: U-Boot stack is corrupted\n";
+ 
+ void __stack_chk_fail(void)
+ {
+-	int i;
+-
+ 	puts(message);
+ }
+ 
+-- 
+2.22.0
+

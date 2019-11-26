@@ -1,0 +1,42 @@
+From 83b3356c45c2d81db8716d9c11bb3f349d8c5dcc Mon Sep 17 00:00:00 2001
+From: David Sniatkiwicz <davidsn@marvell.com>
+Date: Sun, 12 Mar 2017 13:10:44 +0200
+Subject: [PATCH 0626/1200] ata: ahci_mvebu: a8040 a0: remove bad port register
+ offsets workarounds
+
+This workaround was added for A8040/7040 A0.
+A8040/7040 A0 is no longer supported so this workaround
+can be removed.
+
+Change-Id: I6c617e1ef3cde3ac76a680714617a2d894285a33
+Signed-off-by: David Sniatkiwicz <davidsn@marvell.com>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/53604
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ drivers/ata/ahci_mvebu.c | 8 --------
+ 1 file changed, 8 deletions(-)
+
+diff --git a/drivers/ata/ahci_mvebu.c b/drivers/ata/ahci_mvebu.c
+index 73af5670be..f4bfba0d98 100644
+--- a/drivers/ata/ahci_mvebu.c
++++ b/drivers/ata/ahci_mvebu.c
+@@ -17,14 +17,6 @@ __weak int board_ahci_enable(void)
+ 	return 0;
+ }
+ 
+-#ifdef CONFIG_ARMADA_8K
+-/* CP110 has different AHCI port addresses */
+-void __iomem *ahci_port_base(void __iomem *base, u32 port)
+-{
+-	return base + 0x10000 + (port * 0x10000);
+-}
+-#endif
+-
+ static int mvebu_ahci_probe(struct udevice *dev)
+ {
+ 	/*
+-- 
+2.22.0
+

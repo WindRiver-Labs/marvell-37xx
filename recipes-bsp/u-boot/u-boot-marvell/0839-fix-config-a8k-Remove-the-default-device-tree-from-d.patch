@@ -1,0 +1,38 @@
+From 1fad5168f2cb24a6912a93c395d2cc80faad3585 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Thu, 9 Aug 2018 15:45:43 +0300
+Subject: [PATCH 0839/1200] fix: config: a8k: Remove the default device tree
+ from defconfig
+
+Remove the default device tree assignment from the default
+configuration for Armada 8K family.
+This configuration is shared across A8K platform boards and
+the device tree name must be expluicitly specified in make
+command using DEVICE_TREE= string.
+Otherwise there is a high probability of building a wrong
+image for a specific board and cause its boot failure.
+
+Change-Id: I02d15c77f72b710319f6d461253205890e1ced50
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/58920
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ configs/mvebu_db_armada8k_defconfig | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/configs/mvebu_db_armada8k_defconfig b/configs/mvebu_db_armada8k_defconfig
+index a105cee1a6..31e3339b0f 100644
+--- a/configs/mvebu_db_armada8k_defconfig
++++ b/configs/mvebu_db_armada8k_defconfig
+@@ -4,7 +4,6 @@ CONFIG_SYS_TEXT_BASE=0x00000000
+ CONFIG_SYS_MALLOC_F_LEN=0x2000
+ CONFIG_TARGET_MVEBU_ARMADA_8K=y
+ CONFIG_MVEBU_SAR=y
+-CONFIG_DEFAULT_DEVICE_TREE="armada-8040-db"
+ CONFIG_SMBIOS_PRODUCT_NAME=""
+ CONFIG_DEBUG_UART=y
+ CONFIG_AHCI=y
+-- 
+2.22.0
+

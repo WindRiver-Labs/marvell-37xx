@@ -1,0 +1,41 @@
+From 35aed2328538847c04b3468c52b2ea592923fe06 Mon Sep 17 00:00:00 2001
+From: Christine Gharzuzi <chrisg@marvell.com>
+Date: Wed, 10 May 2017 12:26:28 +0300
+Subject: [PATCH 0761/1200] boot_log: a8k: add clock info prints
+
+- This patch override print_cpuinfo to print clock info
+  during boot.
+
+Change-Id: Ia4d4d8571b6aac29e32d3c17f4c7fd6289af8257
+Signed-off-by: Christine Gharzuzi <chrisg@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/39282
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/57180
+---
+ arch/arm/mach-mvebu/armada8k/cpu.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm/mach-mvebu/armada8k/cpu.c b/arch/arm/mach-mvebu/armada8k/cpu.c
+index 782cf7ec59..31f156e83a 100644
+--- a/arch/arm/mach-mvebu/armada8k/cpu.c
++++ b/arch/arm/mach-mvebu/armada8k/cpu.c
+@@ -14,6 +14,7 @@
+ #include <linux/sizes.h>
+ #include <asm/arch/soc.h>
+ #include <asm/armv8/mmu.h>
++#include <mach/clock.h>
+ #include <mach/soc.h>
+ 
+ DECLARE_GLOBAL_DATA_PTR;
+@@ -138,6 +139,7 @@ u32 mvebu_get_nand_clock(void)
+ int print_cpuinfo(void)
+ {
+ 	soc_print_device_info();
++	soc_print_clock_info();
+ 	return 0;
+ }
+ #endif
+-- 
+2.22.0
+

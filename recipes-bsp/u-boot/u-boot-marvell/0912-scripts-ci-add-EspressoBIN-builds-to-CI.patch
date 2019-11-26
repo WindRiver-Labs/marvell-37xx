@@ -1,0 +1,53 @@
+From 6d0ba37fd8ca51aec833291cb3725067665b7cd7 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Mon, 26 Nov 2018 10:39:24 +0200
+Subject: [PATCH 0912/1200] scripts: ci: add EspressoBIN builds to CI
+
+Add builds for EspressoBIN v7 (DDR4) 1GB/2GB with and witout eMMC
+
+Change-Id: I1c41342414a4000bfa76b2faaac6e8f23566b1f8
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/61297
+Reviewed-by: Lior Levin <levin@marvell.com>
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+---
+ scripts/ci/compile.sh           | 9 ++++++++-
+ scripts/ci/supported_builds.txt | 4 ++++
+ 2 files changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index 523e76b827..64bf0634f1 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -132,7 +132,14 @@ case $build_name in
+ 		device_tree="armada-3720-ddr4-db-v3-B"; ;;
+ 	uboot_2018_a37xx_espressobin_ddr3_* )
+ 		device_tree="armada-3720-espressobin"; ;;
+-
++	uboot_2018_a37xx_espressobin_ddr4_v7_1G_emmc* )
++		device_tree="armada-3720-espressobin-emmc"; ;;
++	uboot_2018_a37xx_espressobin_ddr4_v7_2G_emmc* )
++		device_tree="armada-3720-espressobin-emmc"; ;;
++	uboot_2018_a37xx_espressobin_ddr4_v7_1G* )
++		device_tree="armada-3720-espressobin"; ;;
++	uboot_2018_a37xx_espressobin_ddr4_v7_2G* )
++		device_tree="armada-3720-espressobin"; ;;
+ 	* ) echo "Error: Could not configure device_tree." \
+ 		" Unsupported build ${build_name}"; exit -1;	;;
+ esac
+diff --git a/scripts/ci/supported_builds.txt b/scripts/ci/supported_builds.txt
+index b47a6a9539..433f52850a 100644
+--- a/scripts/ci/supported_builds.txt
++++ b/scripts/ci/supported_builds.txt
+@@ -49,4 +49,8 @@ uboot_2018_a37xx_ddr4_v3_A_800_800
+ uboot_2018_a37xx_ddr4_v3_B_800_800
+ uboot_2018_a37xx_espressobin_ddr3_1cs_1000_800
+ uboot_2018_a37xx_espressobin_ddr3_2cs_1000_800
++uboot_2018_a37xx_espressobin_ddr4_v7_1G_1000_800
++uboot_2018_a37xx_espressobin_ddr4_v7_2G_1000_800
++uboot_2018_a37xx_espressobin_ddr4_v7_1G_emmc_1000_800
++uboot_2018_a37xx_espressobin_ddr4_v7_2G_emmc_1000_800
+ uboot_2018_freertos_a37xx_ddr3_v2_A_1000_800
+-- 
+2.22.0
+

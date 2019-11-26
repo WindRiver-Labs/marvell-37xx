@@ -1,0 +1,69 @@
+From dea0f8747498d5e4fb0b248895e03f011360cc0e Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Wed, 5 Jun 2019 11:28:08 +0200
+Subject: [PATCH 1167/1200] arm64: dts: cn913x: remove redundant undefs -
+ cosmetic change
+
+Change-Id: Id257ce46500f56dfaa9b5b8fc2cd5e82fd54a453
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/10504
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/cn9130.dtsi    |  7 -------
+ arch/arm/dts/cn9131-db.dtsi | 14 +++++++-------
+ 2 files changed, 7 insertions(+), 14 deletions(-)
+
+diff --git a/arch/arm/dts/cn9130.dtsi b/arch/arm/dts/cn9130.dtsi
+index 3ff60085f9..9c3a5891c9 100644
+--- a/arch/arm/dts/cn9130.dtsi
++++ b/arch/arm/dts/cn9130.dtsi
+@@ -35,13 +35,6 @@
+ 
+ #include "armada-cp110.dtsi"
+ 
+-#undef CP110_NAME
+-#undef CP110_NUM
+-#undef CP110_PCIEx_CPU_IO_BASE
+-#undef CP110_PCIEx_CPU_MEM_BASE
+-#undef CP110_PCIEx_BUS_IO_BASE
+-#undef CP110_PCIEx_BUS_MEM_BASE
+-
+ / {
+ 	model = "Marvell CN 9030";
+ 	compatible = "marvell,armada70x0", "marvell,armada-ap806-quad",
+diff --git a/arch/arm/dts/cn9131-db.dtsi b/arch/arm/dts/cn9131-db.dtsi
+index e237130e1a..f5c460f752 100644
+--- a/arch/arm/dts/cn9131-db.dtsi
++++ b/arch/arm/dts/cn9131-db.dtsi
+@@ -5,6 +5,13 @@
+  * https://spdx.org/licenses
+  */
+ 
++#undef CP110_NAME
++#undef CP110_NUM
++#undef CP110_PCIEx_CPU_IO_BASE
++#undef CP110_PCIEx_CPU_MEM_BASE
++#undef CP110_PCIEx_BUS_IO_BASE
++#undef CP110_PCIEx_BUS_MEM_BASE
++
+ /* CP110-1 Settings */
+ #define CP110_NAME			cp1
+ #define CP110_NUM			1
+@@ -15,13 +22,6 @@
+ 
+ #include "armada-cp110.dtsi"
+ 
+-#undef CP110_NAME
+-#undef CP110_NUM
+-#undef CP110_PCIEx_CPU_IO_BASE
+-#undef CP110_PCIEx_CPU_MEM_BASE
+-#undef CP110_PCIEx_BUS_IO_BASE
+-#undef CP110_PCIEx_BUS_MEM_BASE
+-
+ / {
+ 	model = "Marvell CN9131 development board";
+ 	compatible = "marvell,cn9131-db";
+-- 
+2.22.0
+

@@ -1,0 +1,55 @@
+From 152b5f76b0d1fa46b14203de0fe7aed55e03bbb4 Mon Sep 17 00:00:00 2001
+From: allen yan <yanwei@marvell.com>
+Date: Wed, 5 Apr 2017 10:24:46 +0800
+Subject: [PATCH 0710/1200] dts: a3700: Add VBUS regulator supply to USB3
+
+- The USB device should linked to VBUS regulator through
+  "vbus-supply" DTS property.
+- This patch adds the "fixed-regulator" node for the USB VBUS
+  regulator.
+- This patch adds handling for "vbus-supply" property inside
+  the USB3 node in armada-3720-db.dts for turning on/off the
+  VBUS regulator.
+
+Change-Id: I960912b69c134efb1d9738077e7fc618aabb41e8
+Signed-off-by: allen yan <yanwei@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/38484
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55110
+Tested-by: Hua Jing <jinghua@marvell.com>
+---
+ arch/arm/dts/armada-3720-db.dts | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/arch/arm/dts/armada-3720-db.dts b/arch/arm/dts/armada-3720-db.dts
+index c1e0c1d752..814dc49dae 100644
+--- a/arch/arm/dts/armada-3720-db.dts
++++ b/arch/arm/dts/armada-3720-db.dts
+@@ -66,6 +66,15 @@
+ 		device_type = "memory";
+ 		reg = <0x00000000 0x00000000 0x00000000 0x20000000>;
+ 	};
++
++	reg_usb3_vbus: usb3_vbus@0 {
++		compatible = "regulator-fixed";
++		regulator-name = "usb3-vbus";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		shutdown-delay-us = <1000000>;
++		gpio = <&expander0 1 GPIO_ACTIVE_HIGH>;
++	};
+ };
+ 
+ &comphy {
+@@ -162,6 +171,7 @@
+ 
+ /* CON31 */
+ &usb3 {
++	vbus-supply = <&reg_usb3_vbus>;
+ 	status = "okay";
+ };
+ 
+-- 
+2.22.0
+

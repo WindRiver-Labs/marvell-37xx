@@ -1,0 +1,26 @@
+From 3dd47413ea9be448ca6c36aa8e46d1f49bac9d44 Mon Sep 17 00:00:00 2001
+From: Radha Mohan Chintakuntla <rchintakuntla@cavium.com>
+Date: Thu, 3 Nov 2016 19:10:02 -0700
+Subject: [PATCH 0269/1200] config: 83xx: Max AHCI SATA ports are 6
+
+Signed-off-by: Radha Mohan Chintakuntla <rchintakuntla@cavium.com>
+---
+ include/configs/thunderx_83xx.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/thunderx_83xx.h b/include/configs/thunderx_83xx.h
+index f4029be107..e6e12d3299 100644
+--- a/include/configs/thunderx_83xx.h
++++ b/include/configs/thunderx_83xx.h
+@@ -247,7 +247,7 @@
+ /** Enable AHCI SATA driver */
+ # define CONFIG_SATA_AHCI
+ /** Maximum number of SATA devices */
+-# define CONFIG_SYS_SATA_MAX_DEVICE	2
++# define CONFIG_SYS_SATA_MAX_DEVICE	6
+ /** Enable 48-bit SATA addressing */
+ # define CONFIG_LBA48
+ /** Enable libata, required for SATA */
+-- 
+2.22.0
+

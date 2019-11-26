@@ -1,0 +1,44 @@
+From 69bc92fa62a7883bf76878e60fa47c84b9b7f2cd Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Wed, 3 Apr 2019 17:49:39 +0300
+Subject: [PATCH 1085/1200] drivers/spi/kirkwood: Better notification about
+ direct access
+
+Break the following message into 2 rows:
+Loading Environment from SPI Flash... Bus spi@700680 CS0 \
+configured for direct access 00000000f9000000:0x1000000
+
+Change-Id: I2e174116a3edff2348d1f80da09a2750cb66e165
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/6920
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Tested-by: sa_ip-sw-jenkins
+---
+ drivers/spi/kirkwood_spi.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/spi/kirkwood_spi.c b/drivers/spi/kirkwood_spi.c
+index 210ff86381..e5a4ef816f 100644
+--- a/drivers/spi/kirkwood_spi.c
++++ b/drivers/spi/kirkwood_spi.c
+@@ -500,14 +500,14 @@ static int mvebu_spi_ofdata_to_platdata(struct udevice *bus)
+ 		 */
+ 		direct_addr = devfdt_get_addr_size_index(bus, cs + 1, &size);
+ 		if (direct_addr == FDT_ADDR_T_NONE) {
+-			printf("Bus %s CS%d address is not set correct.\n",
++			printf("\nBus %s CS%d address is not set correct.\n",
+ 			       bus->name, cs);
+ 			plat->direct_access[cs].addr = NULL;
+ 			continue;
+ 		}
+ 		plat->direct_access[cs].addr = (void *)direct_addr;
+ 		plat->direct_access[cs].size = size;
+-		printf("Bus %s CS%d configured for direct access %p:0x%x\n",
++		printf("\nBus %s CS%d configured for direct access %p:0x%x\n",
+ 		       bus->name, cs,
+ 		       plat->direct_access[cs].addr,
+ 		       plat->direct_access[cs].size);
+-- 
+2.22.0
+

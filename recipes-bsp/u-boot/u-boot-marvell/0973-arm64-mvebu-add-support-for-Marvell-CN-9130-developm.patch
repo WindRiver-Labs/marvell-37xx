@@ -1,0 +1,483 @@
+From 7418fc7894db600886b3c5fa2c52a2bf523b9883 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Mon, 10 Dec 2018 13:00:43 +0100
+Subject: [PATCH 0973/1200] arm64: mvebu: add support for Marvell CN 9130
+ development board
+
+This patch adds basic support for the Marvell CN-9130 Modular
+development board. It is based on cn9130 SoC built from one AP-807 and
+one CP-115, which is extended via 2xMoCi interface about additional
+2xCP-115 (one located on main board and other on board extension).
+This setups describes only interfaces related to CP0.
+
+Some of the interfaces found on the board related to CP0:
+- UART
+- eMMC
+- I2C
+- SDHCI
+- NAND
+- SPI NOR
+- Ethernet (RGMII, SFI)
+- PCIex4
+- SATA
+
+Change-Id: If79e0df4c055b9ad210cc478cd6001fd3a2a6220
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/62413
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Nadav Haklai <nadavh@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/1877
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/Makefile        |   3 +-
+ arch/arm/dts/cn9130-db-A.dts | 219 +++++++++++++++++++++++++++++++++++
+ arch/arm/dts/cn9130-db.dtsi  | 108 +++++++++++++++++
+ arch/arm/dts/cn9130.dtsi     |  80 +++++++++++++
+ 4 files changed, 409 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm/dts/cn9130-db-A.dts
+ create mode 100644 arch/arm/dts/cn9130-db.dtsi
+ create mode 100644 arch/arm/dts/cn9130.dtsi
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index b085acbe19..515e87e9b2 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -129,7 +129,8 @@ dtb-$(CONFIG_ARCH_MVEBU) +=			\
+ 	armada-xp-theadorable.dtb		\
+ 	armada-38x-controlcenterdc.dtb		\
+ 	cn9030-vd-A.dtb				\
+-	cn9030-vd-B.dtb
++	cn9030-vd-B.dtb				\
++	cn9130-db-A.dtb
+ 
+ dtb-$(CONFIG_ARCH_UNIPHIER_LD11) += \
+ 	uniphier-ld11-global.dtb \
+diff --git a/arch/arm/dts/cn9130-db-A.dts b/arch/arm/dts/cn9130-db-A.dts
+new file mode 100644
+index 0000000000..aac7cd09aa
+--- /dev/null
++++ b/arch/arm/dts/cn9130-db-A.dts
+@@ -0,0 +1,219 @@
++/*
++ * Copyright (C) 2018 Marvell International Ltd.
++ *
++ * SPDX-License-Identifier:    GPL-2.0
++ * https://spdx.org/licenses
++ */
++
++#include "cn9130-db.dtsi"
++
++/ {
++	model = "Model: Marvell CN9130 development board (CP NOR) setup(A)";
++	compatible = "marvell,cn9130-db", "marvell,cn91xx", "marvell,cn9030-vd",
++		     "marvell,cn9030", "marvell,armada-ap806-quad",
++		     "marvell,armada-ap806";
++
++	chosen {
++		stdout-path = "serial0:115200n8";
++	};
++
++	aliases {
++		i2c0 = &cp0_i2c0;
++		spi0 = &cp0_spi1;
++	};
++
++	memory@00000000 {
++		device_type = "memory";
++		reg = <0x0 0x0 0x0 0x80000000>;
++	};
++};
++
++&uart0 {
++	status = "okay";
++};
++
++/*
++ * AP related configuration
++ */
++&ap_pinctl {
++	/* MPP Bus:
++	 * SDIO  [0-10, 12]
++	 * UART0 [11,19]
++	 */
++		/*   0 1 2 3 4 5 6 7 8 9 */
++	pin-func = < 1 1 1 1 1 1 1 1 1 1
++		     1 3 1 0 0 0 0 0 0 3 >;
++};
++
++/* on-board eMMC - U9 */
++&ap_sdhci0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&ap_emmc_pins>;
++	bus-width = <8>;
++	status = "okay";
++};
++
++/*
++ * CP related configuration
++ */
++&cp0_pinctl {
++	/* MPP Bus:
++	 *	[0-11]	RGMII1
++	 *	[12]	GPIO GE-IN
++	 *	[13-16]	SPI1
++	 *	[17-27]	NAND
++	 *	[28]	MSS_GPIO[5] XXX:(mode nr from a3900)
++	 *	[29-30]	SATA
++	 *	[31]	MSS_GPIO[4] XXX:(mode nr from a3900)
++	 *	[32,34]	SMI
++	 *	[33]	SDIO
++	 *	[35-36]	I2C1
++	 *	[37-38]	I2C0
++	 *	[39-43]	SDIOctrl
++	 *	[44-55]	RGMII2
++	 *	[56-62]	SDIO
++	 */
++
++		/*   0   1   2   3   4   5   6   7   8   9 */
++	pin-func = < 3   3   3   3   3   3   3   3   3   3
++		     3   3   0   3   3   3   3   1   1   1
++		     1   1   1   1   1   1   1   1   3   9
++		     9   3   7   6   7   2   2   2   2   1
++		     1   1   1   1   1   1   1   1   1   1
++		     1   1   1   1   1   1   0xe 0xe 0xe 0xe
++		     0xe 0xe 0xe>;
++};
++
++&cp0_i2c0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&cp0_i2c0_pins>;
++	status = "okay";
++	clock-frequency = <100000>;
++};
++
++&cp0_i2c1 {
++	status = "okay";
++};
++
++/* CON 28 */
++&cp0_sdhci0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&cp0_sdhci_pins>;
++	bus-width = <4>;
++	status = "okay";
++};
++
++/* U54 */
++&cp0_nand {
++	status = "disabled";
++};
++
++/* U55 */
++&cp0_spi1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&cp0_spi0_pins>;
++	reg = <0x700680 0x50>,		/* control */
++	      <0x2000000 0x1000000>,	/* CS0 */
++	      <0 0xffffffff>,		/* CS1 */
++	      <0 0xffffffff>,		/* CS2 */
++	      <0 0xffffffff>;		/* CS3 */
++	status = "okay";
++
++	spi-flash@0 {
++		#address-cells = <0x1>;
++		#size-cells = <0x1>;
++		compatible = "jedec,spi-nor", "spi-flash";
++		reg = <0x0>;
++		/* On-board MUX does not allow higher frequencies */
++		spi-max-frequency = <40000000>;
++
++		partitions {
++			compatible = "fixed-partitions";
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			partition@0 {
++				label = "U-Boot";
++				reg = <0x0 0x200000>;
++			};
++
++			partition@400000 {
++				label = "Filesystem";
++				reg = <0x200000 0xe00000>;
++			};
++		};
++	};
++};
++
++&cp0_comphy {
++
++	phy0 {
++		phy-type = <COMPHY_TYPE_PEX0>;
++	};
++
++	phy1 {
++		phy-type = <COMPHY_TYPE_PEX0>;
++	};
++
++	phy2 {
++		phy-type = <COMPHY_TYPE_PEX0>;
++	};
++
++	phy3 {
++		phy-type = <COMPHY_TYPE_PEX0>;
++	};
++
++	phy4 {
++		phy-type = <COMPHY_TYPE_SFI0>;
++		phy-speed = <COMPHY_SPEED_10_3125G>;
++	};
++
++	phy5 {
++		phy-type = <COMPHY_TYPE_SATA1>;
++	};
++};
++
++/* SLM-1521-V2, CON6 */
++&cp0_pcie0 {
++	num-lanes = <4>;
++	status = "okay";
++};
++
++&cp0_mdio {
++	status = "okay";
++	phy0: ethernet-phy@0 {
++		reg = <0>;
++	};
++	phy1: ethernet-phy@1 {
++		reg = <1>;
++	};
++};
++
++&cp0_ethernet {
++	status = "okay";
++};
++
++/* SLM-1521-V2, CON9 */
++&cp0_eth0 {
++	status = "okay";
++	phy-mode = "sfi";
++};
++
++/* CON56 */
++&cp0_eth1 {
++	status = "okay";
++	phy = <&phy0>;
++	phy-mode = "rgmii-id";
++};
++
++/* CON57 */
++&cp0_eth2 {
++	status = "okay";
++	phy = <&phy1>;
++	phy-mode = "rgmii-id";
++};
++
++/* SLM-1521-V2, CON2 */
++&cp0_sata0 {
++	status = "okay";
++};
+diff --git a/arch/arm/dts/cn9130-db.dtsi b/arch/arm/dts/cn9130-db.dtsi
+new file mode 100644
+index 0000000000..64908b85e2
+--- /dev/null
++++ b/arch/arm/dts/cn9130-db.dtsi
+@@ -0,0 +1,108 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2018 Marvell International Ltd.
++ */
++
++#include "cn9130.dtsi" /* include SoC device tree */
++
++/ {
++	model = "DB-CN-9130";
++	compatible = "marvell,cn9030", "marvell,armada-ap806-quad",
++		     "marvell,armada-ap806";
++
++	cp0 {
++		config-space {
++			i2c@701000 {
++				/* U36 */
++				expander0: pca953x@21 {
++					compatible = "nxp,pca9555";
++					#gpio-cells = <2>;
++					reg = <0x21>;
++					status = "okay";
++				};
++			};
++			sdhci@780000 {
++				vqmmc-supply = <&cp0_reg_sd_vccq>;
++			};
++
++			cp0_reg_usb3_vbus0: cp0_usb3_vbus@0 {
++				compatible = "regulator-fixed";
++				regulator-name = "cp0-xhci0-vbus";
++				regulator-min-microvolt = <5000000>;
++				regulator-max-microvolt = <5000000>;
++				startup-delay-us = <100000>;
++				regulator-force-boot-off;
++				gpio = <&expander0 0 GPIO_ACTIVE_HIGH>;
++			};
++
++			cp0_reg_usb3_vbus1: cp0_usb3_vbus@1 {
++				compatible = "regulator-fixed";
++				regulator-name = "cp0-xhci1-vbus";
++				regulator-min-microvolt = <5000000>;
++				regulator-max-microvolt = <5000000>;
++				startup-delay-us = <100000>;
++				regulator-force-boot-off;
++				gpio = <&expander0 1 GPIO_ACTIVE_HIGH>;
++			};
++			cp0_reg_sd_vccq: cp0_sd_vccq@0 {
++				compatible = "regulator-gpio";
++				regulator-name = "cp0_sd_vcc";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <3300000>;
++				gpios = <&expander0 15 GPIO_ACTIVE_HIGH>;
++				states = <1800000 0x1
++					  3300000 0x0>;
++			};
++			cp0_reg_usb3_current_lim0:cp0_usb3_current_limiter@0 {
++				compatible = "regulator-fixed";
++				regulator-min-microamp = <900000>;
++				regulator-max-microamp = <900000>;
++				regulator-force-boot-off;
++				gpio = <&expander0 4 GPIO_ACTIVE_HIGH>;
++			};
++
++			cp0_reg_usb3_current_lim1: cp0_usb3_current_limiter@1 {
++				compatible = "regulator-fixed";
++				regulator-min-microamp = <900000>;
++				regulator-max-microamp = <900000>;
++				regulator-force-boot-off;
++				gpio = <&expander0 5 GPIO_ACTIVE_HIGH>;
++			};
++		};
++	};
++
++};
++
++/*
++ * CP0
++ */
++&cp0_utmi0 {
++	status = "okay";
++};
++
++&cp0_utmi1 {
++	status = "okay";
++};
++
++&cp0_usb3_0 {
++	status = "okay";
++	vbus-supply = <&cp0_reg_usb3_vbus0>;
++	current-limiter = <&cp0_reg_usb3_current_lim0>;
++	vbus-disable-delay = <500>;
++};
++
++&cp0_usb3_1 {
++	status = "okay";
++	vbus-supply = <&cp0_reg_usb3_vbus1>;
++	current-limiter = <&cp0_reg_usb3_current_lim1>;
++	vbus-disable-delay = <500>;
++};
++
++&cp0_pcie0 {
++	status = "okay";
++	ranges =
++		/* downstream I/O */
++		<0x81000000 0 0xf8000000 0 0xf8000000 0 0x10000
++		/* non-prefetchable memory */
++		0x82000000 0 0xc0000000 0 0xc0000000 0 0x2000000>;
++};
+diff --git a/arch/arm/dts/cn9130.dtsi b/arch/arm/dts/cn9130.dtsi
+new file mode 100644
+index 0000000000..05ed23943a
+--- /dev/null
++++ b/arch/arm/dts/cn9130.dtsi
+@@ -0,0 +1,80 @@
++/*
++ * Copyright (C) 2018 Marvell International Ltd.
++ *
++ * SPDX-License-Identifier:	GPL-2.0
++ * https://spdx.org/licenses
++ */
++
++/*
++ * Device Tree file for the CN 9030 SoC, made of an AP806 Quad and
++ * one CP110.
++ */
++
++#include <dt-bindings/gpio/gpio.h>
++#include "armada-common.dtsi"
++#include "armada-ap807.dtsi"
++#include "armada-ap80x-quad.dtsi"
++
++/* This defines used to calculate the base address of each CP */
++#define CP110_BASE_OFFSET		(0xf2000000)
++#define CP110_SPACE_SIZE		(0x02000000)
++#define CP110_BASE			(CP110_BASE_OFFSET + \
++						(CP110_NUM * CP110_SPACE_SIZE))
++
++#define CP110_PCIE_MEM_SIZE		(0x1000000)
++#define CP110_PCIE_BUS_MEM_CFG		(0x82000000)
++
++/* CP110-0 Settings */
++#define CP110_NAME			cp0
++#define CP110_NUM			0
++#define CP110_PCIEx_CPU_IO_BASE(iface)	(0xf8000000 + (iface) * 0x10000)
++#define CP110_PCIEx_CPU_MEM_BASE(iface)	((iface == 0) ? 0xc0000000 : \
++					   (0xe0000000 + (iface) * 0x1000000))
++#define CP110_PCIEx_BUS_IO_BASE(iface)	(CP110_PCIEx_CPU_IO_BASE(iface))
++#define CP110_PCIEx_BUS_MEM_BASE(iface)	(CP110_PCIEx_CPU_MEM_BASE(iface))
++
++#include "armada-cp110.dtsi"
++
++#undef CP110_NAME
++#undef CP110_NUM
++
++/ {
++	model = "Marvell CN 9030";
++	compatible = "marvell,armada70x0", "marvell,armada-ap806-quad",
++		     "marvell,armada-ap806";
++};
++
++&cp0_pinctl {
++	compatible = "marvell,mvebu-pinctrl", "marvell,armada-8k-cpm-pinctrl";
++	bank-name ="cp0-110";
++
++	cp0_i2c0_pins: cp0-i2c-pins-0 {
++		marvell,pins = < 37 38 >;
++		marvell,function = <2>;
++	};
++	cp0_i2c1_pins: cp0-i2c-pins-1 {
++		marvell,pins = < 35 36 >;
++		marvell,function = <2>;
++	};
++	cp0_ge1_rgmii_pins: cp0-ge-rgmii-pins-0 {
++		marvell,pins = < 0 1 2 3 4 5 6 7 8 9 10 11>;
++		marvell,function = <3>;
++	};
++	cp0_ge2_rgmii_pins: cp0-ge-rgmii-pins-1 {
++		marvell,pins = < 44 45 46 47 48 49 50 51
++				52 53 54 55 >;
++		marvell,function = <1>;
++	};
++	cp0_pca0_pins: cp0-pca0_pins {
++		marvell,pins = <62>;
++		marvell,function = <0>;
++	};
++	cp0_sdhci_pins: cp0-sdhi-pins-0 {
++		marvell,pins = < 56 57 58 59 60 61 >;
++		marvell,function = <14>;
++	};
++	cp0_spi0_pins: cp0-spi-pins-0 {
++		marvell,pins = < 13 14 15 16 >;
++		marvell,function = <3>;
++	};
++};
+-- 
+2.22.0
+

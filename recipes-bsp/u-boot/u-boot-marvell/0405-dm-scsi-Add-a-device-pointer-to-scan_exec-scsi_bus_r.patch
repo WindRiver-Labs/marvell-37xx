@@ -1,0 +1,45 @@
+From 6f441440911aa756cabcfe0dc1d891e9cffa2097 Mon Sep 17 00:00:00 2001
+From: Simon Glass <sjg@chromium.org>
+Date: Wed, 14 Jun 2017 21:28:40 -0600
+Subject: [PATCH 0405/1200] dm: scsi: Add a device pointer to scan_exec(),
+ scsi_bus_reset()
+
+With driver model these functions need a device pointer. Add one even
+when CONFIG_DM_SCSI is not defined. This avoids having ugly conditional
+function prototypes, When CONFIG_DM_SCSI is not defined we can just ignore
+the pointer.
+
+Signed-off-by: Simon Glass <sjg@chromium.org>
+Reviewed-by: Bin Meng <bmeng.cn@gmail.com>
+---
+ drivers/ata/ahci.c | 1 +
+ include/scsi.h     | 4 ++--
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/ata/ahci.c b/drivers/ata/ahci.c
+index be3a5b4d73..afb213ad89 100644
+--- a/drivers/ata/ahci.c
++++ b/drivers/ata/ahci.c
+@@ -1222,3 +1222,4 @@ __weak int scsi_bus_reset(struct udevice *dev)
+ 
+ 	return 0;
+ }
++#endif
+diff --git a/include/scsi.h b/include/scsi.h
+index 2edb563a5e..7767dd38bb 100644
+--- a/include/scsi.h
++++ b/include/scsi.h
+@@ -232,8 +232,8 @@ void scsi_low_level_init(int busdevfunc);
+ void scsi_init(void);
+ #endif
+ 
+-int scsi_exec(struct scsi_cmd *pccb);
+-void scsi_bus_reset(void);
++int scsi_exec(struct udevice *dev, struct scsi_cmd *pccb);
++int scsi_bus_reset(struct udevice *dev);
+ 
+ /***************************************************************************
+  * functions residing inside cmd_scsi.c
+-- 
+2.22.0
+

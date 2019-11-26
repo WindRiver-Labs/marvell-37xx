@@ -1,0 +1,60 @@
+From a31fd1a86311fbfcb7ecccdc9144419e0a48b3ef Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Wed, 13 Feb 2019 13:37:39 +0100
+Subject: [PATCH 1026/1200] scripts: ci: restore a3900 in the build system
+
+Since we rewind a3900 name in all our components, the same must be done
+in ci scripts.
+
+Change-Id: I26f27c6fe35b71b5c51f27fa80481057c82b95a6
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/3976
+Reviewed-by: Marcin Wojtas <Marcin.Wojtas@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Tested-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ scripts/ci/compile.sh           | 5 +++--
+ scripts/ci/supported_builds.txt | 4 ++--
+ 2 files changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index 2f2d13511b..60257c3859 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -85,6 +85,7 @@ case $build_name in
+ 	*_a80x0_mcbin* ) defconfig="mvebu_mcbin-88f8040_defconfig"; ;;
+ 	*_a80x0_ucpe* )  defconfig="mvebu_ucpe-88f8040_defconfig"; ;;
+ 	*_a80x0* )       defconfig="mvebu_db_armada8k_defconfig"; ;;
++	*_a3900* )       defconfig="mvebu_db_armada8k_defconfig"; ;;
+ 	*_cn9* )        defconfig="mvebu_db_cn91xx_defconfig"; ;;
+ 	*_a37xx_espressobin_* )
+ 	                 defconfig="mvebu_espressobin-88f3720_defconfig"; ;;
+@@ -117,8 +118,8 @@ case $build_name in
+ 	uboot_2018_a80x0_mcbin* ) device_tree="armada-8040-mcbin"; ;;
+ 	uboot_2018_a80x0_ucpe* ) device_tree=""; ;;
+ 
+-	uboot_2018_cn9030_A ) device_tree="cn9030-vd-A"; ;;
+-	uboot_2018_cn9030_B ) device_tree="cn9030-vd-B"; ;;
++	uboot_2018_a3900_A ) device_tree="armada-3900-vd-A"; ;;
++	uboot_2018_a3900_B ) device_tree="armada-3900-vd-B"; ;;
+ 	uboot_2018_cn9130_A ) device_tree="cn9130-db-A"; ;;
+ 	uboot_2018_cn9131_A ) device_tree="cn9131-db-A"; ;;
+ 	uboot_2018_cn9132_A ) device_tree="cn9132-db-A"; ;;
+diff --git a/scripts/ci/supported_builds.txt b/scripts/ci/supported_builds.txt
+index 7ebccd8dd7..1516666b57 100644
+--- a/scripts/ci/supported_builds.txt
++++ b/scripts/ci/supported_builds.txt
+@@ -30,8 +30,8 @@ uboot_2018_a80x0_mcbin_single_shot_cve_2018_3639
+ uboot_2018_a80x0_mcbin_single_shot_pm
+ uboot_2018_a80x0_ucpe
+ 
+-uboot_2018_cn9030_A
+-uboot_2018_cn9030_B
++uboot_2018_a3900_A
++uboot_2018_a3900_B
+ uboot_2018_cn9130_A
+ uboot_2018_cn9131_A
+ uboot_2018_cn9132_A
+-- 
+2.22.0
+

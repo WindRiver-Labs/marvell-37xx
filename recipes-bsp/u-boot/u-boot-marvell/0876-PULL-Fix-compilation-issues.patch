@@ -1,0 +1,86 @@
+From f14c0f80a305e8f9377b18cbf4a7dea9b1900107 Mon Sep 17 00:00:00 2001
+From: Suneel Garapati <sgarapati@caviumnetworks.com>
+Date: Thu, 15 Nov 2018 15:24:12 -0800
+Subject: [PATCH 0876/1200] [PULL] Fix compilation issues
+
+Marvell u-boot-2018.03-devel branch is rebased on uboot-combined,
+this patch fixes all compilation issues.
+
+Signed-off-by: Suneel Garapati <sgarapati@caviumnetworks.com>
+---
+ cmd/mem.c           | 4 ++++
+ common/board_f.c    | 2 +-
+ drivers/net/e1000.c | 4 ++--
+ 3 files changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/cmd/mem.c b/cmd/mem.c
+index f6dfd32e72..7083eb82b5 100644
+--- a/cmd/mem.c
++++ b/cmd/mem.c
+@@ -1085,6 +1085,7 @@ static int do_mem_crc(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+ 
+ #endif
+ 
++#ifdef CONFIG_ARCH_MVEBU
+ int do_ir(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+ {
+ 	u32 offset = 0x0;
+@@ -1165,6 +1166,7 @@ int do_ir(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+ 	}
+ 	return 0;
+ }
++#endif
+ 
+ /**************************************************/
+ U_BOOT_CMD(
+@@ -1335,6 +1337,7 @@ U_BOOT_CMD(
+ );
+ #endif
+ 
++#ifdef CONFIG_ARCH_MVEBU
+ U_BOOT_CMD(
+ 	ir,      2,     1,      do_ir,
+ 	"ir	- Reading and changing internal register values.\n",
+@@ -1344,3 +1347,4 @@ U_BOOT_CMD(
+ 	"\tor by writing 0 or 1 in the required place.\n"
+ 	"\tPressing enter without any value keeps the value unchanged.\n"
+ );
++#endif
+diff --git a/common/board_f.c b/common/board_f.c
+index 0e3b405584..db9637dbee 100644
+--- a/common/board_f.c
++++ b/common/board_f.c
+@@ -796,7 +796,7 @@ static const init_fnc_t init_sequence_f[] = {
+ #if defined(CONFIG_DISPLAY_BOARDINFO)
+ 	show_board_info,
+ #endif
+-#if defined(CONFIG_DISPLAY_BOARDINFO)
++#if defined(CONFIG_DISPLAY_BOARDINFO) && defined(CONFIG_ARCH_MVEBU)
+ 	print_cpuinfo,		/* display cpu info (and speed) */
+ #endif
+ 	INIT_FUNC_WATCHDOG_INIT
+diff --git a/drivers/net/e1000.c b/drivers/net/e1000.c
+index 75f6f1a6a5..b773a9e4ff 100644
+--- a/drivers/net/e1000.c
++++ b/drivers/net/e1000.c
+@@ -4571,7 +4571,7 @@ e1000_get_phy_cfg_done(struct e1000_hw *hw)
+ 			mdelay(1);
+ 			timeout--;
+ 		}
+-/*
++
+ 		if (!timeout) {
+ 			DEBUGOUT("MNG configuration cycle has not "
+ 					"completed.\n");
+@@ -4585,7 +4585,7 @@ e1000_get_phy_cfg_done(struct e1000_hw *hw)
+ 			 * return -E1000_ERR_RESET;
+ 			 */
+ 		}
+-*/
++
+ 		break;
+ 	}
+ 
+-- 
+2.22.0
+

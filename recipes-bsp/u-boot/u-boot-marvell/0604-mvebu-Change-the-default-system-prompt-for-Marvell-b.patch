@@ -1,0 +1,115 @@
+From 32aed70ddd4bf16893b1520aef9631f31db57e79 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Tue, 21 Mar 2017 15:51:29 +0200
+Subject: [PATCH 0604/1200] mvebu: Change the default system prompt for Marvell
+ boards
+
+Set the default system prompt to "Marvell>> " as required
+by the atomation testing system
+
+Change-Id: Ie2cfd15f0f0ee729cb8d3325abb2fec5f3d0cb96
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/37165
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/52519
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+Tested-by: Hua Jing <jinghua@marvell.com>
+---
+ configs/db-88f6720_defconfig                | 1 +
+ configs/db-88f6820-amc_defconfig            | 1 +
+ configs/db-88f6820-gp_defconfig             | 1 +
+ configs/mvebu_db-88f3720_defconfig          | 1 +
+ configs/mvebu_db_armada8k_defconfig         | 1 +
+ configs/mvebu_espressobin-88f3720_defconfig | 1 +
+ configs/mvebu_mcbin-88f8040_defconfig       | 1 +
+ 7 files changed, 7 insertions(+)
+
+diff --git a/configs/db-88f6720_defconfig b/configs/db-88f6720_defconfig
+index b3d06ae309..3d1a6ccff1 100644
+--- a/configs/db-88f6720_defconfig
++++ b/configs/db-88f6720_defconfig
+@@ -16,6 +16,7 @@ CONFIG_SYS_CONSOLE_INFO_QUIET=y
+ # CONFIG_DISPLAY_BOARDINFO is not set
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
++CONFIG_SYS_PROMPT="Marvell>> "
+ # CONFIG_CMD_FLASH is not set
+ CONFIG_CMD_I2C=y
+ CONFIG_CMD_SF=y
+diff --git a/configs/db-88f6820-amc_defconfig b/configs/db-88f6820-amc_defconfig
+index 29c9a39f27..54958d6934 100644
+--- a/configs/db-88f6820-amc_defconfig
++++ b/configs/db-88f6820-amc_defconfig
+@@ -16,6 +16,7 @@ CONFIG_SYS_CONSOLE_INFO_QUIET=y
+ # CONFIG_DISPLAY_BOARDINFO is not set
+ CONFIG_SPL=y
+ CONFIG_SPL_I2C_SUPPORT=y
++CONFIG_SYS_PROMPT="Marvell>> "
+ # CONFIG_CMD_FLASH is not set
+ CONFIG_CMD_I2C=y
+ CONFIG_CMD_PCI=y
+diff --git a/configs/db-88f6820-gp_defconfig b/configs/db-88f6820-gp_defconfig
+index 2beacdbcc9..52902bcb98 100644
+--- a/configs/db-88f6820-gp_defconfig
++++ b/configs/db-88f6820-gp_defconfig
+@@ -11,6 +11,7 @@ CONFIG_SPL_SPI_SUPPORT=y
+ CONFIG_DEFAULT_DEVICE_TREE="armada-388-gp"
+ CONFIG_DEBUG_UART=y
+ CONFIG_BOOTDELAY=3
++CONFIG_SYS_PROMPT="Marvell>> "
+ CONFIG_SYS_CONSOLE_INFO_QUIET=y
+ # CONFIG_DISPLAY_BOARDINFO is not set
+ CONFIG_SPL=y
+diff --git a/configs/mvebu_db-88f3720_defconfig b/configs/mvebu_db-88f3720_defconfig
+index 1d6233a6ff..04a72d6abc 100644
+--- a/configs/mvebu_db-88f3720_defconfig
++++ b/configs/mvebu_db-88f3720_defconfig
+@@ -13,6 +13,7 @@ CONFIG_SYS_CONSOLE_INFO_QUIET=y
+ # CONFIG_DISPLAY_BOARDINFO is not set
+ CONFIG_ARCH_EARLY_INIT_R=y
+ CONFIG_BOARD_EARLY_INIT_F=y
++CONFIG_SYS_PROMPT="Marvell>> "
+ # CONFIG_CMD_FLASH is not set
+ CONFIG_CMD_GPIO=y
+ CONFIG_CMD_I2C=y
+diff --git a/configs/mvebu_db_armada8k_defconfig b/configs/mvebu_db_armada8k_defconfig
+index da67aad707..e807bd7d11 100644
+--- a/configs/mvebu_db_armada8k_defconfig
++++ b/configs/mvebu_db_armada8k_defconfig
+@@ -14,6 +14,7 @@ CONFIG_SYS_CONSOLE_INFO_QUIET=y
+ # CONFIG_DISPLAY_BOARDINFO is not set
+ CONFIG_ARCH_EARLY_INIT_R=y
+ CONFIG_BOARD_EARLY_INIT_F=y
++CONFIG_SYS_PROMPT="Marvell>> "
+ # CONFIG_CMD_FLASH is not set
+ CONFIG_CMD_I2C=y
+ CONFIG_CMD_MMC=y
+diff --git a/configs/mvebu_espressobin-88f3720_defconfig b/configs/mvebu_espressobin-88f3720_defconfig
+index 314d405ea3..6551b07c21 100644
+--- a/configs/mvebu_espressobin-88f3720_defconfig
++++ b/configs/mvebu_espressobin-88f3720_defconfig
+@@ -13,6 +13,7 @@ CONFIG_SYS_CONSOLE_INFO_QUIET=y
+ # CONFIG_DISPLAY_BOARDINFO is not set
+ CONFIG_ARCH_EARLY_INIT_R=y
+ CONFIG_BOARD_EARLY_INIT_F=y
++CONFIG_SYS_PROMPT="Marvell>> "
+ # CONFIG_CMD_FLASH is not set
+ CONFIG_CMD_I2C=y
+ CONFIG_CMD_MMC=y
+diff --git a/configs/mvebu_mcbin-88f8040_defconfig b/configs/mvebu_mcbin-88f8040_defconfig
+index e16a56e31a..7d873be091 100644
+--- a/configs/mvebu_mcbin-88f8040_defconfig
++++ b/configs/mvebu_mcbin-88f8040_defconfig
+@@ -14,6 +14,7 @@ CONFIG_SYS_CONSOLE_INFO_QUIET=y
+ # CONFIG_DISPLAY_BOARDINFO is not set
+ CONFIG_ARCH_EARLY_INIT_R=y
+ CONFIG_BOARD_EARLY_INIT_F=y
++CONFIG_SYS_PROMPT="Marvell>> "
+ # CONFIG_CMD_FLASH is not set
+ CONFIG_CMD_GPIO=y
+ CONFIG_CMD_I2C=y
+-- 
+2.22.0
+

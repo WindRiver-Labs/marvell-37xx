@@ -1,0 +1,47 @@
+From dfdd822322bc2310ff4b76079f5eb975a62fd284 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Thu, 9 Aug 2018 15:41:59 +0300
+Subject: [PATCH 0838/1200] fix: cmd: mvebu: fix partition handling in bubt
+ command
+
+Update the code handling MMC partitions following latest
+changes in the basic MMC structures.
+
+Change-Id: Id2fe245053528705f4391ed9f777fec9a2cddfe6
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/58919
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ cmd/mvebu/bubt.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/cmd/mvebu/bubt.c b/cmd/mvebu/bubt.c
+index 23fb8cd807..37afc8428c 100644
+--- a/cmd/mvebu/bubt.c
++++ b/cmd/mvebu/bubt.c
+@@ -136,8 +136,8 @@ static int mmc_burn_image(size_t image_size)
+ 	}
+ 
+ #ifdef CONFIG_SYS_MMC_ENV_PART
+-	if (mmc->part_num != CONFIG_SYS_MMC_ENV_PART) {
+-		err = mmc_switch_part(mmc_dev_num, CONFIG_SYS_MMC_ENV_PART);
++	if (mmc_get_blk_desc(mmc)->hwpart != CONFIG_SYS_MMC_ENV_PART) {
++		err = mmc_switch_part(mmc, CONFIG_SYS_MMC_ENV_PART);
+ 		if (err) {
+ 			printf("MMC partition switch failed\n");
+ 			return err;
+@@ -177,8 +177,8 @@ static int mmc_burn_image(size_t image_size)
+ 	printf("Done!\n");
+ 
+ #ifdef CONFIG_SYS_MMC_ENV_PART
+-	if (mmc->part_num != CONFIG_SYS_MMC_ENV_PART)
+-		mmc_switch_part(mmc_dev_num, mmc->part_num);
++	if (mmc_get_blk_desc(mmc)->hwpart != CONFIG_SYS_MMC_ENV_PART)
++		mmc_switch_part(mmc, mmc_get_blk_desc(mmc)->hwpart);
+ #endif
+ 
+ 	return 0;
+-- 
+2.22.0
+

@@ -1,0 +1,82 @@
+From 66ef4eb9d0e4edf8e171351b18337f0d84454430 Mon Sep 17 00:00:00 2001
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Date: Fri, 26 Jan 2018 19:25:29 +0900
+Subject: [PATCH 1052/1200] mmc: add the MMC_CLK_ENABLE/DISABLE macro in mmc.h
+
+mmc_set_clock() function has the disable argument as bool type.
+When mmc_set_clock is called, it might be passed to "true" or "false".
+But it's too confusion whether clock is enabled or disabled with only
+"true" and "false".
+To prevent the confusion, replace to MMC_CLK_ENABLE/DISABLE macro from
+true/false.
+
+Change-Id: I7d223b3ef318380a1c31097a0b58dfa4bfb05cb3
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Reviewed-on: https://sj1git1.cavium.com/5419
+Reviewed-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+Tested-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+---
+ drivers/mmc/fsl_esdhc.c    |  2 +-
+ drivers/mmc/meson_gx_mmc.c |  2 +-
+ include/mmc.h              | 12 ++++--------
+ 3 files changed, 6 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/mmc/fsl_esdhc.c b/drivers/mmc/fsl_esdhc.c
+index 6018f84307..f5424c74cd 100644
+--- a/drivers/mmc/fsl_esdhc.c
++++ b/drivers/mmc/fsl_esdhc.c
+@@ -983,7 +983,7 @@ static int esdhc_init_common(struct fsl_esdhc_priv *priv, struct mmc *mmc)
+ #endif
+ 
+ 	/* Set the initial clock speed */
+-	mmc_set_clock(mmc, 400000, false);
++	mmc_set_clock(mmc, 400000, MMC_CLK_ENABLE);
+ 
+ 	/* Disable the BRR and BWR bits in IRQSTAT */
+ 	esdhc_clrbits32(&regs->irqstaten, IRQSTATEN_BRR | IRQSTATEN_BWR);
+diff --git a/drivers/mmc/meson_gx_mmc.c b/drivers/mmc/meson_gx_mmc.c
+index a2cd5d3a44..3cd934634d 100644
+--- a/drivers/mmc/meson_gx_mmc.c
++++ b/drivers/mmc/meson_gx_mmc.c
+@@ -250,7 +250,7 @@ static int meson_mmc_probe(struct udevice *dev)
+ 	mmc->priv = pdata;
+ 	upriv->mmc = mmc;
+ 
+-	mmc_set_clock(mmc, cfg->f_min, false);
++	mmc_set_clock(mmc, cfg->f_min, MMC_CLK_ENABLE);
+ 
+ 	/* reset all status bits */
+ 	meson_write(mmc, STATUS_MASK, MESON_SD_EMMC_STATUS);
+diff --git a/include/mmc.h b/include/mmc.h
+index 0866ee1b9f..e40873ff05 100644
+--- a/include/mmc.h
++++ b/include/mmc.h
+@@ -728,11 +728,11 @@ int mmc_voltage_to_mv(enum mmc_voltage voltage);
+  * @disable:	flag indicating if the clock must on or off
+  * @return 0 if OK, -ve on error
+  */
+-#if !CONFIG_IS_ENABLED(MMC_OCTEONTX)
+ int mmc_set_clock(struct mmc *mmc, uint clock, bool disable);
+-#else
+-void mmc_set_clock(struct mmc *mmc, uint clock);
+-#endif
++
++#define MMC_CLK_ENABLE		false
++#define MMC_CLK_DISABLE		true
++
+ struct mmc *find_mmc_device(int dev_num);
+ int mmc_set_dev(int dev_num);
+ void print_mmc_devices(char separator);
+@@ -835,9 +835,5 @@ int mmc_get_env_dev(void);
+  * @devnum:	device number
+  * @return block device if found, else NULL
+  */
+-#ifdef CONFIG_MMC_OCTEONTX
+-struct blk_desc *mmc_get_blk_desc(struct mmc *mmc, int devnum);
+-#else
+ struct blk_desc *mmc_get_blk_desc(struct mmc *mmc);
+-#endif
+ #endif /* _MMC_H_ */
+-- 
+2.22.0
+

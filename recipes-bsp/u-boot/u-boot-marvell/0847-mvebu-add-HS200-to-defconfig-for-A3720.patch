@@ -1,0 +1,32 @@
+From 6c55994d86a5190f7fb52193ad0d18d7b5672d2e Mon Sep 17 00:00:00 2001
+From: Wojciech Macek <wma@semihalf.com>
+Date: Mon, 20 Aug 2018 09:25:22 +0200
+Subject: [PATCH 0847/1200] mvebu: add HS200 to defconfig for A3720
+
+Add support for HS200.
+
+Change-Id: I4dfed3811ca0ee374f648594530d94d840a29a9d
+Signed-off-by: Wojciech Macek <wma@semihalf.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/59231
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+---
+ configs/mvebu_db-88f3720_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/configs/mvebu_db-88f3720_defconfig b/configs/mvebu_db-88f3720_defconfig
+index 6ef5c63227..6a6b9a302b 100644
+--- a/configs/mvebu_db-88f3720_defconfig
++++ b/configs/mvebu_db-88f3720_defconfig
+@@ -44,6 +44,7 @@ CONFIG_DM_MMC=y
+ CONFIG_MMC_SDHCI=y
+ CONFIG_MMC_SDHCI_SDMA=y
+ CONFIG_MMC_SDHCI_XENON=y
++CONFIG_MMC_HS200_SUPPORT=y
+ CONFIG_SPI_FLASH=y
+ CONFIG_SPI_FLASH_MACRONIX=y
+ CONFIG_SPI_FLASH_SPANSION=y
+-- 
+2.22.0
+

@@ -1,0 +1,396 @@
+From da4fefadce717e76586fbc3e3e650dc1029af2a3 Mon Sep 17 00:00:00 2001
+From: zxu <zouhaix@marvell.com>
+Date: Thu, 2 May 2019 15:22:57 +0800
+Subject: [PATCH 1105/1200] arm: dts: Add dts for cn9130-crb-A/B
+
+The cn9130 crb board supports 2 possible configurations.
+
+Topology for configure A:
+AP-MPPs:
+	- SDIO, UART
+CP0-SerDes:
+	- lane0-3: NVMe(PCIex4)
+	- lane4: XFI
+	- lane5: HS_SGMII
+CP0-MPPs:
+	- RGMII, SDIO, I2C0, I2C1, SMI, XSMI
+
+Topology for configure B:
+AP-MPPs:
+        - SDIO, UART
+CP0-SerDes:
+	- lane0: PCIe0
+	- lane1: USB3_0
+	- lane2: SATA0
+	- lane3: USB3_1
+	- lane4: XFI
+	- lane5: HS_SGMII
+CP0-MPPs:
+        - RGMII1, SDIO, I2C0, I2C1, SMI, XSMI
+
+Change-Id: I544b45ca6e6074ed26b2e47b03164595ca48a1d6
+Signed-off-by: Zuohai Xu <zouhaix@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/8401
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+---
+ arch/arm/dts/cn9130-crb-A.dts |  49 ++++++++
+ arch/arm/dts/cn9130-crb-B.dts |  61 ++++++++++
+ arch/arm/dts/cn9130-crb.dtsi  | 220 ++++++++++++++++++++++++++++++++++
+ 3 files changed, 330 insertions(+)
+ create mode 100644 arch/arm/dts/cn9130-crb-A.dts
+ create mode 100644 arch/arm/dts/cn9130-crb-B.dts
+ create mode 100644 arch/arm/dts/cn9130-crb.dtsi
+
+diff --git a/arch/arm/dts/cn9130-crb-A.dts b/arch/arm/dts/cn9130-crb-A.dts
+new file mode 100644
+index 0000000000..ef04181ef1
+--- /dev/null
++++ b/arch/arm/dts/cn9130-crb-A.dts
+@@ -0,0 +1,49 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2019 Marvell International Ltd.
++ */
++
++#include "cn9130-crb.dtsi"
++
++/ {
++	model = "CN9130-CRB-A";
++	compatible = "marvell,cn9130-crb-A",
++		"marvell,cn9130",
++		"marvell,armada-ap806-quad",
++		"marvell,armada-ap806";
++};
++
++&cp0_comphy {
++	phy0 {
++		phy-type = <COMPHY_TYPE_PEX0>;
++	};
++
++	phy1 {
++		phy-type = <COMPHY_TYPE_PEX0>;
++	};
++
++	phy2 {
++		phy-type = <COMPHY_TYPE_PEX0>;
++	};
++
++	phy3 {
++		phy-type = <COMPHY_TYPE_PEX0>;
++	};
++
++	phy4 {
++		phy-type = <COMPHY_TYPE_SFI0>;
++		phy-speed = <COMPHY_SPEED_10_3125G>;
++	};
++
++	phy5 {
++		phy-type = <COMPHY_TYPE_SGMII2>;
++		phy-speed = <COMPHY_SPEED_3_125G>;
++	};
++};
++
++&cp0_pcie0 {
++	num-lanes = <4>;
++		/* non-prefetchable memory */
++	ranges =<0x82000000 0 0xc0000000 0 0xc0000000 0 0x2000000>;
++	status = "okay";
++};
+diff --git a/arch/arm/dts/cn9130-crb-B.dts b/arch/arm/dts/cn9130-crb-B.dts
+new file mode 100644
+index 0000000000..52204d52d9
+--- /dev/null
++++ b/arch/arm/dts/cn9130-crb-B.dts
+@@ -0,0 +1,61 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2019 Marvell International Ltd.
++ */
++
++#include "cn9130-crb.dtsi"
++
++/ {
++	model = "CN9130-CRB-B";
++	compatible = "marvell,cn9130-crb-B",
++		"marvell,cn9130",
++		"marvell,armada-ap806-quad",
++		"marvell,armada-ap806";
++};
++
++&cp0_comphy {
++	phy0 {
++		phy-type = <COMPHY_TYPE_PEX0>;
++	};
++
++	phy1 {
++		phy-type = <COMPHY_TYPE_USB3_HOST0>;
++	};
++
++	phy2 {
++		phy-type = <COMPHY_TYPE_SATA0>;
++	};
++
++	phy3 {
++		phy-type = <COMPHY_TYPE_USB3_HOST1>;
++	};
++
++	phy4 {
++		phy-type = <COMPHY_TYPE_SFI0>;
++		phy-speed = <COMPHY_SPEED_10_3125G>;
++	};
++
++	phy5 {
++		phy-type = <COMPHY_TYPE_SGMII2>;
++		phy-speed = <COMPHY_SPEED_3_125G>;
++	};
++};
++
++&cp0_sata0 {
++	status = "okay";
++};
++
++&cp0_pcie0 {
++	num-lanes = <1>;
++		/* non-prefetchable memory */
++	ranges =<0x82000000 0 0xc0000000 0 0xc0000000 0 0x2000000>;
++	status = "okay";
++};
++
++&cp0_usb3_0 {
++	status = "okay";
++};
++
++&cp0_usb3_1 {
++	status = "okay";
++};
+diff --git a/arch/arm/dts/cn9130-crb.dtsi b/arch/arm/dts/cn9130-crb.dtsi
+new file mode 100644
+index 0000000000..6d12e3c36b
+--- /dev/null
++++ b/arch/arm/dts/cn9130-crb.dtsi
+@@ -0,0 +1,220 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2019 Marvell International Ltd.
++ */
++
++#include "cn9130.dtsi" /* include SoC device tree */
++
++/ {
++	model = "CN9130-CRB";
++	compatible = "marvell,cn9130-crb",
++		"marvell,cn9130",
++		"marvell,armada-ap806-quad",
++		"marvell,armada-ap806";
++	chosen {
++		stdout-path = "serial0:115200n8";
++	};
++
++	aliases {
++		i2c0 = &cp0_i2c0;
++		spi0 = &cp0_spi1;
++		gpio0 = &ap_gpio0;
++		gpio1 = &cp0_gpio0;
++		gpio2 = &cp0_gpio1;
++	};
++
++	memory@00000000 {
++		device_type = "memory";
++		reg = <0x0 0x0 0x0 0x80000000>;
++	};
++
++	cp0 {
++		config-space {
++			sdhci@780000 {
++				vqmmc-supply = <&cp0_reg_sd_vccq>;
++				vmmc-supply = <&cp0_reg_sd_vcc>;
++			};
++			cp0_reg_sd_vccq: cp0_sd_vccq@0 {
++				compatible = "regulator-gpio";
++				regulator-name = "cp0_sd_vccq";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <3300000>;
++				gpios = <&cp0_gpio0 25 GPIO_ACTIVE_HIGH>;
++				states = <1800000 0x1
++					  3300000 0x0>;
++			};
++			cp0_reg_sd_vcc: cp0_sd_vcc@0 {
++				compatible = "regulator-fixed";
++				regulator-name = "cp0_sd_vcc";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				gpio = <&cp0_gpio1 19 GPIO_ACTIVE_HIGH>;
++				enable-active-high;
++				regulator-always-on;
++			};
++		};
++	};
++};
++
++&uart0 {
++	status = "okay";
++};
++
++/*
++ * AP related configuration
++ */
++&ap_pinctl {
++	/* MPP Bus:
++	 * SDIO  [0-10, 12]
++	 * UART0 [11,19]
++	 */
++		/*   0 1 2 3 4 5 6 7 8 9 */
++	pin-func = < 1 1 1 1 1 1 1 1 1 1
++		     1 3 1 0 0 0 0 0 0 3 >;
++};
++
++/* on-board eMMC - U6 */
++&ap_sdhci0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&ap_emmc_pins>;
++	bus-width = <8>;
++	status = "okay";
++};
++
++/*
++ * CP related configuration
++ */
++&cp0_pinctl {
++	/* MPP Bus:
++	 *	[0-11]	RGMII1
++	 *	[12-16]	SPI1
++	 *	[17-28] GPIO
++	 *	[29-30] UART0
++	 *	[31-32] GPIO
++	 *	[33]	SDIO
++	 *	[34]	CP_PCIE0_CLKREQn
++	 *	[35-36]	I2C1
++	 *	[37-38]	I2C0
++	 *	[39]	GPIO
++	 *	[40-41]	UART1
++	 *	[42-43] SD Control
++	 *	[44]	GPIO
++	 *	[45]	CP_PCIE_RSTOUTn
++	 *	[46]	GPIO
++	 *	[47-50] SMI/XSMI
++	 *	[51-55] GPIO
++	 *	[56-62]	SDIO
++	 */
++		/*   0   1   2   3   4   5   6   7   8   9 */
++	pin-func = < 3   3   3   3   3   3   3   3   3   3
++		     3   3   3   3   3   3   3   0   0   0
++		     0   0   0   0   0   0   0   0   0   0xa
++		     0xa 0   0   6   9   2   2   2   2   0
++		     7   7   1   1   0   9   0   8   8   8
++		     8   0   0   0   0   0   0xe 0xe 0xe 0xe
++		     0xe 0xe 0xe>;
++};
++
++/*
++ * CP0
++ */
++&cp0_i2c0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&cp0_i2c0_pins>;
++	status = "okay";
++	clock-frequency = <100000>;
++};
++
++&cp0_i2c1 {
++	status = "okay";
++};
++
++&cp0_sdhci0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&cp0_sdhci_pins>;
++	bus-width = <4>;
++	status = "okay";
++};
++
++&cp0_spi1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&cp0_spi0_pins>;
++	reg = <0x700680 0x50>,		/* control */
++	      <0x2000000 0x1000000>,	/* CS0 */
++	      <0 0xffffffff>,		/* CS1 */
++	      <0 0xffffffff>,		/* CS2 */
++	      <0 0xffffffff>;		/* CS3 */
++	status = "okay";
++
++	spi-flash@0 {
++		#address-cells = <0x1>;
++		#size-cells = <0x1>;
++		compatible = "jedec,spi-nor", "spi-flash";
++		reg = <0x0>;
++		/* On-board MUX does not allow higher frequencies */
++		spi-max-frequency = <40000000>;
++
++		partitions {
++			compatible = "fixed-partitions";
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			partition@0 {
++				label = "U-Boot";
++				reg = <0x0 0x200000>;
++			};
++
++			partition@400000 {
++				label = "Filesystem";
++				reg = <0x200000 0xe00000>;
++			};
++		};
++	};
++};
++
++&cp0_utmi0 {
++	status = "okay";
++};
++
++&cp0_utmi1 {
++	status = "okay";
++};
++
++&cp0_mdio {
++	status = "okay";
++	phy0: ethernet-phy@0 {
++		reg = <0>;
++	};
++	switch6: ethernet-switch@6 {
++		reg = <6>;
++	};
++};
++
++&cp0_xmdio {
++	status = "okay";
++	nbaset_phy0: ethernet-phy@r0 {
++		reg = <0>;
++	};
++};
++
++&cp0_ethernet {
++	status = "okay";
++};
++
++&cp0_eth0 {
++	status = "okay";
++	phy-mode = "sfi";
++};
++
++&cp0_eth1 {
++	status = "okay";
++	phy = <&phy0>;
++	phy-mode = "rgmii-id";
++};
++
++&cp0_eth2 {
++	status = "okay";
++	phy = <&nbaset_phy0>;
++	phy-speed = <2500>;
++	phy-mode = "sgmii";
++};
+-- 
+2.22.0
+

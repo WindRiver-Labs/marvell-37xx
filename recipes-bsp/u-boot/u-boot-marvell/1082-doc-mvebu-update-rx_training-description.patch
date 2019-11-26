@@ -1,0 +1,65 @@
+From 0159da8964084562c88a47efdb946c6eb319328c Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Thu, 21 Mar 2019 16:00:02 +0100
+Subject: [PATCH 1082/1200] doc: mvebu: update rx_training description
+
+After the rx_training procedure update there is no need to use loopback
+module anymore.
+
+Also the purpose of rx_training had changed after last update. Currently
+it is not suppose to help with providing static parameters for porting
+layer, instead it aim is to suit parameters per connection. So e.g. it
+is possible that the values trained will be different for one
+cable/fiber than for other or when connected to different peer.
+
+Change-Id: I6914e75604bfe9e68823afe61f348a1f42aec733
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: https://sj1git1.cavium.com/6112
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ doc/mvebu/uboot_cmd.txt | 22 ++--------------------
+ 1 file changed, 2 insertions(+), 20 deletions(-)
+
+diff --git a/doc/mvebu/uboot_cmd.txt b/doc/mvebu/uboot_cmd.txt
+index 10616a53c4..7c182d2605 100644
+--- a/doc/mvebu/uboot_cmd.txt
++++ b/doc/mvebu/uboot_cmd.txt
+@@ -307,32 +307,14 @@ rx_training command
+ RX training allows to improve link quality (for SFI/XFI mode) by running training
+ sequence, this allows to reach better link quality then using static configuration.
+ 
+-To perform rx_training there is need to connect the loopback module (rx and tx
+-is physically looped using one fiber lane) first.
+-
+-.. _fig_rx_loopback_module:
+-
+-.. figure:: /images/rx_loopback_module.*
+-   :align: center
+-
+-   Rx loopback module
+-
+-.. Note::
+-        The "rx loopback module" is simple fiber patchcord but modified in way that
+-        the same fiber lane goes to both rx and tx.
+-
+-When running rx_training sequence, the user must state CP index (0/1) and comphy ID (0/5).
++When running rx_training sequence, the user must state CP index (0/1/2) and comphy ID (0/5).
+ 
+ If after rx training procedure the kernel will be booted (without
+ resetting/rebooting the board), Linux will skip comphy power off and power on
+ sequence, so the user can test the link quality in Linux.
+ 
+ After board reset/reboot the comphy parameters for SFI/XFI are the default one
+-(the training results are not valid anymore after reset). If the user want to
+-use values from training there are two options:
+-        1) perform rx_training from u-boot after board reset
+-        2) perform rx_training from u-boot and then apply the new parameters
+-           using comphy porting layer.
++(the training results are not valid anymore after reset).
+ 
+ .. seealso::
+         Please refer to :ref:`porting` section: Comphy Porting.
+-- 
+2.22.0
+

@@ -1,0 +1,33 @@
+From 42d3277a305788b2af4f8187d39ea373b90c7d71 Mon Sep 17 00:00:00 2001
+From: Lior Levin <levin@marvell.com>
+Date: Mon, 14 Jan 2019 18:18:41 +0200
+Subject: [PATCH 0981/1200] scripts: ci/pack_source.sh copy entire source, not
+ just diff
+
+Change-Id: Iee0186ac188c5d911d110a410ff545d95e9a3f36
+Signed-off-by: Lior Levin <levin@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/2108
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Lior Levin <Lior.Levin@cavium.com>
+---
+ scripts/ci/pack_source.sh | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/scripts/ci/pack_source.sh b/scripts/ci/pack_source.sh
+index 59feda300d..6909ad8080 100755
+--- a/scripts/ci/pack_source.sh
++++ b/scripts/ci/pack_source.sh
+@@ -30,9 +30,8 @@ ref_to_ref="${base_tag}..${end_tag}"
+ srcpkg="sources-${packname}"
+ gitpkg="git-${packname}"
+ 
+-file_list=`git diff --name-status $ref_to_ref | grep -v \"^D\" | cut -f2`
+ mkdir -p ${DESTDIR}/$srcpkg
+-cp --parents $file_list ${DESTDIR}/$srcpkg/ || true
++cp -R ./* ${DESTDIR}/$srcpkg/ || true
+ 
+ mkdir ${DESTDIR}/$gitpkg
+ git format-patch -o ${DESTDIR}/$gitpkg $ref_to_ref
+-- 
+2.22.0
+

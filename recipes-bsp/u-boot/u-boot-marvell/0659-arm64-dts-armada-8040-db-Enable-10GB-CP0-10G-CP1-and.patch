@@ -1,0 +1,65 @@
+From 60aa17081deabd28e78806e08927e11c52b2ff34 Mon Sep 17 00:00:00 2001
+From: Stefan Chulski <stefanc@marvell.com>
+Date: Sun, 30 Apr 2017 08:51:16 +0300
+Subject: [PATCH 0659/1200] arm64: dts: armada-8040-db: Enable 10GB CP0, 10G
+ CP1 and RGMII0 CP1
+
+This patch enables the 10GB CP0, 10G CP1, RGMII0 CP1 A8K ports
+and connect RGMII0 CP1 to mdio driver.
+
+Change-Id: Ia53ae7ed00ba171b0752b0b9cf0bfd16defb0c80
+Signed-off-by: Stefan Chulski <stefanc@marvell.com>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55225
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/armada-8040-db.dts | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+diff --git a/arch/arm/dts/armada-8040-db.dts b/arch/arm/dts/armada-8040-db.dts
+index 43de7efc4f..ddcbfc4901 100644
+--- a/arch/arm/dts/armada-8040-db.dts
++++ b/arch/arm/dts/armada-8040-db.dts
+@@ -298,12 +298,38 @@
+ 	};
+ };
+ 
++&cps_mdio {
++	phy0: ethernet-phy@0 {
++		reg = <0>;
++	};
++};
++
+ &cpm_ethernet {
+ 	status = "okay";
+ };
+ 
++&cps_ethernet {
++	status = "okay";
++};
++
++&cpm_eth0 {
++	status = "okay";
++	phy-mode = "sfi"; /* lane-2 */
++};
++
+ &cpm_eth2 {
+ 	status = "okay";
+ 	phy = <&phy1>;
+ 	phy-mode = "rgmii-id";
+ };
++
++&cps_eth0 {
++	status = "okay";
++	phy-mode = "sfi"; /* lane-2 */
++};
++
++&cps_eth1 {
++	status = "okay";
++	phy = <&phy0>;
++	phy-mode = "rgmii-id";
++};
+-- 
+2.22.0
+

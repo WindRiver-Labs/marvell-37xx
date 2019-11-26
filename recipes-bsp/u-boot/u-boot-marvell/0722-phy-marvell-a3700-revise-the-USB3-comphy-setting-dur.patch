@@ -1,0 +1,134 @@
+From 49bc0843312c70c026e7d2eee1ddc29382d924b0 Mon Sep 17 00:00:00 2001
+From: zachary <zhangzg@marvell.com>
+Date: Thu, 20 Apr 2017 16:35:04 +0800
+Subject: [PATCH 0722/1200] phy: marvell: a3700: revise the USB3 comphy setting
+ during power on
+
+- According to design specification, the transmitter should be set to high
+  impedence mode during electrical idle. Thus transmitter should detect RX
+  at high impedence mode also, and delay is needed to accommodate high
+  impedence off latency. Otherwise the USB3 will have detection issue that
+  most of the time the USB3 device can not be detected at all, or be
+  detected as USB2 device sometimes.
+  Modified registers: RD005C302h (R181h) (0051h) Lane Configuration 1
+  Bit 6: set to 1 to let Tx detect Rx at HiZ mode
+  Bit [3:4]: set to 2 to be delayed by 2 clock cycles
+  Bit 0: set to 1 to set transmitter to high impedance mode during idle.
+- USB3 De-emphasize level of -3.5dB is mandatory, but USB3 MAC selects 0x2
+  (emphasize disabled) in the MAC_PHY_TXDEEMPH [1:0], while it is supposed
+  to select 0x1(3.5dB emphasize). Thus need to override what comes from
+  the MAC(by setting register 0x1c2 bit2 to 0x1) and to configure the
+  overridded values of MAC_PHY_TXDEEMPH [1:0] to 0x1(bit15 of register
+  0x181 and bit0 of register 0x180).
+- According to USB3 application note, need to update below comphy
+  registers:
+  Set max speed generation to USB3.0 5Gbps(set RD005C04Ah bit[11:10] to 1)
+  Set capacitor value to 0xF(set RF005C224 bit[3:0] to 0xF)
+
+Change-Id: I1dcc499e90cb34ff8b65d606d023838caa5310a1
+Signed-off-by: zachary <zhangzg@marvell.com>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55197
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ drivers/phy/marvell/comphy_a3700.c | 27 ++++++++++++++++++++-------
+ drivers/phy/marvell/comphy_a3700.h | 27 ++++++++++++++++++++++++---
+ 2 files changed, 44 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/phy/marvell/comphy_a3700.c b/drivers/phy/marvell/comphy_a3700.c
+index 6dd58548b5..5b9f670f8c 100644
+--- a/drivers/phy/marvell/comphy_a3700.c
++++ b/drivers/phy/marvell/comphy_a3700.c
+@@ -376,13 +376,18 @@ static int comphy_usb3_power_up(u32 speed, u32 invert)
+ 	reg_set16((void __iomem *)LANE_CFG0_ADDR(USB3), 0x1, 0xFF);
+ 
+ 	/*
+-	 * unset BIT0: set Tx Electrical Idle Mode: Transmitter is in
+-	 * low impedance mode during electrical idle
++	 * Set BIT0: enable transmitter in high impedance mode
++	 * Set BIT[3:4]: delay 2 clock cycles for HiZ off latency
++	 * Set BIT6: Tx detect Rx at HiZ mode
++	 * Unset BIT15: set to 0 to set USB3 De-emphasize level to -3.5db
++	 *              together with bit 0 of COMPHY_REG_LANE_CFG0_ADDR
++	 *		register
+ 	 */
+-	/* unset BIT4: set G2 Tx Datapath with no Delayed Latency */
+-	/* unset BIT6: set Tx Detect Rx Mode at LoZ mode */
+-	reg_set16((void __iomem *)LANE_CFG1_ADDR(USB3), 0x0, 0xFFFF);
+-
++	reg_set16((void __iomem *)LANE_CFG1_ADDR(USB3),
++		  TX_DET_RX_MODE | GEN2_TX_DATA_DLY_DEFT |
++		  TX_ELEC_IDLE_MODE_EN,
++		  PRD_TXDEEMPH1_MASK | TX_DET_RX_MODE | GEN2_TX_DATA_DLY_MASK |
++		  TX_ELEC_IDLE_MODE_EN);
+ 
+ 	/* 0xd005c310 = 0x93: set Spread Spectrum Clock Enabled  */
+ 	reg_set16((void __iomem *)LANE_CFG4_ADDR(USB3),
+@@ -462,8 +467,16 @@ static int comphy_usb3_power_up(u32 speed, u32 invert)
+ 			  phy_rxd_inv, 0);
+ 	}
+ 
++	/* 10. Set max speed generation to USB3.0 5Gbps */
++	reg_set16((void __iomem *)SYNC_MASK_GEN_REG(USB3),
++		  PHY_GEN_USB3_5G, PHY_GEN_MAX_MASK);
++
++	/* 11. Set capacitor value for FFE gain peaking to 0xF */
++	reg_set16((void __iomem *)GEN3_SETTINGS_3(USB3),
++		  PHY_GEN_FFE_CAP_SEL_VALUE, PHY_GEN_FFE_CAP_SEL_MASK);
++
+ 	/*
+-	 * 10. Release SW reset
++	 * 12. Release SW reset
+ 	 */
+ 	reg_set16((void __iomem *)GLOB_PHY_CTRL0_ADDR(USB3),
+ 		  rb_mode_core_clk_freq_sel | rb_mode_pipe_width_32 | 0x20,
+diff --git a/drivers/phy/marvell/comphy_a3700.h b/drivers/phy/marvell/comphy_a3700.h
+index 9a4d160a44..1a3fff1d0e 100644
+--- a/drivers/phy/marvell/comphy_a3700.h
++++ b/drivers/phy/marvell/comphy_a3700.h
+@@ -112,6 +112,13 @@
+ #define phy_txd_inv			BIT(10)
+ #define phy_rxd_inv			BIT(11)
+ 
++#define PHY_SYNC_MASK_GEN_REG		0x25
++#define SYNC_MASK_GEN_REG(unit)		\
++	(PHY_SYNC_MASK_GEN_REG * PHY_SHFT(unit) + PHY_BASE(unit))
++#define PHY_GEN_MAX_OFFSET		10
++#define PHY_GEN_MAX_MASK		(3 << PHY_GEN_MAX_OFFSET)
++#define PHY_GEN_USB3_5G			(1 << PHY_GEN_MAX_OFFSET)
++
+ /* for phy_read16 and phy_write16 */
+ #define PHY_REG_UNIT_CTRL_ADDR		0x48
+ #define UNIT_CTRL_ADDR(unit)		\
+@@ -154,10 +161,24 @@
+ #define MISC_REG1_ADDR(u)		(0x73 * PHY_SHFT(u) + PHY_BASE(u))
+ #define bf_sel_bits_pcie_force		BIT(15)
+ 
+-#define LANE_CFG0_ADDR(u)		(0x180 * PHY_SHFT(u) + PHY_BASE(u))
+-#define bf_use_max_pll_rate		BIT(9)
+-#define LANE_CFG1_ADDR(u)		(0x181 * PHY_SHFT(u) + PHY_BASE(u))
++#define PHY_REG_GEN3_SETTINGS_3		0x112
++#define GEN3_SETTINGS_3(u)	\
++	(PHY_REG_GEN3_SETTINGS_3 * PHY_SHFT(u) + PHY_BASE(u))
++#define PHY_GEN_FFE_CAP_SEL_MASK	0xF
++#define PHY_GEN_FFE_CAP_SEL_VALUE	0xF
++
++#define PHY_REG_LANE_CFG0_ADDR		0x180
++#define LANE_CFG0_ADDR(u)	\
++	(PHY_REG_LANE_CFG0_ADDR * PHY_SHFT(u) + PHY_BASE(u))
++#define PHY_REG_LANE_CFG1_ADDR		0x181
++#define LANE_CFG1_ADDR(u)	\
++	(PHY_REG_LANE_CFG1_ADDR * PHY_SHFT(u) + PHY_BASE(u))
++#define PRD_TXDEEMPH1_MASK		BIT(15)
+ #define bf_use_max_pll_rate		BIT(9)
++#define TX_DET_RX_MODE			BIT(6)
++#define GEN2_TX_DATA_DLY_MASK		(BIT(3) | BIT(4))
++#define GEN2_TX_DATA_DLY_DEFT		(2 << 3)
++#define TX_ELEC_IDLE_MODE_EN		BIT(0)
+ /* 0x5c310 = 0x93 (set BIT7) */
+ #define LANE_CFG4_ADDR(u)		(0x188 * PHY_SHFT(u) + PHY_BASE(u))
+ #define bf_spread_spectrum_clock_en	BIT(7)
+-- 
+2.22.0
+

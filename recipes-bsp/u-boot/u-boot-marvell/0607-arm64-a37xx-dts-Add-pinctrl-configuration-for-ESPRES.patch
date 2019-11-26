@@ -1,0 +1,63 @@
+From 49691b826a2953b2f270a51ba2f8bce82763628a Mon Sep 17 00:00:00 2001
+From: Ken Ma <make@marvell.com>
+Date: Wed, 28 Jun 2017 15:29:25 +0800
+Subject: [PATCH 0607/1200] arm64: a37xx: dts: Add pinctrl configuration for
+ ESPRESSOBin board
+
+Change-Id: I28b171ab441ea21668ff84d4800cea0ac396cce0
+Reviewed-on: http://vgitil04.il.marvell.com:8080/40913
+Reviewed-by: Wilson Ding <dingwei@marvell.com>
+Tested-by: Wilson Ding <dingwei@marvell.com>
+Cc: Simon Glass <sjg@chromium.org>
+Cc: Stefan Roese <sr@denx.de>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/52522
+Tested-by: Hua Jing <jinghua@marvell.com>
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+---
+ arch/arm/dts/armada-3720-espressobin.dts | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/arch/arm/dts/armada-3720-espressobin.dts b/arch/arm/dts/armada-3720-espressobin.dts
+index aa6587af66..5d8d27ebd1 100644
+--- a/arch/arm/dts/armada-3720-espressobin.dts
++++ b/arch/arm/dts/armada-3720-espressobin.dts
+@@ -89,6 +89,8 @@
+ 
+ &eth0 {
+ 	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&rgmii_pins>;
+ 	phy-mode = "rgmii";
+ 	phy_addr = <0x1>;
+ 	fixed-link {
+@@ -98,6 +100,8 @@
+ };
+ 
+ &i2c0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&i2c1_pins>;
+ 	status = "okay";
+ };
+ 
+@@ -108,6 +112,8 @@
+ 
+ &spi0 {
+ 	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&spi_quad_pins>;
+ 
+ 	spi-flash@0 {
+ 		#address-cells = <1>;
+@@ -121,6 +127,8 @@
+ 
+ /* Exported on the micro USB connector CON32 through an FTDI */
+ &uart0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart1_pins>;
+ 	status = "okay";
+ };
+ 
+-- 
+2.22.0
+

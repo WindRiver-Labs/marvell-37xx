@@ -1,0 +1,32 @@
+From b1489151fe201792feadbc61495faa6ffd3bdfca Mon Sep 17 00:00:00 2001
+From: Igal Liberman <igall@marvell.com>
+Date: Wed, 14 Nov 2018 13:49:49 +0200
+Subject: [PATCH 0897/1200] net: mvpp2: fix phy configuration
+
+Currently network for ports with attached PHY is not working.
+This patch fixes this issue.
+
+Change-Id: I33a135cc1528b01aeec90a54078ba8b1dd6f53f2
+Signed-off-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/60909
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+---
+ drivers/net/mvpp2.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/net/mvpp2.c b/drivers/net/mvpp2.c
+index f1ef356612..998a92181c 100644
+--- a/drivers/net/mvpp2.c
++++ b/drivers/net/mvpp2.c
+@@ -4728,7 +4728,7 @@ static int phy_info_parse(struct udevice *dev, struct mvpp2_port *port)
+ 	fixed_link = fdt_subnode_offset(gd->fdt_blob, port_node, "fixed-link");
+ 
+ 	if (phy_node > 0) {
+-		if (fixed_link != FDT_ERR_NOTFOUND) {
++		if (fixed_link != -FDT_ERR_NOTFOUND) {
+ 			/* phy_addr is set to invalid value for fixed links */
+ 			phyaddr = PHY_MAX_ADDR;
+ 		} else {
+-- 
+2.22.0
+

@@ -1,0 +1,136 @@
+From 34789f7bce5be629ba7e17bf08bc3b71f10ae06d Mon Sep 17 00:00:00 2001
+From: Stefan Chulski <stefanc@marvell.com>
+Date: Sun, 14 Apr 2019 18:56:58 +0300
+Subject: [PATCH 1096/1200] arm64: dts: cn9131: add cn9131-db device tree with
+ setup B
+
+The cn913x DB board is a modular board,
+which supports multiple possible configurations.
+
+Topology for setup B:
+AP-MPPs:
+	- SDIO, UART
+CP0-SerDes:
+	- lane0: PCIe0
+	- lane1: PCIe0
+	- lane2: PCIe0
+	- lane3: PCIe0
+	- lane4: SFI0
+	- lane5: SATA1
+CP0-MPPs:
+	- RGMII1, RGMII2, SDIO, I2C, NAND
+CP1-SerDes:
+	- lane0: PCIe0
+	- lane1: PCIe0
+	- lane2: SFI0
+	- lane3: USB3_1
+	- lane4: SGMII1
+	- lane5: SATA1
+CP1-MPPs:
+	- I2C, SPI1
+
+Change-Id: I56ef73dda93a7323f253bac48ca743e88bb4859c
+Signed-off-by: Stefan Chulski <stefanc@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/7370
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/Makefile        |  3 +-
+ arch/arm/dts/cn9131-db-B.dts | 71 ++++++++++++++++++++++++++++++++++++
+ 2 files changed, 73 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm/dts/cn9131-db-B.dts
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index cdb1f1dc00..7af9a3fed1 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -132,7 +132,8 @@ dtb-$(CONFIG_ARCH_MVEBU) +=			\
+ 	armada-38x-controlcenterdc.dtb		\
+ 	cn9130-db-A.dtb				\
+ 	cn9130-db-B.dtb				\
+-	cn9131-db-A.dtb
++	cn9131-db-A.dtb				\
++	cn9131-db-B.dtb
+ 
+ dtb-$(CONFIG_ARCH_UNIPHIER_LD11) += \
+ 	uniphier-ld11-global.dtb \
+diff --git a/arch/arm/dts/cn9131-db-B.dts b/arch/arm/dts/cn9131-db-B.dts
+new file mode 100644
+index 0000000000..cd67ed7858
+--- /dev/null
++++ b/arch/arm/dts/cn9131-db-B.dts
+@@ -0,0 +1,71 @@
++/*
++ * Copyright (C) 2019 Marvell International Ltd.
++ *
++ * SPDX-License-Identifier:    GPL-2.0
++ * https://spdx.org/licenses
++ */
++
++#include "cn9130-db-B.dts"
++#include "cn9131-db.dtsi"
++
++/ {
++	model = "Marvell CN9131 development board (CP NAND) setup(B)";
++	compatible = "marvell,cn9131-db", "marvell,armada-ap806-quad",
++		     "marvell,armada-ap806";
++};
++
++&cp1_comphy {
++	/* Serdes Configuration:
++	 *	Lane 0: PCIe0 (x2)
++	 *	Lane 1: PCIe0 (x2)
++	 *	Lane 2: SFI (port 0)
++	 *	Lane 3: USB1
++	 *	Lane 4: SGMII (port 1)
++	 *	Lane 5: SATA1
++	 */
++	phy0 {
++		phy-type = <COMPHY_TYPE_PEX0>;
++	};
++	phy1 {
++		phy-type = <COMPHY_TYPE_PEX0>;
++	};
++	phy2 {
++		phy-type = <COMPHY_TYPE_SFI0>;
++		phy-speed = <COMPHY_SPEED_10_3125G>;
++	};
++	phy3 {
++		phy-type = <COMPHY_TYPE_USB3_HOST1>;
++	};
++	phy4 {
++		phy-type = <COMPHY_TYPE_SGMII1>;
++		phy-speed = <COMPHY_SPEED_1_25G>;
++	};
++	phy5 {
++		phy-type = <COMPHY_TYPE_SATA1>;
++	};
++};
++
++&cp1_ethernet {
++	status = "okay";
++};
++
++/* 3310 RJ45 CON55 */
++&cp1_eth0 {
++	status = "okay";
++	phy-mode = "sfi"; /* lane-2 */
++	phy = <&sfi_phy8>; /* required by 3310 fw download */
++};
++
++/* CON50 */
++&cp1_eth1 {
++	status = "okay";
++	phy-mode = "sgmii"; /* lane-4 */
++	marvell,sfp-tx-disable-gpio = <&cp1_gpio0 9 GPIO_ACTIVE_HIGH>;
++};
++
++&cp1_xmdio {
++	status = "okay";
++	sfi_phy8: ethernet-phy@8 {
++		reg = <8>;
++	};
++};
+-- 
+2.22.0
+

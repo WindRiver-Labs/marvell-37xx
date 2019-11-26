@@ -1,0 +1,44 @@
+From 328065aa23affde9065ee7cd5d9a05cacd88d281 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Wed, 8 Aug 2018 18:10:55 +0300
+Subject: [PATCH 0833/1200] mtd: nand: pxa3xx: add support for Toshiba flash
+
+Add timings and device ID for Toshiba TC58NVG1S3HTA00 flash
+
+Change-Id: I5ac2b467c8940a48277b5b67d088927760d016ca
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/58880
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+---
+ drivers/mtd/nand/pxa3xx_nand.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/mtd/nand/pxa3xx_nand.c b/drivers/mtd/nand/pxa3xx_nand.c
+index 268f64f960..6cc8489a42 100644
+--- a/drivers/mtd/nand/pxa3xx_nand.c
++++ b/drivers/mtd/nand/pxa3xx_nand.c
+@@ -257,10 +257,12 @@ struct pxa3xx_nand_info {
+ };
+ 
+ static struct pxa3xx_nand_timing timing[] = {
++	/*ch  cs  wh  wp   rh  rp   r      whr  ar */
+ 	{ 40, 80, 60, 100, 80, 100, 90000, 400, 40, },
+ 	{ 10,  0, 20,  40, 30,  40, 11123, 110, 10, },
+ 	{ 10, 25, 15,  25, 15,  30, 25000,  60, 10, },
+ 	{ 10, 35, 15,  25, 15,  25, 25000,  60, 10, },
++	{  5, 20, 10,  12, 10,  12, 25000,  60, 10, },
+ };
+ 
+ static struct pxa3xx_nand_flash builtin_flash_types[] = {
+@@ -272,6 +274,7 @@ static struct pxa3xx_nand_flash builtin_flash_types[] = {
+ 	{ 0xdc2c,  8,  8, &timing[2] },
+ 	{ 0xcc2c, 16, 16, &timing[2] },
+ 	{ 0xba20, 16, 16, &timing[3] },
++	{ 0xda98,  8,  8, &timing[4] },
+ };
+ 
+ #ifdef CONFIG_SYS_NAND_USE_FLASH_BBT
+-- 
+2.22.0
+

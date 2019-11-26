@@ -1,0 +1,148 @@
+From 7096be532c16f285df7c55b272e576c395abf496 Mon Sep 17 00:00:00 2001
+From: Igal Liberman <igall@marvell.com>
+Date: Thu, 5 Jul 2018 18:52:15 +0300
+Subject: [PATCH 0798/1200] dts: a8040: align network and comphy configurations
+
+Setup A:
+	- Disable CP1 USB3_1.
+
+Setup B:
+	- CP1 comphy2: SGMII0 --> SFI0.
+	  CP1 eth1 updated accordingly.
+
+Setup D:
+        - CP1 comphy2: SFI0 --> SGMII0.
+          CP1 eth0 updated accordingly.
+
+Setup E:
+	- CP1 comphy2: SFI0 --> SGMII0 (3.25G).
+	  CP1 eth0 updated accordingly.
+
+The documentation will be updated in a separate patch.
+
+Change-Id: Ib3f8fab540b95d727c0d3104bfd7868745c608d7
+Signed-off-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/57734
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+---
+ arch/arm/dts/armada-8040-db-B.dts | 8 ++++----
+ arch/arm/dts/armada-8040-db-D.dts | 7 ++++---
+ arch/arm/dts/armada-8040-db-E.dts | 7 ++++---
+ arch/arm/dts/armada-8040-db.dts   | 5 -----
+ 4 files changed, 12 insertions(+), 15 deletions(-)
+
+diff --git a/arch/arm/dts/armada-8040-db-B.dts b/arch/arm/dts/armada-8040-db-B.dts
+index 1864f4d4ad..61bfe1b510 100644
+--- a/arch/arm/dts/armada-8040-db-B.dts
++++ b/arch/arm/dts/armada-8040-db-B.dts
+@@ -236,7 +236,7 @@
+ 	/* Serdes Configuration:
+ 	 *	Lane 0: PCIe0 (x1)
+ 	 *	Lane 1: USB3_HOST0
+-	 *	Lane 2: SGMII0 (1.25G)
++	 *	Lane 2: SFI0 (10G)
+ 	 *	Lane 3: SATA1
+ 	 *	Lane 4: PCIe1 (x1)
+ 	 *	Lane 5: PCIe2 (x1)
+@@ -249,8 +249,8 @@
+ 		phy-speed = <COMPHY_SPEED_5G>;
+ 	};
+ 	phy2 {
+-		phy-type = <COMPHY_TYPE_SGMII0>;
+-		phy-speed = <COMPHY_SPEED_1_25G>;
++		phy-type = <COMPHY_TYPE_SFI0>;
++		phy-speed = <COMPHY_SPEED_10_3125G>;
+ 	};
+ 	phy3 {
+ 		phy-type = <COMPHY_TYPE_SATA1>;
+@@ -333,7 +333,7 @@
+ 
+ &cp1_eth0 {
+ 	status = "okay";
+-	phy-mode = "sgmii"; /* lane-2 */
++	phy-mode = "sfi"; /* lane-2 */
+ };
+ 
+ &cp1_eth1 {
+diff --git a/arch/arm/dts/armada-8040-db-D.dts b/arch/arm/dts/armada-8040-db-D.dts
+index 755e02dfdb..0a24f3b999 100644
+--- a/arch/arm/dts/armada-8040-db-D.dts
++++ b/arch/arm/dts/armada-8040-db-D.dts
+@@ -239,7 +239,7 @@
+ 	/* Serdes Configuration:
+ 	 *	Lane 0: PCIe0 (x1)
+ 	 *	Lane 1: SATA0
+-	 *	Lane 2: SFI (10G)
++	 *	Lane 2: SGMII0 (1.25G)
+ 	 *	Lane 3: SATA1
+ 	 *	Lane 4: PCIe1 (x1)
+ 	 *	Lane 5: PCIe2 (x1)
+@@ -251,7 +251,8 @@
+ 		phy-type = <COMPHY_TYPE_SATA0>;
+ 	};
+ 	phy2 {
+-		phy-type = <COMPHY_TYPE_SFI0>;
++		phy-type = <COMPHY_TYPE_SGMII0>;
++		phy-speed = <COMPHY_SPEED_1_25G>;
+ 	};
+ 	phy3 {
+ 		phy-type = <COMPHY_TYPE_SATA1>;
+@@ -302,5 +303,5 @@
+ 
+ &cp1_eth0 {
+ 	status = "okay";
+-	phy-mode = "sfi"; /* lane-2 */
++	phy-mode = "sgmii"; /* lane-2 */
+ };
+diff --git a/arch/arm/dts/armada-8040-db-E.dts b/arch/arm/dts/armada-8040-db-E.dts
+index 96d96bd8f7..703643e280 100644
+--- a/arch/arm/dts/armada-8040-db-E.dts
++++ b/arch/arm/dts/armada-8040-db-E.dts
+@@ -221,7 +221,7 @@
+ 	/* Serdes Configuration:
+ 	 *	Lane 0: PCIe0 (x1)
+ 	 *	Lane 1: SATA0
+-	 *	Lane 2: SFI (10G)
++	 *	Lane 2: SGMII (3.125G)
+ 	 *	Lane 3: SATA1
+ 	 *	Lane 4: PCIe1 (x1)
+ 	 *	Lane 5: PCIe2 (x1)
+@@ -233,7 +233,8 @@
+ 		phy-type = <COMPHY_TYPE_SATA0>;
+ 	};
+ 	phy2 {
+-		phy-type = <COMPHY_TYPE_SFI0>;
++		phy-type = <COMPHY_TYPE_SGMII0>;
++		phy-speed = <COMPHY_SPEED_3_125G>;
+ 	};
+ 	phy3 {
+ 		phy-type = <COMPHY_TYPE_SATA1>;
+@@ -316,7 +317,7 @@
+ 
+ &cp1_eth0 {
+ 	status = "okay";
+-	phy-mode = "sfi"; /* lane-2 */
++	phy-mode = "sgmii"; /* lane-2 */
+ };
+ 
+ &cp1_eth1 {
+diff --git a/arch/arm/dts/armada-8040-db.dts b/arch/arm/dts/armada-8040-db.dts
+index e7d263c2e0..2bbcc94116 100644
+--- a/arch/arm/dts/armada-8040-db.dts
++++ b/arch/arm/dts/armada-8040-db.dts
+@@ -331,11 +331,6 @@
+ 	status = "okay";
+ };
+ 
+-/* CON10 on CP1 expansion */
+-&cp1_usb3_1 {
+-	status = "okay";
+-};
+-
+ &cp1_utmi0 {
+ 	status = "okay";
+ };
+-- 
+2.22.0
+

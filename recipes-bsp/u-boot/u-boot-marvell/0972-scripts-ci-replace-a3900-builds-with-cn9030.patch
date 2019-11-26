@@ -1,0 +1,61 @@
+From 6857aae9e42fa7e6c474a85a27d20d5ab7fc89cd Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Sun, 6 Jan 2019 16:59:29 +0200
+Subject: [PATCH 0972/1200] scripts: ci: replace a3900 builds with cn9030
+
+Change-Id: I8a95bce3691b91e63cade8aede35f27b831780e7
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/62441
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Lior Levin <levin@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/1876
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ scripts/ci/compile.sh           | 6 +++---
+ scripts/ci/supported_builds.txt | 4 ++--
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index 14844088c6..1b0107102a 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -85,7 +85,7 @@ case $build_name in
+ 	*_a80x0_mcbin* ) defconfig="mvebu_mcbin-88f8040_defconfig"; ;;
+ 	*_a80x0_ucpe* )  defconfig="mvebu_ucpe-88f8040_defconfig"; ;;
+ 	*_a80x0* )       defconfig="mvebu_db_armada8k_defconfig"; ;;
+-	*_a3900* )       defconfig="mvebu_db_armada8k_defconfig"; ;;
++	*_cn9* )        defconfig="mvebu_db_cn91xx_defconfig"; ;;
+ 	*_a37xx_espressobin_* )
+ 	                 defconfig="mvebu_espressobin-88f3720_defconfig"; ;;
+ 	*_a37xx_* )      defconfig="mvebu_db-88f3720_defconfig"; ;;
+@@ -117,8 +117,8 @@ case $build_name in
+ 	uboot_2018_a80x0_mcbin* ) device_tree="armada-8040-mcbin"; ;;
+ 	uboot_2018_a80x0_ucpe* ) device_tree=""; ;;
+ 
+-	uboot_2018_a3900_A ) device_tree="armada-3900-vd-A"; ;;
+-	uboot_2018_a3900_B ) device_tree="armada-3900-vd-B"; ;;
++	uboot_2018_cn9030_A ) device_tree="cn9030-vd-A"; ;;
++	uboot_2018_cn9030_B ) device_tree="cn9030-vd-B"; ;;
+ 
+ 	uboot_2018*_a37xx_ddr3_v2_A_* )
+ 		device_tree="armada-3720-db"; ;;
+diff --git a/scripts/ci/supported_builds.txt b/scripts/ci/supported_builds.txt
+index 4a3c4d7df6..9dec00cb0c 100644
+--- a/scripts/ci/supported_builds.txt
++++ b/scripts/ci/supported_builds.txt
+@@ -30,8 +30,8 @@ uboot_2018_a80x0_mcbin_single_shot_cve_2018_3639
+ uboot_2018_a80x0_mcbin_single_shot_pm
+ uboot_2018_a80x0_ucpe
+ 
+-uboot_2018_a3900_A
+-uboot_2018_a3900_B
++uboot_2018_cn9030_A
++uboot_2018_cn9030_B
+ 
+ uboot_2018_a37xx_ddr3_v2_A_1000_800
+ uboot_2018_a37xx_ddr3_v2_B_1000_800
+-- 
+2.22.0
+

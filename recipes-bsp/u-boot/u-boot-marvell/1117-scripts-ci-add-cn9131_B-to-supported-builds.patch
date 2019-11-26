@@ -1,0 +1,32 @@
+From 6322ef8eea4f643b0cf3ce37d973eb1065dc5dc8 Mon Sep 17 00:00:00 2001
+From: Stefan Chulski <stefanc@marvell.com>
+Date: Sun, 19 May 2019 10:02:33 +0300
+Subject: [PATCH 1117/1200] scripts/ci: add cn9131_B to supported builds
+
+Patch also remove duplicate cn9132_A label.
+
+Change-Id: I628ad05ee7821f1aaf58e55959f48f2dbaf73acf
+Signed-off-by: Stefan Chulski <stefanc@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/9205
+Tested-by: sa_ip-sw-jenkins <sa_ip-sw-jenkins@marvell.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ scripts/ci/supported_builds.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/scripts/ci/supported_builds.txt b/scripts/ci/supported_builds.txt
+index 41ebdb075f..1bb11d8743 100644
+--- a/scripts/ci/supported_builds.txt
++++ b/scripts/ci/supported_builds.txt
+@@ -40,7 +40,7 @@ uboot_2018_cn9130_emmc_A
+ uboot_2018_cn9130_crb_A
+ uboot_2018_cn9130_crb_B
+ uboot_2018_cn9131_A
+-uboot_2018_cn9132_A
++uboot_2018_cn9131_B
+ uboot_2018_cn9131_ddr32_A
+ uboot_2018_cn9131_emmc_A
+ uboot_2018_cn9132_A
+-- 
+2.22.0
+

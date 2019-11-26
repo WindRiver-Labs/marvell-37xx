@@ -1,0 +1,36 @@
+From 62f7e402d396e3a7db7bd3d376aacf10f816248d Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Mon, 13 Aug 2018 15:05:18 +0300
+Subject: [PATCH 0848/1200] fix: mvebu: Increase the malloc size to 16MB
+
+The boot on some Marvell platforms is unstable and may freeze during
+network initialization due to insufficient allocation space for RX/TX
+buffers.
+This patch increases the CONFIG_SYS_MALLOC_LEN from 8MB to 16MB for
+all Armada 64-bit plaforms for improving the boot stability.
+
+Change-Id: Icbfb30ad6d4067363451262b04f0ef63ec17e4f4
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/59019
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ include/configs/mvebu_armada-common.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/mvebu_armada-common.h b/include/configs/mvebu_armada-common.h
+index cc8b99d055..399748593c 100644
+--- a/include/configs/mvebu_armada-common.h
++++ b/include/configs/mvebu_armada-common.h
+@@ -91,7 +91,7 @@
+ /*
+  * Size of malloc() pool
+  */
+-#define CONFIG_SYS_MALLOC_LEN	(8 << 20) /* 8MiB for malloc() */
++#define CONFIG_SYS_MALLOC_LEN	(9 << 20) /* 16MiB for malloc() */
+ 
+ /*
+  * Other required minimal configurations
+-- 
+2.22.0
+

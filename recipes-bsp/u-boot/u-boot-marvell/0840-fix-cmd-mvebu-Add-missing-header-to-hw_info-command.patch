@@ -1,0 +1,33 @@
+From c4b3d3b622557ed7b9257e0b61c7926466f09636 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Thu, 9 Aug 2018 16:07:21 +0300
+Subject: [PATCH 0840/1200] fix: cmd: mvebu: Add missing header to hw_info
+ command
+
+Add missing "common.h" include to hw_info code.
+This change fixes broken build for boot from MMC mode.
+
+Change-Id: Ie7fe9afefd46dbb4a8ee81ddfc729d791c448d59
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/58923
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ cmd/mvebu/hw_info.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/cmd/mvebu/hw_info.c b/cmd/mvebu/hw_info.c
+index 15759c8015..ee09e22f27 100644
+--- a/cmd/mvebu/hw_info.c
++++ b/cmd/mvebu/hw_info.c
+@@ -5,6 +5,7 @@
+ 
+ #include <config.h>
+ #include <command.h>
++#include <common.h>
+ #include <errno.h>
+ #include <console.h>
+ #include <environment.h>
+-- 
+2.22.0
+

@@ -1,0 +1,47 @@
+From 27be2ad9f2d230366f3484b58c5aae8d8be83cfc Mon Sep 17 00:00:00 2001
+From: Wilson Ding <dingwei@marvell.com>
+Date: Tue, 18 Apr 2017 18:28:04 +0800
+Subject: [PATCH 0618/1200] arm64: a37xx: populate pcie memory region
+
+This patch added a new region of 32MiB AT 0xe800.0000
+to Armada37x0's memory map. This region is supposed to
+be mapped in MMU in order to enable the access to the
+PCI I/O or MEM resources.
+
+Change-Id: Iec36deb8f473c8e17ff33ef8ef1725466766b799
+Signed-off-by: Wilson Ding <dingwei@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/38724
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Victor Gu <xigu@marvell.com>
+Cc: Simon Glass <sjg@chromium.org>
+Cc: Stefan Roese <sr@denx.de>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/52533
+Tested-by: Hua Jing <jinghua@marvell.com>
+Reviewed-by: Hua Jing <jinghua@marvell.com>
+---
+ arch/arm/mach-mvebu/armada3700/cpu.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/arch/arm/mach-mvebu/armada3700/cpu.c b/arch/arm/mach-mvebu/armada3700/cpu.c
+index b9214f7bd9..ab4164cbe0 100644
+--- a/arch/arm/mach-mvebu/armada3700/cpu.c
++++ b/arch/arm/mach-mvebu/armada3700/cpu.c
+@@ -45,6 +45,14 @@ static struct mm_region mvebu_mem_map[] = {
+ 		.attrs = PTE_BLOCK_MEMTYPE(MT_DEVICE_NGNRNE) |
+ 			 PTE_BLOCK_NON_SHARE
+ 	},
++	{
++		/* PCI regions */
++		.phys = 0xe8000000UL,
++		.virt = 0xe8000000UL,
++		.size = 0x02000000UL,	/* 32MiB master PCI space */
++		.attrs = PTE_BLOCK_MEMTYPE(MT_DEVICE_NGNRNE) |
++			 PTE_BLOCK_NON_SHARE
++	},
+ 	{
+ 		/* List terminator */
+ 		0,
+-- 
+2.22.0
+

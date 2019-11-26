@@ -1,0 +1,64 @@
+From 669d383c550056e4724c1e2077be50819960d9b2 Mon Sep 17 00:00:00 2001
+From: Alex Leibovich <alexl@marvell.com>
+Date: Sun, 17 Mar 2019 14:54:11 +0200
+Subject: [PATCH 1078/1200] ci: added ddr32 relevant builds cn9131 and cn9132
+
+Added u-boot build for cn9131 and cn9132
+with support in ddr32
+
+Change-Id: Ie5b77a296db0a34a3b7c484717f53c9882fbb825
+Signed-off-by: Alex Leibovich <alexl@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/5852
+Reviewed-by: Stefan Chulski <Stefan.Chulski@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Tested-by: sa_ip-sw-jenkins
+---
+ scripts/ci/compile.sh           | 8 +++++---
+ scripts/ci/supported_builds.txt | 2 ++
+ 2 files changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index be604e0d7f..0bffd05780 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -113,18 +113,20 @@ case $build_name in
+ 	uboot_2018_a80x0_H ) device_tree="armada-8040-db-H"; ;;
+ 	uboot_2018_a80x0_kr ) device_tree="armada-8040-db"; ;;
+ 	uboot_2018_a80x0_pm ) device_tree="armada-8040-db"; ;;
+-        uboot_2018_a80x0_ddr32 ) device_tree="armada-8040-db"; ;;
++	uboot_2018_a80x0_ddr32 ) device_tree="armada-8040-db"; ;;
+ 	uboot_2018_a80x0_mcbin_single_shot* )
+-		device_tree="armada-8040-mcbin-single-shot"; ;;
++	device_tree="armada-8040-mcbin-single-shot"; ;;
+ 	uboot_2018_a80x0_mcbin* ) device_tree="armada-8040-mcbin"; ;;
+ 	uboot_2018_a80x0_ucpe* ) device_tree=""; ;;
+ 
+ 	uboot_2018_a3900_A ) device_tree="armada-3900-vd-A"; ;;
+ 	uboot_2018_a3900_B ) device_tree="armada-3900-vd-B"; ;;
+ 	uboot_2018_cn9130_A ) device_tree="cn9130-db-A"; ;;
+-        uboot_2018_cn9130_ddr32_A ) device_tree="cn9130-db-A"; ;;
++	uboot_2018_cn9130_ddr32_A ) device_tree="cn9130-db-A"; ;;
+ 	uboot_2018_cn9131_A ) device_tree="cn9131-db-A"; ;;
++	uboot_2018_cn9131_ddr32_A ) device_tree="cn9131-db-A"; ;;
+ 	uboot_2018_cn9132_A ) device_tree="cn9132-db-A"; ;;
++	uboot_2018_cn9132_ddr32_A ) device_tree="cn9132-db-A"; ;;
+ 
+ 	uboot_2018*_a37xx_ddr3_v2_A_* )
+ 		device_tree="armada-3720-db"; ;;
+diff --git a/scripts/ci/supported_builds.txt b/scripts/ci/supported_builds.txt
+index 2fe9f32e31..0173fedb5e 100644
+--- a/scripts/ci/supported_builds.txt
++++ b/scripts/ci/supported_builds.txt
+@@ -36,7 +36,9 @@ uboot_2018_a3900_B
+ uboot_2018_cn9130_A
+ uboot_2018_cn9130_ddr32_A
+ uboot_2018_cn9131_A
++uboot_2018_cn9131_ddr32_A
+ uboot_2018_cn9132_A
++uboot_2018_cn9132_ddr32_A
+ 
+ uboot_2018_a37xx_ddr3_v2_A_1000_800
+ uboot_2018_a37xx_ddr3_v2_B_1000_800
+-- 
+2.22.0
+

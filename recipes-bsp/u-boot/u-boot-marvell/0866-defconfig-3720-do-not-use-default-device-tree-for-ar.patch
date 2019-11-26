@@ -1,0 +1,33 @@
+From 3ad2d304d9f6831de587717a48b211bdab54dd63 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Tue, 18 Sep 2018 11:11:52 +0200
+Subject: [PATCH 0866/1200] defconfig: 3720: do not use default device tree for
+ armada 3720 defconfig
+
+Because there are plenty of armada 3720 device-tree version, do not add
+default one and force the user to specify desired one intentionally.
+
+Change-Id: I36f7c4a7bd800788fc6f0b6503fc4d81adf882b1
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/59928
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ configs/mvebu_db-88f3720_defconfig | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/configs/mvebu_db-88f3720_defconfig b/configs/mvebu_db-88f3720_defconfig
+index 6a6b9a302b..137efb3bf0 100644
+--- a/configs/mvebu_db-88f3720_defconfig
++++ b/configs/mvebu_db-88f3720_defconfig
+@@ -3,7 +3,6 @@ CONFIG_ARCH_MVEBU=y
+ CONFIG_SYS_TEXT_BASE=0x00000000
+ CONFIG_SYS_MALLOC_F_LEN=0x2000
+ CONFIG_TARGET_MVEBU_ARMADA_37XX=y
+-CONFIG_DEFAULT_DEVICE_TREE="armada-3720-db"
+ CONFIG_DEBUG_UART=y
+ CONFIG_AHCI=y
+ CONFIG_DISTRO_DEFAULTS=y
+-- 
+2.22.0
+

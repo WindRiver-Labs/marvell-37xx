@@ -1,0 +1,50 @@
+From 5a5081e651142c34f59e0c0831969790cf930966 Mon Sep 17 00:00:00 2001
+From: Bin Meng <bmeng.cn@gmail.com>
+Date: Wed, 23 May 2018 23:40:47 -0700
+Subject: [PATCH 1185/1200] usb: xhci: Set accurate add context flags when
+ updating hub attributes
+
+If a USB 3.0 hub is plugged into the root port of the xHC, the xHCI
+driver will issue a 'Configure Endpoint' command to the xHC for it
+to update its internal data structure for this hub device. The hub
+attributes are in the slot context so we need tell xHC to update the
+slot context by setting the add context flags of the input control
+context to only cover the slot context.
+
+At present the add context flags is or'ed with the slot context bit,
+but it should really be accurately set to the slot context, as the
+variable that holds the value of the add context flags comes from
+whatever was set in the last command execution, which may contain
+additional contexts that 'Configure Endpoint' command should not
+touch. Some xHC implementations like x86 don't complain such, but
+it was observed on Renesas RCar Gen3 platform that the RCar xHC
+complains with a 'TRB error' completion codes as the response.
+
+Change-Id: Ib22612b7688d000cf31fff3bc2e6a0c64fb63068
+Reported-by: Marek Vasut <marek.vasut@gmail.com>
+Signed-off-by: Bin Meng <bmeng.cn@gmail.com>
+Tested-by: Marek Vasut <marek.vasut@gmail.com>
+Tested-by: Matthias Blankertz <matthias.blankertz@cetitec.com>
+Reviewed-on: https://sj1git1.cavium.com/12545
+Reviewed-by: Chandrakala Chavva <cchavva@marvell.com>
+Tested-by: Chandrakala Chavva <cchavva@marvell.com>
+---
+ drivers/usb/host/xhci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/usb/host/xhci.c b/drivers/usb/host/xhci.c
+index a5db3f2a59..505af8dc3a 100644
+--- a/drivers/usb/host/xhci.c
++++ b/drivers/usb/host/xhci.c
+@@ -1427,7 +1427,7 @@ static int xhci_update_hub_device(struct udevice *dev, struct usb_device *udev)
+ 
+ 	ctrl_ctx = xhci_get_input_control_ctx(in_ctx);
+ 	/* Initialize the input context control */
+-	ctrl_ctx->add_flags |= cpu_to_le32(SLOT_FLAG);
++	ctrl_ctx->add_flags = cpu_to_le32(SLOT_FLAG);
+ 	ctrl_ctx->drop_flags = 0;
+ 
+ 	xhci_inval_cache((uintptr_t)out_ctx->bytes, out_ctx->size);
+-- 
+2.22.0
+

@@ -1,0 +1,71 @@
+From 4ddc6ca5f6b8eacd4a7560da5dee3c97a2131018 Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Wed, 4 Nov 2015 20:27:33 -0800
+Subject: [PATCH 0065/1200] pci: Make prescan and postscan function calls
+ unconditional
+
+---
+ drivers/pci/pci_auto_old.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/pci/pci_auto_old.c b/drivers/pci/pci_auto_old.c
+index aac5a1e9ce..49944ce6e9 100644
+--- a/drivers/pci/pci_auto_old.c
++++ b/drivers/pci/pci_auto_old.c
+@@ -26,8 +26,6 @@
+  *
+  */
+ 
+-extern int pci_config_fixed(struct pci_controller *hose, pci_dev_t dev);
+-
+ void pciauto_region_init(struct pci_region *res)
+ {
+ 	/*
+@@ -364,6 +362,7 @@ void pciauto_postscan_setup_bridge(struct pci_controller *hose,
+ }
+ 
+ 
++extern int pci_config_fixed(struct pci_controller *hose, pci_dev_t dev);
+ extern int pci_prescan_config(struct pci_controller *hose, pci_dev_t dev);
+ extern int pci_postscan_config(struct pci_controller *hose, pci_dev_t dev);
+ 
+@@ -390,16 +389,16 @@ int pciauto_config_device(struct pci_controller *hose, pci_dev_t dev)
+ 		debug("PCI Autoconfig: Found P2P bridge, device %d\n",
+ 		      PCI_DEV(dev));
+ 		hose->current_busno++;
++		pci_prescan_config(hose, dev);
++
+ 		if (!pci_config_fixed(hose, dev)) {
+ 			pciauto_setup_device(hose, dev, 2, pci_mem,
+ 					     pci_prefetch, pci_io);
+ 		}
+ 
+ 		/* Passing in current_busno allows for sibling P2P bridges */
+-		hose->current_busno++;
+ 		pciauto_prescan_setup_bridge(hose, dev, hose->current_busno);
+ 		if (!pci_config_fixed(hose, dev)) {
+-			pci_prescan_config(hose, dev);
+ 			pciauto_prescan_setup_bridge(hose, dev, hose->current_busno);
+ 		} else {
+ 			pci_hose_read_config_byte(hose, dev, PCI_PRIMARY_BUS, &pri_bus);
+@@ -408,6 +407,8 @@ int pciauto_config_device(struct pci_controller *hose, pci_dev_t dev)
+ 			sec_bus += hose->first_busno;
+ 			pci_hose_read_config_byte(hose, dev, PCI_SUBORDINATE_BUS, &sub_bus);
+ 			sub_bus += hose->first_busno;
++
++			hose->current_busno = sec_bus;
+ 		}
+ 		/*
+ 		 * need to figure out if this is a subordinate bridge on the bus
+@@ -422,6 +423,8 @@ int pciauto_config_device(struct pci_controller *hose, pci_dev_t dev)
+ 		}
+ 
+ 		sub_bus = hose->current_busno;
++		pci_postscan_config(hose, dev);
++
+ 		break;
+ /*
+ 	case PCI_CLASS_STORAGE_IDE:
+-- 
+2.22.0
+

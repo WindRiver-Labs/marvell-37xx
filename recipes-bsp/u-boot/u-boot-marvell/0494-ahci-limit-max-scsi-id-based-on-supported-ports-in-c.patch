@@ -1,0 +1,26 @@
+From 7c22a9541b39f40869f1a4a5cf13e48bf06c4812 Mon Sep 17 00:00:00 2001
+From: Suneel Garapati <sgarapati@caviumnetworks.com>
+Date: Tue, 14 Nov 2017 17:24:41 -0800
+Subject: [PATCH 0494/1200] ahci: limit max scsi id based on supported ports in
+ controller
+
+Signed-off-by: Suneel Garapati <sgarapati@caviumnetworks.com>
+---
+ drivers/ata/ahci.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/drivers/ata/ahci.c b/drivers/ata/ahci.c
+index c8f3deba1f..5761eeb90f 100644
+--- a/drivers/ata/ahci.c
++++ b/drivers/ata/ahci.c
+@@ -1194,7 +1194,6 @@ int ahci_probe_scsi(struct udevice *ahci_dev, ulong base)
+ 	if (ret)
+ 		return ret;
+ 
+-	uc_plat->max_lun = 1;
+ 	uc_plat->max_id = uc_priv->n_ports;
+ 
+ 	ret = ahci_start_ports(uc_priv);
+-- 
+2.22.0
+

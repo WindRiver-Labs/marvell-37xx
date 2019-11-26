@@ -1,0 +1,34 @@
+From ffa6310fc1ba044fe49e10d7e014159a5c52c534 Mon Sep 17 00:00:00 2001
+From: Jagan Teki <jteki@openedev.com>
+Date: Mon, 14 Dec 2015 18:03:54 +0530
+Subject: [PATCH 0978/1200] sf: Minor cleanup
+
+- Tab space
+- Place all read commands at one place.
+- Re-arrange write commands.
+
+Change-Id: I6b5a6f43b32cd142323ada736a745c0c52dbf68a
+Reviewed-by: Bin Meng <bmeng.cn@gmail.com>
+Signed-off-by: Jagan Teki <jteki@openedev.com>
+Reviewed-on: https://sj1git1.cavium.com/2037
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ drivers/mtd/spi/sf_internal.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/mtd/spi/sf_internal.h b/drivers/mtd/spi/sf_internal.h
+index 30994f9f46..a7bd97a9f0 100644
+--- a/drivers/mtd/spi/sf_internal.h
++++ b/drivers/mtd/spi/sf_internal.h
+@@ -51,6 +51,7 @@ enum spi_nor_option_flags {
+ #define CMD_WRITE_ENABLE		0x06
+ #define CMD_PAGE_PROGRAM_1_1_4		0x32
+ #define CMD_PAGE_PROGRAM_1_4_4		0x38
++#define CMD_QUAD_PAGE_PROGRAM		0x32
+ 
+ /* Read commands */
+ #define CMD_READ_ARRAY_SLOW		0x03
+-- 
+2.22.0
+

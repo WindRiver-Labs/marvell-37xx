@@ -1,0 +1,59 @@
+From 4198813e69a2461dafa951bb4ab592eac793af21 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Thu, 2 Aug 2018 09:28:35 +0200
+Subject: [PATCH 0842/1200] net: mvpp2: mark phy as invalid in case of missing
+ appropriate driver
+
+If the phy doesn't match with any existing u-boot drivers the phy
+framework will connect it to generic one which uid == 0xffffffff. In
+this case act as if the phy wouldn't be declared in dts. Otherwise in
+case of 3310 (for which the driver doesn't exist) the link will be
+marked as always down. Removing phy entry from dts in case of 3310 is
+not good option because it is required for the phy_fw_down procedure.
+
+This patch fixes the issue with the link always down on MCBIN board.
+
+Change-Id: I22d3e4399480b73403dfb0c163348d3b2e2f11a0
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/58907
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ drivers/net/mvpp2.c | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/drivers/net/mvpp2.c b/drivers/net/mvpp2.c
+index d903568e3d..503448f1e9 100644
+--- a/drivers/net/mvpp2.c
++++ b/drivers/net/mvpp2.c
+@@ -4500,6 +4500,27 @@ static void mvpp2_phy_connect(struct udevice *dev, struct mvpp2_port *port)
+ 	if (!port->init || port->link == 0) {
+ 		phy_dev = phy_connect(port->bus, port->phyaddr, dev,
+ 				      port->phy_interface);
++
++		/* If the phy doesn't match with any existing u-boot drivers the
++		 * phy framework will connect it to generic one which
++		 * uid == 0xffffffff. In this case act as if the phy wouldn't be
++		 * declared in dts. Otherwise in case of 3310 (for which the
++		 * driver doesn't exist) the link will not be correctly
++		 * detected. Removing phy entry from dts in case of 3310 is not
++		 * an option because it is required for the phy_fw_down
++		 * procedure.
++		 */
++		if (phy_dev->drv->uid == 0xffffffff) {/* Generic phy */
++			netdev_warn(port->dev,
++				    "Marking phy as invalid, link will not be checked\n");
++			/* set phy_addr to invalid value */
++			port->phyaddr = PHY_MAX_ADDR;
++			mvpp2_egress_enable(port);
++			mvpp2_ingress_enable(port);
++
++			return;
++		}
++
+ 		port->phy_dev = phy_dev;
+ 		if (!phy_dev) {
+ 			netdev_err(port->dev, "cannot connect to phy\n");
+-- 
+2.22.0
+

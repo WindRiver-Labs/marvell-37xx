@@ -1,0 +1,24 @@
+From 0ee48e78e4bb836e0b8624bdd353fe237ab13506 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Tue, 2 Apr 2019 11:41:01 +0300
+Subject: [PATCH 1083/1200] Bump u-boot-2018.03 to release devel-1.0.0
+
+Change-Id: I0929a1a72cbddc4dbe760c273ea64faa71e24fdf
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/6760
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ localversion | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/localversion b/localversion
+index 8e3ec26c86..90e4cff822 100644
+--- a/localversion
++++ b/localversion
+@@ -1 +1 @@
+--devel-19.03.0
++-devel-1.0.0
+-- 
+2.22.0
+

@@ -1,0 +1,48 @@
+From 82449dfa5d655d771495cc4abfe66ccaa4f38b78 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Tue, 13 Nov 2018 17:43:02 +0200
+Subject: [PATCH 0893/1200] fix: cmd: sar: Relocate "sar" command to cmd/mvebu
+ folder
+
+Move Marvell "sar" command source to the dedicated folder.
+
+Change-Id: I6d0142406f42393d72c8ed82da50ad2d287ad24f
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/60884
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ cmd/Makefile          | 1 -
+ cmd/mvebu/Makefile    | 1 +
+ cmd/{ => mvebu}/sar.c | 0
+ 3 files changed, 1 insertion(+), 1 deletion(-)
+ rename cmd/{ => mvebu}/sar.c (100%)
+
+diff --git a/cmd/Makefile b/cmd/Makefile
+index f6af4fde20..d6eb4caf08 100644
+--- a/cmd/Makefile
++++ b/cmd/Makefile
+@@ -13,7 +13,6 @@ obj-y += help.o
+ obj-y += version.o
+ 
+ # command
+-obj-$(CONFIG_CMD_MVEBU_SAR) += sar.o
+ obj-$(CONFIG_CMD_AES) += aes.o
+ obj-$(CONFIG_CMD_ARMFLASH) += armflash.o
+ obj-y += blk_common.o
+diff --git a/cmd/mvebu/Makefile b/cmd/mvebu/Makefile
+index d3b2e9dc64..4dc58975db 100644
+--- a/cmd/mvebu/Makefile
++++ b/cmd/mvebu/Makefile
+@@ -13,3 +13,4 @@ obj-$(CONFIG_CMD_MVEBU_MAP) += map.o
+ obj-$(CONFIG_CMD_MVEBU_TSEN) += thermal.o
+ obj-$(CONFIG_CMD_MVEBU_HW_INFO) += hw_info.o
+ obj-$(CONFIG_CMD_MVEBU_NAND_OEM) += pxa3xx_nand_oem.o
++obj-$(CONFIG_CMD_MVEBU_SAR) += sar.o
+diff --git a/cmd/sar.c b/cmd/mvebu/sar.c
+similarity index 100%
+rename from cmd/sar.c
+rename to cmd/mvebu/sar.c
+-- 
+2.22.0
+

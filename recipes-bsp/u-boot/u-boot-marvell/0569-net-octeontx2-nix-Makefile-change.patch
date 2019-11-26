@@ -1,0 +1,24 @@
+From 1b70e4bd30d25c39c9116e195eaafce4494e4b03 Mon Sep 17 00:00:00 2001
+From: Aaron Williams <aaron.williams@cavium.com>
+Date: Mon, 7 May 2018 22:22:19 -0700
+Subject: [PATCH 0569/1200] net: octeontx2: nix Makefile change.
+
+Signed-off-by: Aaron Williams <aaron.williams@cavium.com>
+---
+ drivers/net/cavium/octeontx2/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/net/cavium/octeontx2/Makefile b/drivers/net/cavium/octeontx2/Makefile
+index 5c0b66e32b..3cc3ad8132 100644
+--- a/drivers/net/cavium/octeontx2/Makefile
++++ b/drivers/net/cavium/octeontx2/Makefile
+@@ -4,5 +4,5 @@
+ # SPDX-License-Identifier:	GPL-2.0+
+ #
+ obj-$(CONFIG_OCTEONTX2_CGX) += cgx_intf.o cgx.o nix_af.o nix.o
+-obj-$(CONFIG_OCTEONTX2_RVU) += rvu_pf.o rvu_af.o
++obj-$(CONFIG_OCTEONTX2_RVU) += rvu_pf.o rvu_af.o rvu_common.o
+ #obj-y += cgx_intf.o cgx.o rvu_pf.o rvu_af.o
+-- 
+2.22.0
+

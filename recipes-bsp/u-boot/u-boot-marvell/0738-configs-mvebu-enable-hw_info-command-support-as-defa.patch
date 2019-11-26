@@ -1,0 +1,43 @@
+From 6295d1dc300b4950aea0e3fc7bcb217e7e897c7a Mon Sep 17 00:00:00 2001
+From: zachary zhang <zhangzg@marvell.com>
+Date: Wed, 19 Apr 2017 15:40:06 +0800
+Subject: [PATCH 0738/1200] configs: mvebu:  enable hw_info command support as
+ default
+
+Change-Id: I0289c3a1be7743ea7f4fa7e168363fb642c6e960
+Signed-off-by: zachary zhang <zhangzg@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55280
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ configs/mvebu_db-88f3720_defconfig  | 1 +
+ configs/mvebu_db_armada8k_defconfig | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/configs/mvebu_db-88f3720_defconfig b/configs/mvebu_db-88f3720_defconfig
+index 79e7601222..69ee8a4bef 100644
+--- a/configs/mvebu_db-88f3720_defconfig
++++ b/configs/mvebu_db-88f3720_defconfig
+@@ -29,6 +29,7 @@ CONFIG_CMD_TFTPPUT=y
+ CONFIG_CMD_CACHE=y
+ CONFIG_CMD_TIME=y
+ CONFIG_CMD_MVEBU_BUBT=y
++CONFIG_CMD_MVEBU_HW_INFO=y
+ CONFIG_CMD_EXT4_WRITE=y
+ CONFIG_MAC_PARTITION=y
+ CONFIG_ENV_IS_IN_SPI_FLASH=y
+diff --git a/configs/mvebu_db_armada8k_defconfig b/configs/mvebu_db_armada8k_defconfig
+index e418bd8e31..9609d6889e 100644
+--- a/configs/mvebu_db_armada8k_defconfig
++++ b/configs/mvebu_db_armada8k_defconfig
+@@ -33,6 +33,7 @@ CONFIG_CMD_MVEBU_PHY_FW_DOWNLOAD=y
+ CONFIG_CMD_MVEBU_RX_TRAINING=y
+ CONFIG_CMD_REGULATOR=y
+ CONFIG_CMD_EXT4_WRITE=y
++CONFIG_CMD_MVEBU_HW_INFO=y
+ CONFIG_MAC_PARTITION=y
+ CONFIG_ENV_IS_IN_SPI_FLASH=y
+ CONFIG_SCSI_AHCI=y
+-- 
+2.22.0
+

@@ -1,0 +1,69 @@
+From ccb1359be55c9457249f5782232a4ce1b49a48dd Mon Sep 17 00:00:00 2001
+From: zachary <zhangzg@marvell.com>
+Date: Sat, 25 Feb 2017 00:34:08 +0800
+Subject: [PATCH 0703/1200] phy: marvell: a3700: align comphy mux configuration
+ with mvebu framework
+
+- There is mux configuration in mvebu comphy framework to check and
+  configure serdes. But Armada3700 comphy driver did not implemented
+  it.
+- This patch implements a3700 comphy mux configuration for Serdes
+  lane0 and lane1.
+
+Change-Id: Id3a1c73d38def3f09f2d28a1928eee946f70a338
+Signed-off-by: zachary <zhangzg@marvell.com>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/53598
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/armada-37xx.dtsi      |  2 +-
+ drivers/phy/marvell/comphy_a3700.c | 12 ++++++++++++
+ 2 files changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/dts/armada-37xx.dtsi b/arch/arm/dts/armada-37xx.dtsi
+index 54007428ed..4e11751cea 100644
+--- a/arch/arm/dts/armada-37xx.dtsi
++++ b/arch/arm/dts/armada-37xx.dtsi
+@@ -290,7 +290,7 @@
+ 				compatible = "marvell,mvebu-comphy", "marvell,comphy-armada-3700";
+ 				reg = <0x18300 0x28>,
+ 				      <0x1f300 0x3d000>;
+-				mux-bitcount = <1>;
++				mux-bitcount = <4>;
+ 				max-lanes = <2>;
+ 			};
+ 		};
+diff --git a/drivers/phy/marvell/comphy_a3700.c b/drivers/phy/marvell/comphy_a3700.c
+index 0e9c371882..f1a4401bc2 100644
+--- a/drivers/phy/marvell/comphy_a3700.c
++++ b/drivers/phy/marvell/comphy_a3700.c
+@@ -19,6 +19,14 @@ struct sgmii_phy_init_data_fix {
+ 	u16 value;
+ };
+ 
++struct comphy_mux_data a3700_comphy_mux_data[] = {
++/* Lane 0 */ {3, {{COMPHY_TYPE_UNCONNECTED, 0x0}, {COMPHY_TYPE_SGMII0, 0x0},
++			{COMPHY_TYPE_PEX0, 0x1} } },
++/* Lane 1 */ {4, {{COMPHY_TYPE_UNCONNECTED, 0x0}, {COMPHY_TYPE_SGMII1, 0x0},
++			{COMPHY_TYPE_USB3_HOST0, 0x1},
++			{COMPHY_TYPE_USB3_DEVICE, 0x1} } },
++};
++
+ /* Changes to 40M1G25 mode data required for running 40M3G125 init mode */
+ static struct sgmii_phy_init_data_fix sgmii_phy_init_fix[] = {
+ 	{0x005, 0x07CC}, {0x015, 0x0000}, {0x01B, 0x0000}, {0x01D, 0x0000},
+@@ -916,6 +924,10 @@ int comphy_a3700_init(struct chip_serdes_phy_config *chip_cfg,
+ 
+ 	debug_enter();
+ 
++	/* PHY mux initialize */
++	chip_cfg->mux_data = a3700_comphy_mux_data;
++	comphy_mux_init(chip_cfg, serdes_map, (void __iomem *)COMPHY_SEL_ADDR);
++
+ 	for (lane = 0, comphy_map = serdes_map; lane < comphy_max_count;
+ 	     lane++, comphy_map++) {
+ 		debug("Initialize serdes number %d\n", lane);
+-- 
+2.22.0
+

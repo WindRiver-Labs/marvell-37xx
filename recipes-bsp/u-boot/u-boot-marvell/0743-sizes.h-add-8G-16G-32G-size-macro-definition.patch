@@ -1,0 +1,30 @@
+From 167193b7db6fa79155c5dab8c87f4a2870d60efe Mon Sep 17 00:00:00 2001
+From: Igal Liberman <igall@marvell.com>
+Date: Mon, 29 Jan 2018 19:02:14 +0200
+Subject: [PATCH 0743/1200] sizes.h: add 8G/16G/32G size macro definition
+
+Change-Id: Ica1d1ca644194bdbfd1a40651988df1640ab629c
+Signed-off-by: Igal Liberman <igall@marvell.com>
+Signed-off-by: Ken Ma <make@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/56244
+---
+ include/linux/sizes.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/include/linux/sizes.h b/include/linux/sizes.h
+index ce3e8150c1..71f3d58cbe 100644
+--- a/include/linux/sizes.h
++++ b/include/linux/sizes.h
+@@ -43,5 +43,9 @@
+ 
+ #define SZ_1G				0x40000000
+ #define SZ_2G				0x80000000
++#define SZ_4G				0x100000000ULL
++#define SZ_8G				0x200000000ULL
++#define SZ_16G				0x400000000ULL
++#define SZ_32G				0x800000000ULL
+ 
+ #endif /* __LINUX_SIZES_H__ */
+-- 
+2.22.0
+

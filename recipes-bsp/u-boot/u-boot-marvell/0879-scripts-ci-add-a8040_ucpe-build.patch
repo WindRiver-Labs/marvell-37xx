@@ -1,0 +1,51 @@
+From deca23dcb509a683aea245cef32562337caebafe Mon Sep 17 00:00:00 2001
+From: Igal Liberman <igall@marvell.com>
+Date: Tue, 13 Nov 2018 12:08:43 +0200
+Subject: [PATCH 0879/1200] scripts: ci: add a8040_ucpe build
+
+Change-Id: I40a0ebed3c2b9d970d642423e6a587503c6d7a36
+Signed-off-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/60873
+Reviewed-by: Kostya Porotchkin <kostap@marvell.com>
+Reviewed-by: Lior Levin <levin@marvell.com>
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+---
+ scripts/ci/compile.sh           | 2 ++
+ scripts/ci/supported_builds.txt | 1 +
+ 2 files changed, 3 insertions(+)
+
+diff --git a/scripts/ci/compile.sh b/scripts/ci/compile.sh
+index c8c338b432..523e76b827 100755
+--- a/scripts/ci/compile.sh
++++ b/scripts/ci/compile.sh
+@@ -83,6 +83,7 @@ case $build_name in
+ 	*_a70x0* )       defconfig="mvebu_db_armada8k_defconfig"; ;;
+ 	*_a7020_amc )    defconfig="mvebu_db_armada8k_defconfig"; ;;
+ 	*_a80x0_mcbin* ) defconfig="mvebu_mcbin-88f8040_defconfig"; ;;
++	*_a80x0_ucpe* )  defconfig="mvebu_ucpe-88f8040_defconfig"; ;;
+ 	*_a80x0* )       defconfig="mvebu_db_armada8k_defconfig"; ;;
+ 	*_a3900* )       defconfig="mvebu_db_armada8k_defconfig"; ;;
+ 	*_a37xx_espressobin_* )
+@@ -112,6 +113,7 @@ case $build_name in
+ 	uboot_2018_a80x0_kr ) device_tree="armada-8040-db"; ;;
+ 	uboot_2018_a80x0_pm ) device_tree="armada-8040-db"; ;;
+ 	uboot_2018_a80x0_mcbin* ) device_tree=""; ;;
++	uboot_2018_a80x0_ucpe* ) device_tree=""; ;;
+ 
+ 	uboot_2018_a3900_A ) device_tree="armada-3900-vd-A"; ;;
+ 	uboot_2018_a3900_B ) device_tree="armada-3900-vd-B"; ;;
+diff --git a/scripts/ci/supported_builds.txt b/scripts/ci/supported_builds.txt
+index 35935c6b0c..b47a6a9539 100644
+--- a/scripts/ci/supported_builds.txt
++++ b/scripts/ci/supported_builds.txt
+@@ -25,6 +25,7 @@ uboot_2018_a80x0_pm
+ uboot_2018_a80x0_mcbin
+ uboot_2018_a80x0_mcbin_cve_2018_3639
+ uboot_2018_a80x0_mcbin_pm
++uboot_2018_a80x0_ucpe
+ 
+ uboot_2018_a3900_A
+ uboot_2018_a3900_B
+-- 
+2.22.0
+

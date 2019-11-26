@@ -1,0 +1,91 @@
+From 1e78d29329fdc85735646f2e706b4ebe1df304b6 Mon Sep 17 00:00:00 2001
+From: Grzegorz Jaszczyk <jaz@semihalf.com>
+Date: Tue, 28 Aug 2018 13:11:02 +0200
+Subject: [PATCH 0862/1200] pcie: pcie_advk: move setting of reference clock to
+ the pcie driver
+
+The settings of reference clock is done via pcie address space and not
+comphy address space - move the settings in appropriate place.
+
+This aligns hw initialization of pcie advk with Linux and also will allow
+to get rid of not comphy related operation from the comphy driver.
+
+Change-Id: I9cc2e8f3e415a880dfb01d10cc8db73b7e81a605
+Signed-off-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/59619
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+---
+ drivers/pci/pci-aardvark.c         | 8 ++++++++
+ drivers/phy/marvell/comphy_a3700.c | 4 ++--
+ drivers/phy/marvell/comphy_a3700.h | 5 -----
+ 3 files changed, 10 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/pci/pci-aardvark.c b/drivers/pci/pci-aardvark.c
+index 69a4d81c2e..3263061318 100644
+--- a/drivers/pci/pci-aardvark.c
++++ b/drivers/pci/pci-aardvark.c
+@@ -92,6 +92,11 @@
+ #define     PCIE_CORE_CTRL2_STRICT_ORDER_ENABLE	BIT(5)
+ #define     PCIE_CORE_CTRL2_ADDRWIN_MAP_ENABLE	BIT(6)
+ 
++#define PCIE_PHY_REF_CLOCK			(CONTROL_BASE_ADDR + 0x14)
++#define     PCIE_PHY_CTRL_OFF			16
++#define     PCIE_PHY_BUF_CTRL_OFF		0
++#define     PCIE_PHY_BUF_CTRL_INIT_VAL		0x1342
++
+ /* LMI registers base address and register offsets */
+ #define LMI_BASE_ADDR				0x6000
+ #define CFG_REG					(LMI_BASE_ADDR + 0x0)
+@@ -513,6 +518,9 @@ static int pcie_advk_setup_hw(struct pcie_advk *pcie)
+ {
+ 	u32 reg;
+ 
++	/* Set HW Reference Clock Buffer Control */
++	advk_writel(pcie, PCIE_PHY_BUF_CTRL_INIT_VAL, PCIE_PHY_REF_CLOCK);
++
+ 	/* Set to Direct mode */
+ 	reg = advk_readl(pcie, CTRL_CONFIG_REG);
+ 	reg &= ~(CTRL_MODE_MASK << CTRL_MODE_SHIFT);
+diff --git a/drivers/phy/marvell/comphy_a3700.c b/drivers/phy/marvell/comphy_a3700.c
+index 5b9f670f8c..a4d4586d57 100644
+--- a/drivers/phy/marvell/comphy_a3700.c
++++ b/drivers/phy/marvell/comphy_a3700.c
+@@ -208,9 +208,9 @@ static int comphy_pcie_power_up(u32 speed, u32 invert)
+ 		  0xA00D | rb_clk500m_en | rb_clk100m_125m_en, 0xFFFF);
+ 
+ 	/*
+-	 * 7. Enable TX
++	 * 7. Enable TX, PCIE global register, 0xd0074814, it is done in
++	 * PCI-E driver
+ 	 */
+-	reg_set((void __iomem *)PHY_REF_CLK_ADDR, 0x1342, 0xFFFFFFFF);
+ 
+ 	/*
+ 	 * 8. Check crystal jumper setting and program the Power and PLL
+diff --git a/drivers/phy/marvell/comphy_a3700.h b/drivers/phy/marvell/comphy_a3700.h
+index 1a3fff1d0e..466197785b 100644
+--- a/drivers/phy/marvell/comphy_a3700.h
++++ b/drivers/phy/marvell/comphy_a3700.h
+@@ -48,9 +48,6 @@
+ /*
+  * PCIe/USB/SGMII definitions
+  */
+-#define PCIE_BASE			MVEBU_REG(0x070000)
+-#define PCIETOP_BASE			MVEBU_REG(0x080000)
+-#define PCIE_RAMBASE			MVEBU_REG(0x08C000)
+ #define PCIEPHY_BASE			MVEBU_REG(0x01F000)
+ #define PCIEPHY_SHFT			2
+ 
+@@ -200,8 +197,6 @@
+ 
+ #define PWR_MGM_TIM1_ADDR(u)		(0x1d0 * PHY_SHFT(u) + PHY_BASE(u))
+ 
+-#define PHY_REF_CLK_ADDR		(0x4814 + PCIE_BASE)
+-
+ #define USB3_CTRPUL_VAL_REG		(0x20 + USB32_BASE)
+ #define USB3_TOP_INT_STATUS_REG		(0xd8 + USB32_BASE)
+ #define vbus_int_state			BIT(5)
+-- 
+2.22.0
+

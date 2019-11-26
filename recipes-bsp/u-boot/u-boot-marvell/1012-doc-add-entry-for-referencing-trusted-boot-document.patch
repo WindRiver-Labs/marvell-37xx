@@ -1,0 +1,28 @@
+From 21b774c459f228e8401bbdde4c4a9f1d00d345a1 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Wed, 6 Feb 2019 16:18:50 +0200
+Subject: [PATCH 1012/1200] doc: add entry for referencing trusted boot
+ document
+
+Change-Id: I02818959b1d49786d9b5f770ca4d99a79f15f79d
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/3587
+Tested-by: sa_ip-sw-jenkins
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ doc/mvebu/trusted_boot.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/doc/mvebu/trusted_boot.txt b/doc/mvebu/trusted_boot.txt
+index 688ccdf2b7..15338c4fe5 100644
+--- a/doc/mvebu/trusted_boot.txt
++++ b/doc/mvebu/trusted_boot.txt
+@@ -1,3 +1,5 @@
++.. _uboot_trusted:
++
+ Trusted Boot (Secure Mode)
+ ==========================
+ 
+-- 
+2.22.0
+

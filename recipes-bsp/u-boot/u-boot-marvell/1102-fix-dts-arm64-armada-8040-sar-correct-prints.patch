@@ -1,0 +1,38 @@
+From 5dfdac0b052599da9ba90ca085934ed59bc4acc8 Mon Sep 17 00:00:00 2001
+From: Ben Peled <bpeled@marvell.com>
+Date: Tue, 30 Apr 2019 18:23:59 +0300
+Subject: [PATCH 1102/1200] fix: dts: arm64: armada-8040: sar: correct prints
+
+Only correct print no behavioral change.
+
+Change-Id: I32ea0e6dece64f6bdd3933809c311de5bb839b4c
+Signed-off-by: Ben Peled <bpeled@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/8318
+Tested-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+Reviewed-by: Kostya Porotchkin <Kostya.Porotchkin@cavium.com>
+---
+ arch/arm/dts/armada-8040-dev-info.dtsi | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/dts/armada-8040-dev-info.dtsi b/arch/arm/dts/armada-8040-dev-info.dtsi
+index c1ddc445d7..a8a51f225a 100644
+--- a/arch/arm/dts/armada-8040-dev-info.dtsi
++++ b/arch/arm/dts/armada-8040-dev-info.dtsi
+@@ -36,10 +36,10 @@
+ 				start-bit = <0>;
+ 				bit-length = <4>;
+ 				option-cnt = <4>;
+-				options = "0x1", "CPU/DDR = 0x1: 2000/1050 Mhz, PIDI = 0: 1Ghz",
+-					  "0x3", "CPU/DDR = 0x3: 1800/1050 Mhz, PIDI = 0: 1Ghz",
+-					  "0x4", "CPU/DDR = 0x4: 1600/1050 Mhz, PIDI = 0: 1Ghz",
+-					  "0xe", "CPU/DDR = 0x6: 1300/800 Mhz,  PIDI = 1: 500Mhz";
++				options = "0x1", "CPU/DDR = 0x1:  2000/1050 Mhz, PIDI = 0: 1Ghz",
++					  "0x3", "CPU/DDR = 0x3:  1800/1050 Mhz, PIDI = 0: 1Ghz",
++					  "0x4", "CPU/DDR = 0x4:  1600/1050 Mhz, PIDI = 0: 1Ghz",
++					  "0xe", "CPU/DDR = 0x34: 1300/800 Mhz,  PIDI = 1: 500Mhz";
+ 				default = <0x1>;
+ 				status = "okay";
+ 			};
+-- 
+2.22.0
+

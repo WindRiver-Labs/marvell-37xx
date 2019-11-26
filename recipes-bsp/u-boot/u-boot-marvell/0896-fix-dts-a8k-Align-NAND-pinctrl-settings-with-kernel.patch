@@ -1,0 +1,79 @@
+From 71b39626b1dc4bc3438317243abebb55569d4ee7 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Wed, 14 Nov 2018 13:33:35 +0200
+Subject: [PATCH 0896/1200] fix: dts: a8k: Align NAND pinctrl settings with
+ kernel
+
+Use the same NAND pin control configuration as Linux kernel
+for Armada-8040-DB-D board (boot from NAND).
+
+Change-Id: I57819f63e2d9ea0195f19261efc828a2797691e2
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/60907
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+---
+ arch/arm/dts/armada-8040-db-D.dts | 12 +++++++-----
+ arch/arm/dts/armada-8040.dtsi     | 12 ++++++++++++
+ 2 files changed, 19 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm/dts/armada-8040-db-D.dts b/arch/arm/dts/armada-8040-db-D.dts
+index 524edfe336..82679f67c9 100644
+--- a/arch/arm/dts/armada-8040-db-D.dts
++++ b/arch/arm/dts/armada-8040-db-D.dts
+@@ -216,17 +216,16 @@
+ 
+ &cp1_pinctl {
+ 	/* MPP Bus:
+-	 *	[0-5]   AU_I2S
+-	 *	[12]    SPI1
+-	 *	[13]    ND_RBn
++	 *	[0-11]  DEV_AD
++	 *	[12,13] ND_RBn
+ 	 *	[14-27] DEV_AD
+ 	 *	[28]    SATA1_PRESENT_ACTIVEn
+ 	 *	[29-30] UART0
+ 	 *	[32-62] = 0xff: Keep default CP1_shared_pins
+ 	 */
+ 	/*	     0    1    2    3    4    5    6    7    8    9 */
+-	pin-func = < 0x2  0x2  0x2  0x2  0x2  0x2  0xff 0xff 0xff 0xff
+-		     0xff 0xff 0x3  0x2  0x0  0x1  0x1  0x1  0x1  0x1
++	pin-func = < 0x1  0x1  0x1  0x1  0x1  0x1  0x1  0x1  0x1  0x1
++		     0x1  0x1  0x2  0x2  0x1  0x1  0x1  0x1  0x1  0x1
+ 		     0x1  0x1  0x1  0x1  0x1  0x1  0x1  0x1  0x9  0xA
+ 		     0xA  0x0  0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff
+ 		     0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff
+@@ -301,6 +300,9 @@
+ };
+ 
+ &cp1_nand {
++	pinctrl-names = "default";
++	pinctrl-0 = <&cp1_nand_pins &cp1_nand_rb>;
++
+ 	status = "okay";
+ };
+ 
+diff --git a/arch/arm/dts/armada-8040.dtsi b/arch/arm/dts/armada-8040.dtsi
+index de5e4ef6b7..ee9ddf6f0e 100644
+--- a/arch/arm/dts/armada-8040.dtsi
++++ b/arch/arm/dts/armada-8040.dtsi
+@@ -122,4 +122,16 @@
+ 		marvell,pins = < 13 14 15 16 >;
+ 		marvell,function = <3>;
+ 	};
++
++	cp1_nand_pins: cp1-nand-pins {
++		marvell,pins = < 0  1  2  3  4  5  6  7  8
++				 9  10 11 14 15 16 17 18 19
++				 20 21 22 23 24 25 26 27 >;
++		marvell,function = <1>;
++	};
++
++	cp1_nand_rb: cp1-nand-rb {
++		marvell,pins = < 12 13 >;
++		marvell,function = <2>;
++	};
+ };
+-- 
+2.22.0
+

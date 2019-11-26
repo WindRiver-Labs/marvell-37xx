@@ -1,0 +1,84 @@
+From 4c44f69444d3633d6066b83976ab1cd3125369c8 Mon Sep 17 00:00:00 2001
+From: Ofer Heifetz <oferh@marvell.com>
+Date: Thu, 23 Nov 2017 16:18:38 +0200
+Subject: [PATCH 0791/1200] mtd: pxa3xx_nand: Simplify pxa3xx_nand_scan
+
+This commit simplifies the initial configuration performed
+by pxa3xx_nand_scan. No functionality change is intended.
+
+This commit is taken from Linux:
+'commit 154f50fbde53'
+("mtd: pxa3xx_nand: Simplify pxa3xx_nand_scan")
+
+Change-Id: Ie5e5863f7201cf7f27180488b00ac0b791ecca07
+Signed-off-by: Chris Packham <judge.packham@gmail.com>
+Signed-off-by: Ofer Heifetz <oferh@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/47035
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Tested-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55777
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+---
+ drivers/mtd/nand/pxa3xx_nand.c | 30 ++++++++++++++----------------
+ 1 file changed, 14 insertions(+), 16 deletions(-)
+
+diff --git a/drivers/mtd/nand/pxa3xx_nand.c b/drivers/mtd/nand/pxa3xx_nand.c
+index 88d4118ead..e0f3b1cdf6 100644
+--- a/drivers/mtd/nand/pxa3xx_nand.c
++++ b/drivers/mtd/nand/pxa3xx_nand.c
+@@ -1260,7 +1260,7 @@ static void pxa3xx_nand_config_tail(struct pxa3xx_nand_info *info)
+ 	info->reg_ndcr |= (mtd->writesize == 2048) ? NDCR_PAGE_SZ : 0;
+ }
+ 
+-static int pxa3xx_nand_detect_config(struct pxa3xx_nand_info *info)
++static void pxa3xx_nand_detect_config(struct pxa3xx_nand_info *info)
+ {
+ 	struct pxa3xx_nand_platform_data *pdata = info->pdata;
+ 	uint32_t ndcr = nand_readl(info, NDCR);
+@@ -1272,7 +1272,6 @@ static int pxa3xx_nand_detect_config(struct pxa3xx_nand_info *info)
+ 	info->reg_ndcr |= (pdata->enable_arbiter) ? NDCR_ND_ARB_EN : 0;
+ 	info->ndtr0cs0 = nand_readl(info, NDTR0CS0);
+ 	info->ndtr1cs0 = nand_readl(info, NDTR1CS0);
+-	return 0;
+ }
+ 
+ static int pxa3xx_nand_init_buff(struct pxa3xx_nand_info *info)
+@@ -1392,22 +1391,21 @@ static int pxa3xx_nand_scan(struct mtd_info *mtd)
+ 	int ret;
+ 	uint16_t ecc_strength, ecc_step;
+ 
+-	if (pdata->keep_config && !pxa3xx_nand_detect_config(info))
+-		goto KEEP_CONFIG;
+-
+-	ret = pxa3xx_nand_config_ident(info);
+-	if (ret)
+-		return ret;
+-
+-	ret = pxa3xx_nand_sensing(host);
+-	if (ret) {
+-		dev_info(&info->pdev->dev, "There is no chip on cs %d!\n",
+-			 info->cs);
+-
+-		return ret;
++	if (pdata->keep_config) {
++		pxa3xx_nand_detect_config(info);
++	} else {
++		ret = pxa3xx_nand_config_ident(info);
++		if (ret)
++			return ret;
++		ret = pxa3xx_nand_sensing(host);
++		if (ret) {
++			dev_info(&info->pdev->dev,
++				 "There is no chip on cs %d!\n",
++				 info->cs);
++			return ret;
++		}
+ 	}
+ 
+-KEEP_CONFIG:
+ 	/* Device detection must be done with ECC disabled */
+ 	if (info->variant == PXA3XX_NAND_VARIANT_ARMADA370)
+ 		nand_writel(info, NDECCCTRL, 0x0);
+-- 
+2.22.0
+

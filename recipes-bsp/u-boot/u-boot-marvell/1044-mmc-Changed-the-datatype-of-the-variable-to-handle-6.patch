@@ -1,0 +1,59 @@
+From ca48c6ef4bfd0f2b49a2985c9406da61ca2e47ff Mon Sep 17 00:00:00 2001
+From: Vipul Kumar <vipul.kumar@xilinx.com>
+Date: Thu, 3 May 2018 12:20:54 +0530
+Subject: [PATCH 1044/1200] mmc: Changed the datatype of the variable to handle
+ 64-bit arch
+
+This patch changed the datatype of variable "start" from uint to ulong
+to work properly on 64-bit machines as well. Also the return type of
+get_timer() function is ulong.
+
+Change-Id: I5b93f36756e91a332fa24450d8badb45a4b81e22
+Signed-off-by: Vipul Kumar <vipul.kumar@xilinx.com>
+Signed-off-by: Michal Simek <michal.simek@xilinx.com>
+Reviewed-on: https://sj1git1.cavium.com/5411
+Reviewed-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+Tested-by: Chandrakala Chavva <Chandrakala.Chavva@cavium.com>
+---
+ drivers/mmc/mmc.c   | 4 ++--
+ drivers/mmc/sdhci.c | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/mmc.c b/drivers/mmc/mmc.c
+index 87a622bd3c..278a137584 100644
+--- a/drivers/mmc/mmc.c
++++ b/drivers/mmc/mmc.c
+@@ -682,7 +682,7 @@ static int mmc_complete_op_cond(struct mmc *mmc)
+ {
+ 	struct mmc_cmd cmd;
+ 	int timeout = 1000;
+-	uint start;
++	ulong start;
+ 	int err;
+ 
+ 	mmc->op_cond_pending = 0;
+@@ -2615,7 +2615,7 @@ static int mmc_complete_init(struct mmc *mmc)
+ int mmc_init(struct mmc *mmc)
+ {
+ 	int err = 0;
+-	__maybe_unused unsigned start;
++	__maybe_unused ulong start;
+ #if CONFIG_IS_ENABLED(DM_MMC)
+ 	struct mmc_uclass_priv *upriv = dev_get_uclass_priv(mmc->dev);
+ 
+diff --git a/drivers/mmc/sdhci.c b/drivers/mmc/sdhci.c
+index 6a46cb059e..fdc3c3da08 100644
+--- a/drivers/mmc/sdhci.c
++++ b/drivers/mmc/sdhci.c
+@@ -152,7 +152,7 @@ static int sdhci_send_command(struct mmc *mmc, struct mmc_cmd *cmd,
+ 	u32 mask, flags, mode;
+ 	unsigned int time = 0, start_addr = 0;
+ 	int mmc_dev = mmc_get_blk_desc(mmc)->devnum;
+-	unsigned start = get_timer(0);
++	ulong start = get_timer(0);
+ 
+ 	/* Timeout unit - ms */
+ 	static unsigned int cmd_timeout = SDHCI_CMD_DEFAULT_TIMEOUT;
+-- 
+2.22.0
+

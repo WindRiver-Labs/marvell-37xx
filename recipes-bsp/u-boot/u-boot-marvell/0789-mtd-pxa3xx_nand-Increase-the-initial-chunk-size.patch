@@ -1,0 +1,58 @@
+From 9136b9336aca3f1713a1bb028e6b1bc0dc265038 Mon Sep 17 00:00:00 2001
+From: Ofer Heifetz <oferh@marvell.com>
+Date: Thu, 23 Nov 2017 16:17:29 +0200
+Subject: [PATCH 0789/1200] mtd: pxa3xx_nand: Increase the initial chunk size
+
+The chunk size represents the size of the data chunks, which
+is used by the controllers that allow to split transferred data.
+
+However, the initial chunk size is used in a non-split way,
+during device identification. Therefore, it must be large enough
+for all the NAND commands issued during device identification.
+This includes NAND_CMD_PARAM which was recently changed to
+transfer up to 2048 bytes (for the redundant parameter pages).
+
+Thus, the initial chunk size should be 2048 as well.
+
+On Armada 370/XP platforms (NFCv2) booted without the keep-config
+devicetree property, this commit fixes a timeout on the NAND_CMD_PARAM
+command:
+
+  [..]
+  pxa3xx-nand f10d0000.nand: This platform can't do DMA on this device
+  pxa3xx-nand f10d0000.nand: Wait time out!!!
+  nand: device found, Manufacturer ID: 0x2c, Chip ID: 0x38
+  nand: Micron MT29F8G08ABABAWP
+  nand: 1024 MiB, SLC, erase size: 512 KiB, page size: 4096, OOB size: 224
+
+This commit is taken from Linux:
+'commit c7f00c29aa8'
+("mtd: pxa3xx_nand: Increase the initial chunk size")
+
+Change-Id: Ibfc8259e79687cefb7db167319463ca8a5d3f6b9
+Signed-off-by: Chris Packham <judge.packham@gmail.com>
+Signed-off-by: Ofer Heifetz <oferh@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/47033
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Igal Liberman <igall@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/55775
+---
+ drivers/mtd/nand/pxa3xx_nand.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mtd/nand/pxa3xx_nand.c b/drivers/mtd/nand/pxa3xx_nand.c
+index d59cae1e1a..62dd60c4d7 100644
+--- a/drivers/mtd/nand/pxa3xx_nand.c
++++ b/drivers/mtd/nand/pxa3xx_nand.c
+@@ -1380,7 +1380,7 @@ static int pxa3xx_nand_scan(struct mtd_info *mtd)
+ 		goto KEEP_CONFIG;
+ 
+ 	/* Set a default chunk size */
+-	info->chunk_size = 512;
++	info->chunk_size = PAGE_CHUNK_SIZE;
+ 
+ 	ret = pxa3xx_nand_sensing(host);
+ 	if (ret) {
+-- 
+2.22.0
+

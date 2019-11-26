@@ -1,0 +1,79 @@
+From 31ccfa7c2ec1e046c4d17277b8826e581f80ee15 Mon Sep 17 00:00:00 2001
+From: Ben Peled <bpeled@marvell.com>
+Date: Tue, 15 Jan 2019 14:10:49 +0200
+Subject: [PATCH 0983/1200] dts: cn9130: add sar support to cn9130
+
+Change-Id: Ided1d30b1367db15cd64944708f76dc16697c049
+Signed-off-by: Ben Peled <bpeled@marvell.com>
+Reviewed-on: https://sj1git1.cavium.com/2041
+Tested-by: Ben Peled <Ben.Peled@cavium.com>
+Reviewed-by: Ben Peled <Ben.Peled@cavium.com>
+---
+ arch/arm/dts/cn9130-db-dev-info.dtsi | 42 ++++++++++++++++++++++++++++
+ arch/arm/dts/cn9130-db.dtsi          |  1 +
+ 2 files changed, 43 insertions(+)
+ create mode 100644 arch/arm/dts/cn9130-db-dev-info.dtsi
+
+diff --git a/arch/arm/dts/cn9130-db-dev-info.dtsi b/arch/arm/dts/cn9130-db-dev-info.dtsi
+new file mode 100644
+index 0000000000..d1631bb9e0
+--- /dev/null
++++ b/arch/arm/dts/cn9130-db-dev-info.dtsi
+@@ -0,0 +1,42 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2018 Marvell International Ltd.
++ */
++/ {
++	/* This should go only into devel boards */
++	compatible = "marvell,cp110";
++	sar {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		sar_fields {
++			compatible = "marvell,sample-at-reset";
++			reg = <0x4c 0x4e>;
++			chip_count = <2>;
++			bit_width = <5>;
++			freq {
++				key = "freq";
++				description = "CPU/DDR and PIDI frequencies";
++				start-bit = <0>;
++				bit-length = <4>;
++				option-cnt = <3>;
++				options = "0x0", "CPU/DDR = 0x0: 2000/1200 Mhz, PIDI = 0: 1Ghz",
++					  "0x2", "CPU/DDR = 0x6: 2200/1200 Mhz, PIDI = 0: 1Ghz",
++					  "0x4", "CPU/DDR = 0xD: 1600/1200 Mhz, PIDI = 0: 1Ghz";
++				default = <0x0>;
++				status = "okay";
++			};
++			boot_mode {
++				key = "boot_mode";
++				description = "Boot mode options";
++				start-bit = <4>;
++				bit-length = <6>;
++				option-cnt = <2>;
++				options = "0x2A", "AP_EMMC",
++					  "0x32", "CP1_SPI_1 24bits";
++				default = <0x2A>;
++				status = "okay";
++			};
++		};
++	};
++};
+diff --git a/arch/arm/dts/cn9130-db.dtsi b/arch/arm/dts/cn9130-db.dtsi
+index 64908b85e2..ccf575ffa3 100644
+--- a/arch/arm/dts/cn9130-db.dtsi
++++ b/arch/arm/dts/cn9130-db.dtsi
+@@ -4,6 +4,7 @@
+  */
+ 
+ #include "cn9130.dtsi" /* include SoC device tree */
++#include "cn9130-db-dev-info.dtsi"
+ 
+ / {
+ 	model = "DB-CN-9130";
+-- 
+2.22.0
+

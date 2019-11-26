@@ -1,0 +1,21 @@
+From 6146999fb52e492190059a3c3da15efebcf2e97c Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Wed, 4 Nov 2015 16:47:28 -0800
+Subject: [PATCH 0059/1200] Add CSR include directory symlink
+
+---
+ csr | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 120000 csr
+
+diff --git a/csr b/csr
+new file mode 120000
+index 0000000000..5702a41e9a
+--- /dev/null
++++ b/csr
+@@ -0,0 +1 @@
++../../csr
+\ No newline at end of file
+-- 
+2.22.0
+

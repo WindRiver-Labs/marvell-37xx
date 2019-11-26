@@ -1,0 +1,33 @@
+From 38fc65ed59af199630d0736ad27b600eb9237c6e Mon Sep 17 00:00:00 2001
+From: Sergey Temerkhanov <s.temerkhanov@gmail.com>
+Date: Fri, 29 Jan 2016 15:08:23 -0800
+Subject: [PATCH 0100/1200] Config: remove redundant definitions
+
+---
+ include/configs/thunderx_88xx.h | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/include/configs/thunderx_88xx.h b/include/configs/thunderx_88xx.h
+index 6ea51f8181..a6563e7b84 100644
+--- a/include/configs/thunderx_88xx.h
++++ b/include/configs/thunderx_88xx.h
+@@ -13,8 +13,6 @@
+ 
+ /*#define CONFIG_ARMV8_SWITCH_TO_EL1*/
+ 
+-#define CONFIG_SYS_GENERIC_BOARD
+-
+ #define CONFIG_SYS_64BIT
+ 
+ #define CONFIG_SYS_NO_FLASH
+@@ -175,6 +173,7 @@
+ #define CONFIG_CMD_SATA
+ 
+ #define CONFIG_CMD_ATF
++#define CONFIG_CMD_PCI
+ 
+ /* AHCI support Definitions */
+ #ifdef CONFIG_CMD_SATA
+-- 
+2.22.0
+

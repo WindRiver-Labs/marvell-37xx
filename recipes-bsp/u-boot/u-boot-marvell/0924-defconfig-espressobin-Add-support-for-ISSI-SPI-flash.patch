@@ -1,0 +1,33 @@
+From b0b077602de5d92c1ac7508a1c5031f58c5d36a6 Mon Sep 17 00:00:00 2001
+From: Konstantin Porotchkin <kostap@marvell.com>
+Date: Sun, 2 Dec 2018 14:38:38 +0200
+Subject: [PATCH 0924/1200] defconfig: espressobin: Add support for ISSI SPI
+ flashes
+
+Enable support of ISSI SPI flashes found on EspressoBIN boards
+
+Change-Id: I6de61c48f108fb4f410f321b9db45887d23212e5
+Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
+Reviewed-on: http://vgitil04.il.marvell.com:8080/61455
+Tested-by: iSoC Platform CI <ykjenk@marvell.com>
+Reviewed-by: Grzegorz Jaszczyk <jaz@semihalf.com>
+Reviewed-by: Stefan Chulski <stefanc@marvell.com>
+---
+ configs/mvebu_espressobin-88f3720_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/configs/mvebu_espressobin-88f3720_defconfig b/configs/mvebu_espressobin-88f3720_defconfig
+index c325012e31..c2b61388fe 100644
+--- a/configs/mvebu_espressobin-88f3720_defconfig
++++ b/configs/mvebu_espressobin-88f3720_defconfig
+@@ -45,6 +45,7 @@ CONFIG_SPI_FLASH_SPANSION=y
+ CONFIG_SPI_FLASH_STMICRO=y
+ CONFIG_SPI_FLASH_WINBOND=y
+ CONFIG_SPI_FLASH_GIGADEVICE=y
++CONFIG_SPI_FLASH_ISSI=y
+ CONFIG_MV88E6XXX_SWITCH=y
+ CONFIG_PHY_GIGE=y
+ CONFIG_E1000=y
+-- 
+2.22.0
+

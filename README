@@ -3,6 +3,7 @@
 
 1. About this document
 ======================
+
 This document describes the common and non-hardware specific information.
 Please refer to README.hardware for hardware specific information.
 
@@ -133,8 +134,20 @@ rootpath=/tftpboot/rootfs
 consoledev=ttyMV0
 baudrate=115200
 
-5. WIC Image
+
+5. CPU hotplug
+==============
+
+This feature need to update u-boot.bin. But we didn't find a stable way to upgrade
+u-boot.bin. To avoid breaking the only one board, we don't support this feature at
+this version.
+
+Because of this, kexec & kdump feature is unavailable.
+
+
+6. WIC Image
 ============
+
 Please refer to the Yocto manual for the detailed info about WIC. After building
 the project, the WIC image is at:
    tmp-glibc/deploy/images/marvell-37xx/wrlinux-image-glibc-std-<machine name>.wic

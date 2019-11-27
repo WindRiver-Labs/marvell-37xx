@@ -42,7 +42,7 @@ The following BSP features are validated and supported.
 		+ I2C:
 			+ I2C Master interface
 		+ PCI-Express:
-			+ 1x PCI Express (PCIe) Gen 2.0 or 1x mini PCI Express (PCIe) Gen 2.0
+			+ 1x PCI Express (PCIe) Gen 2.0
 		+ SDIO: SDIO Host Controller
 
 	o USB
@@ -71,6 +71,7 @@ The following features are not supported or validated.
 
 	x CPU Freq
 	x Sample at Reset (SatR) memory device @ address 0x4C
+	x mini PCI Express (PCIe) Gen 2.0
 	x USB3 switch PI5USB30213XEA @ address 0x0D
 	x ID component of PHY module @ address 0x24
 	x USB3.0 Port (Type-C)

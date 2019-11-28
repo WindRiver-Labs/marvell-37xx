@@ -144,3 +144,15 @@ this version.
 
 Because of this, kexec & kdump feature is unavailable.
 
+
+6. Multilib
+===========
+
+By default, this BSP is configured as a 64-bit kernel and 64-bit userspace.
+If a full 32-bit filesystem is necessary, use the prefix "lib32-" before
+the expected target image as follows:
+
+        # bitbake lib32-wrlinux-image-glibc-std
+
+
+
